@@ -1,0 +1,338 @@
+<apex:page controller="SitesUsereditControllerRakuten" action="{!init}" cache="false" sidebar="false" showHeader="false" standardStylesheets="false">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>お客様情報変更</title>
+
+    <!-- Design Style -->
+    <apex:stylesheet value="{!URLFOR($Resource.SitesContentsRakuten, 'common/css/import.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.SitesContentsRakuten, 'common/css/editorial/sub.css')}" />
+
+    <!-- 独自のスタイル -->
+    <style type="text/css">
+        table.sf-radio {
+            margin-bottom: 0;
+        }
+        table.sf-radio tr td {
+            border-style: none;
+        }
+    </style>
+
+    <!-- JQuery --> 
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>
+    
+    <!-- Design Script -->
+    <apex:includeScript value="{!URLFOR($Resource.SitesContentsRakuten, 'common/js/jquery.blend-min.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.SitesContentsRakuten, 'common/js/scrollsmoothly.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.SitesContentsRakuten, 'common/js/heightLine.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.SitesContentsRakuten, 'common/js/common.js')}"/>
+
+    <!-- 郵便番号検索 -->
+    <apex:includeScript value="{!URLFOR($Resource.AjaxZip2, 'ajaxzip2/ajaxzip2.js')}"/>
+    <script type="text/javascript">AjaxZip2.JSONDATA = "{!URLFOR($Resource.AjaxZip2, 'ajaxzip2/data')}"</script>
+
+    <!-- 独自のScript -->
+    <script type="text/javascript">
+    
+        // リロード時
+        $(document).ready(function(){
+            // 請求担当者フラグのラジオボタンをチェックする
+            $('input[id$="seikyuTantoFlg"]').each(function () {
+                if($(this).attr('checked')) {
+                    $("input[name='dummy']").val([$(this).attr('id')]);
+                }
+            });
+        });
+        
+        // ラジオボタンの値を設定
+        function setRadioValue(targetId, targetId_full) {
+            // 全てのチェックを外す
+            $('input[id$="' + targetId + '"]').removeAttr('checked');
+            // チェック
+            document.getElementById(targetId_full).checked = 'checked';
+        }
+        
+        // 担当者追加：前処理
+        function preAddTantosya() {
+            $('input[id$="addTantosya"]').click();
+            $('#dispAddTantosya').attr("disabled", "disabled"); 
+        }
+
+        // 担当者追加：後処理
+        function postAddTantosya() {
+            // 担当者追加ボタンを有効化
+            $('#dispAddTantosya').removeAttr("disabled"); 
+
+            // 請求担当者フラグのラジオボタンをチェックする
+            $('input[id$="seikyuTantoFlg"]').each(function () {
+                if($(this).attr('checked')) {
+                    $("input[name='dummy']").val([$(this).attr('id')]);
+                }
+            });
+        }
+    </script>
+    
+    <!--Google Analytics-->
+    <script type="text/javascript">
+
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-17698964-1', 'auto', {'allowLinker': true}); 
+    ga('require', 'linker');
+    ga('linker:autoLink', ['kirinuki.jp','kirinuki.secure.force.com','mediabackoffice.co.jp'] ); 
+    ga('send', 'pageview');
+
+    </script>
+    <!--Google Analytics-->
+</head>
+
+<body>
+    <div id="wrapper">
+    <div id="header" class="cf">
+        <div class="left">
+            <h1>
+            </h1>
+        </div><!--div.left -->
+        <div class="right">
+            <apex:form >
+                <ul>
+                    <li>
+                        <apex:commandLink action="{!order}">
+                            <img src="{!URLFOR($Resource.SitesContentsRakuten, 'common/img/btn_form.png')}" width="89" height="24" alt="発注フォームへ"/>
+                        </apex:commandLink>                
+                    </li>
+                    <li>
+                        <apex:commandLink action="{!mypage}">
+                            <img src="{!URLFOR($Resource.SitesContentsRakuten, 'common/img/btn_maypage.png')}" width="89" height="24" alt="マイページへ"/>
+                        </apex:commandLink>                
+                    </li>
+                    <li>
+                        <apex:commandLink action="{!logout}">
+                            <img src="{!URLFOR($Resource.SitesContentsRakuten, 'common/img/btn_logout.png')}" width="89" height="24" alt="ログアウト"/>
+                        </apex:commandLink>                
+                    </li>
+                </ul>
+            </apex:form>
+        </div><!--div.right -->
+    </div><!--div#header -->
+
+    <div id="container" class="cf">
+    <div id="content" class="cf">
+
+        <!-- 通常モード：登録画面 -->
+        <apex:outputPanel rendered="{!(dispMode=='normal')}">
+            <apex:form >
+                <!-- メッセージ -->
+                <div style="width: 700px; margin: auto;">
+                    <c:SitesMessage msgList="{!msgList}"/>
+                </div>
+
+                <div class="comment_normal">
+
+                    <p>
+                        <!-- 2016/05/11 edit Start -->
+                        <!--
+                        ※必要事項をご記入の上、送信フォームより画像を送信してください。
+                        -->
+                        ※ご担当者様情報をご記入の上、確認ボタンを押してください。
+                        <!-- 2016/05/11 edit End -->
+                    </p>
+                
+                </div>
+        
+                <div class="comment_normal">
+                    <p>
+                        ご担当者様　※ご担当者様をご登録出来ます。
+                        <input id="dispAddTantosya" type="button" value="追加" onclick="preAddTantosya();"/>
+                        <div style="display: none">
+                            <apex:commandButton id="addTantosya" value="追加" action="{!addTantosya}" reRender="tantosyaArea"/>
+                        </div>
+                    </p>
+                </div>
+       
+                <apex:outputPanel id="tantosyaArea">
+                    <table border="0" cellspacing="0" cellpadding="0" width="700" class="normal">
+                        <tr>
+                            <th>お名前</th>
+                            <th>部署名・パートナー名</th>
+                            <th>ご役職</th>
+                            <th>メールアドレス</th>
+                            <!-- 2016/05/12 delete Start -->
+                            <!--
+                            <th>ご請求先</th>
+                            -->
+                            <!-- 2016/05/12 delete End -->
+                        </tr>
+                        <apex:variable value="0" var="cnt"/>
+                        <apex:repeat var="item" value="{!tantosyaList}">
+                            <apex:variable value="{!Value(cnt)+1}" var="cnt"/>
+                            <tr>
+                                <td>
+                                    <apex:inputText value="{!item.TantosyaName}" styleClass="textbox4 ime-active" onblur="Blur(this);" onfocus="Focus(this);"/>
+                                </td>
+                                <td>
+                                    <apex:inputText value="{!item.Department}" styleClass="textbox4 ime-active" onblur="Blur(this);" onfocus="Focus(this);"/>
+                                </td>
+                                <td>
+                                    <apex:inputText value="{!item.Title}" styleClass="textbox4 ime-active" onblur="Blur(this);" onfocus="Focus(this);"/>
+                                </td>
+                                <td>
+                                    <apex:inputText value="{!item.Email}" styleClass="textbox4 ime-disabled" onblur="Blur(this);" onfocus="Focus(this);"/>
+                                </td>
+                                <!-- 2016/05/12 delete Start -->
+                                <!--
+                                <td class="center">
+                                    <input type="radio" name="dummy" value="{!$Component.seikyuTantoFlg}" onclick="setRadioValue('seikyuTantoFlg', '{!$Component.seikyuTantoFlg}')"/>
+                                    <span style="display: none;">
+                                        <apex:inputCheckbox id="seikyuTantoFlg" value="{!item.SeikyuTantoFlg}" />
+                                    </span>
+                                </td>
+                                -->
+                                <!-- 2016/05/12 delete End -->
+                            </tr>
+                        </apex:repeat>
+                    </table>
+                    
+                    <!-- 担当者追加：後処理 -->
+                    <script type="text/javascript">
+                        postAddTantosya();
+                    </script>
+                </apex:outputPanel>
+        
+                <div class="comment_normal">
+                    <p class="text_inline">
+                        例） 山田太郎  /  切り抜きJP事業部 /  部長 /  kirinuki@kirinuki.jp /  _<br />
+                        ※担当者を追加する場合は、追加ボタンから追加して下さい。<br />
+                        ※担当者を削除する場合は、お名前、部署名・パートナー名、ご役職、メールアドレスをすべて空白にして下さい。
+
+                    </p>
+                </div>
+        
+                <!-- ボタン部 -->
+                <p class="inquiry">
+                    <apex:commandButton value="確認" action="{!confirm}" styleClass="button"/>&nbsp;
+                    <input type="reset" value="リセット" class="button"/>&nbsp;&nbsp;
+                    <apex:commandButton value="キャンセル" action="{!mypage}" styleClass="button"/>
+                </p>
+        
+                <p>&nbsp;</p>
+            
+            </apex:form>
+        </apex:outputPanel>
+
+        <!-- 確認モード：確認画面 -->
+        <apex:outputPanel rendered="{!(dispMode=='confirm')}">
+            <apex:form >
+                <div class="comment_normal">
+                    <p>
+                        下記内容でよろしいですか？
+                    </p>
+                </div>
+        
+                <table border="0" cellspacing="0" cellpadding="0" class="normal" width="700">
+                    <tr>
+                        <th>ご担当者様</th>
+                        <td>
+                            <table border="0" cellspacing="0" cellpadding="0" class="normal" width="100%">
+                                <tr>
+                                    <th>お名前</th>
+                                    <th>部署名・パートナー名</th>
+                                    <th>ご役職</th>
+                                    <th>メールアドレス</th>
+                                    <!-- 2016/05/12 delete Start -->
+                                    <!--
+                                    <th>ご請求先</th>
+                                    -->
+                                    <!-- 2016/05/12 delete End -->
+                                </tr>
+                                <apex:repeat var="item" value="{!dispTantosyaList}">
+                                    <tr>
+                                        <td><apex:outputText value="{!item.TantosyaName}"/></td>
+                                        <td><apex:outputText value="{!item.Department}"/></td>
+                                        <td><apex:outputText value="{!item.Title}"/></td>
+                                        <td><apex:outputText value="{!item.Email}"/></td>
+                                        <!-- 2016/05/12 delete Start -->
+                                        <!--
+                                        <td class="center"><apex:outputText value="{!IF(item.SeikyuTantoFlg, '●', '&nbsp;')}" escape="false"/></td>
+                                        -->
+                                        <!-- 2016/05/12 delete End -->
+                                    </tr>
+                                </apex:repeat>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+        
+                <p>&nbsp;</p>
+        
+                <!-- ボタン部 -->
+                <p class="inquiry">
+                    <apex:commandButton value="送信" action="{!send}" styleClass="button"/>&nbsp;&nbsp;&nbsp;
+                    <apex:commandButton value="戻る" action="{!back}" styleClass="button"/>
+                </p>
+                <p>&nbsp;</p>
+
+            </apex:form>
+        </apex:outputPanel>
+
+        <!-- 結果モード：確認画面 -->
+        <apex:outputPanel rendered="{!(dispMode=='result')}">
+            <apex:form >
+                <div class="comment_normal">
+                    <p>
+                        お客様情報を変更しました。
+                    </p>
+                </div>
+
+                <!-- ボタン部 -->
+                <p class="inquiry">
+                    <apex:commandButton value="マイページへ戻る" action="{!mypage}" styleClass="button"/>
+                </p>
+                <p>&nbsp;</p>
+            </apex:form>
+        </apex:outputPanel>
+
+    </div><!--div#content -->
+    </div><!--div#container -->
+    </div><!--div#wrapper -->
+
+    <!-- copy ritgh -->
+    <div id="copyright">
+        Powered by<a href="http://www.force.com/" target="_blank"> force.com</a>
+    </div><!--div#copyright -->
+
+<!--Google リマーケティング-->
+<!-- Google Code for &#20840;&#27969;&#20837; -->
+<!-- Remarketing tags may not be associated with personally identifiable information or placed on pages related to sensitive categories. For instructions on adding this tag and more information on the above requirements, read the setup guide: google.com/ads/remarketingsetup -->
+<script type="text/javascript">
+/* <![CDATA[ */
+var google_conversion_id = 995058442;
+var google_conversion_label = "5mxVCK7c2wYQisa92gM";
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+/* ]]> */
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/995058442/?value=0&amp;label=5mxVCK7c2wYQisa92gM&amp;guid=ON&amp;script=0"/>
+</div>
+</noscript>
+<!--Google リマーケティング-->
+
+<!-- YDN リターゲティング -->
+<script type="text/javascript" language="javascript">
+/* <![CDATA[ */
+var yahoo_retargeting_id = 'T15AP4YAQ4';
+var yahoo_retargeting_label = '';
+/* ]]> */
+</script>
+<script type="text/javascript" language="javascript" src="//b92.yahoo.co.jp/js/s_retargeting.js"></script>
+<!-- YDN リターゲティング -->
+
+</body>
+</apex:page>

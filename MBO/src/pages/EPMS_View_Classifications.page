@@ -1,0 +1,1508 @@
+<apex:page controller="EPMS_ViewClassification" id="viewPo" tabstyle="Production_Order__c" sidebar="false" showHeader="false"> 
+    
+        <apex:stylesheet value="{!URLFOR($Resource.View_Directory,'css/jquery.treeview.css')}" /> 
+        <apex:stylesheet value="{!URLFOR($Resource.View_Directory,'css/custom.css')}" /> 
+        
+        <apex:includeScript value="{!URLFOR($Resource.View_Directory,'js/jquery.js')}" />
+        <apex:includeScript value="{!URLFOR($Resource.View_Directory,'js/jquery.treeview.js')}" />
+        <apex:includeScript value="{!URLFOR($Resource.View_Directory,'js/jquery-checktree.js')}" />
+        <apex:includeScript value="{!URLFOR($Resource.View_Directory,'js/custom.js')}" />
+        
+        <apex:includeScript value="{!URLFOR($Resource.csspopup,'add-style.js')}" />
+        <apex:includeScript value="{!URLFOR($Resource.csspopup,'css-pop.js')}" />
+        
+        <apex:includeScript value="{!URLFOR($Resource.attendance,'jquery-ui.min.js')}"/>
+        <apex:includeScript value="{!URLFOR($Resource.attendance,'gridviewScroll.js')}"/>
+        
+        <apex:stylesheet value="{!URLFOR($Resource.Classification,'css/defaultTheme.css')}" /> 
+        <apex:stylesheet value="{!URLFOR($Resource.Classification,'css/myTheme.css')}" />
+        
+       <apex:includescript value="{!URLFOR($Resource.Classification,'js/jquery.fixedheadertable.js')}" />
+       <apex:includescript value="{!URLFOR($Resource.Classification,'js/custom-table.js')}" /> 
+        
+        <script type="text/javascript">
+            var __sfdcSessionId = '{!GETSESSIONID()}';
+        </script>
+        
+       
+         
+        
+        
+        <script src="/soap/ajax/31.0/connection.js" type="text/javascript"></script>
+        
+        <script>
+        function Reloadpage(Sucessmessage){
+            
+            var currentID='{!$CurrentPage.Parameters.Id}';
+          
+            popup('popUpalert','alert','',Sucessmessage); 
+            window.location.assign('/apex/EPMS_PO_ViewDirectory?id='+currentID);
+            
+         }
+         function ReloadVDPage(message){
+          popup('popUpalert','alert','',message); 
+          location.reload();
+         }
+         function showpopup1(jobdiv){
+            //  $(".blanket-div").show();            
+            //document.getElementById(jobdiv).style.display='block';
+         }
+        
+        function showpopup2(jobdiv){        
+            //document.getElementById(jobdiv).style.display='block';        
+        }
+        
+        function showpopup3(jobdiv){
+            document.getElementById(jobdiv).style.display='block';        
+        }        
+        
+        function showpopup4(jobdiv){
+            document.getElementById(jobdiv).style.display='block';        
+        }
+        
+        function showpopup5(jobdiv){
+            document.getElementById(jobdiv).style.display='block';        
+        }        
+        
+        function showpopup6(jobdiv){        
+            document.getElementById(jobdiv).style.display='block';        
+        }
+          function updateInstruction(){
+             
+            var url = encodeURI("/apex/ChangeInstruction"); 
+            var width = "520"; 
+            var height = "400"; 
+            window.open(url, '','scrollbars=no,resizable=no,status=no,toolbar=no,menubar=no, width=' + width + ',height=' + height + ',left=' + ((window.innerWidth - width)/2) + ',top=' + ((window.innerHeight - height)/2) );
+            return false;
+        }
+    
+  
+    function treeopen()
+    {
+  /*  setTimeout(function()
+        {
+        //alert("ss");
+        
+        }, 2000); */
+    }
+    
+        $(document).ready(function () {
+           
+            $(".case").removeAttr("checked");
+            $("#browser").treeview({
+                toggle: function() {
+                    console.log("%s was toggled.", $(this).find(">span").text());
+                    }   
+            });
+        
+          
+          var winwidth = document.body.clientWidth-140;
+            var winheight = window.innerHeight - 350;
+             gridviewScroll(winwidth, winheight);
+             gridviewScrollauto();
+            });
+
+            
+            
+            $(window).resize(function() {
+           
+            var winwidth = document.body.clientWidth-140;
+            var winheight = window.innerHeight - 350;
+             gridviewScroll(winwidth, winheight);
+            });
+            
+            
+            /*$( '#GridView1Wrapper' ).load(function() {                
+                gridviewScrollauto();               
+            });*/
+            
+            $( '#GridView1Wrapper' ).load(function() {  
+                location.reload(true);
+            });
+            
+            function gridviewScrollauto()
+            {
+            
+             var winwidth = document.body.clientWidth-140;
+            var winheight = window.innerHeight - 350;
+            setTimeout(function(){
+               gridviewScroll(winwidth, winheight);
+               },2000);
+            }
+            
+            function gridviewScroll(winwidth, winheight ) {
+           
+                gridView1 = $('#GridView1').gridviewScroll({
+                    width: winwidth,
+                    height: winheight,
+                    railcolor: "#F0F0F0",
+                    barcolor: "#CDCDCD",
+                    barhovercolor: "#606060",
+                    bgcolor: "#F0F0F0",
+                    arrowsize: 30,
+                    varrowtopimg: "{!URLFOR($Resource.attendance,'Images/arrowvt.png')}",               
+                    varrowbottomimg: "{!URLFOR($Resource.attendance,'Images/arrowvb.png')}",
+                    harrowleftimg:"{!URLFOR($Resource.attendance,'Images/arrowhl.png')}",
+                    harrowrightimg: "{!URLFOR($Resource.attendance,'Images/arrowhr.png')}",
+            
+                                    
+                    headerrowcount: 1,
+                    railsize: 16,
+                    barsize: 8,
+                    
+                });
+                
+                $('#browser').checktree();
+        }
+ 
+    
+    
+    
+    
+    
+    
+    $(window).on('load',function(){
+            if ($('.sidebarCollapsed').length > 0) {
+            //alert("2")
+                var winwidth = document.body.clientWidth ;
+                //var winwidth = document.body.clientWidth - 170;
+                var winheight = window.innerHeight - 250;
+                $(".freezeTableAutoWidth").css('width', winwidth+"px");
+            }
+        });       
+    
+        
+        
+        function setWinSizeFreezeTable(){
+            var winwidth = document.body.clientWidth - 40;
+            //var winheight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+            var winheight = window.innerHeight-250;
+            
+            $(".freezeTableAutoWidth").css('width', winwidth+"px");      
+            
+            $('.headerFreezeTable').fixedHeaderTable({ altClass: 'odd', height:winheight+"px"});            
+            $('.headerFreezeTable th.last').css('padding-right', '0px');            
+            //$(".freezeTableAutoWidth").css('height', b);  
+            
+            
+            $(".handlebarContainer").click(function(){
+            
+                if ($('.sidebarCollapsed').length > 0) {
+                //alert("2")
+                    var winwidth = document.body.clientWidth - 270;
+                    var winheight = window.innerHeight - 250;
+                    $(".freezeTableAutoWidth").css('width', winwidth+"px");
+                }
+                else {
+                //alert("2a")
+                    var winwidth = document.body.clientWidth - 70;
+                    var winheight = window.innerHeight - 250;
+                    $(".freezeTableAutoWidth").css('width', winwidth+"px");
+                }
+            });
+            
+            /*setTimeout(function () {
+                setWinSizeFreezeTable();
+            }, 2000);*/
+            
+        }    
+        
+        
+        $(document).ready(function() {  
+            setWinSizeFreezeTable();
+            setTimeout(function(){
+                $(".sortListAsc").focus();
+            },2000);
+        });
+    
+    
+    
+    
+      $(window).load(function(){
+        var array = new Array();
+        $('.thumbImageBody').each(function() {
+            var a = $(this).width();
+            //alert($(this).width());
+            array.push(a);
+        });
+        var maxWidth = Math.max.apply(Math, array);
+        //alert (maxWidth); 
+        $('#thumbImageHeader .fht-cell').css('width',(maxWidth+1) + "px");
+        //alert($('#thumbImageHeader').width());
+    });
+    
+    
+    
+    
+    
+    
+    
+ 
+ </script>   
+<style type="text/css">
+.body .bPageBlock
+{
+margin-bottom:0px;
+}
+.penalityTableSec table{  margin-bottom:0;}
+body .bodyDiv #bodyTable {padding:0;}
+table.pagefooter
+{
+    background:#f2f3f3;
+    border:1px solid #e0e3e5;
+     border-top:0px solid #e0e3e5;
+    padding:0px;
+    margin:0;
+}
+
+#GridView1Wrapper {margin-bottom:20px;}
+.paginationNav{ width:100%;}
+.changeCategoryDiv{
+        display:none;
+    } 
+table.pagefooter td{
+border:0px;
+vertical-align: middle;
+}
+table.pagefooter td.lefttd
+{
+text-align:left !important;
+}
+table.pagefooter td:last-child
+{
+text-align:right !important;
+}
+.NOFPage input
+{
+    width:20px;
+}
+
+body .bRelatedList .pbBody table.list, body .apexp .pbBody table.list {border:0;}
+body .pbBody table.list tr th, body .pbBody table.list tr td 
+    {   
+        border-width:0 1px 0 0;
+        border-color:#ECECEC;
+        border-style:solid;
+    }
+
+        
+table.list
+    {
+        background-color: #fff;
+        border-top: 0px solid #e0e3e5;
+    }
+.list td, .list th, body.oldForecast .list .last td, body.oldForecast .list .last th {
+    /*padding: 10px 2px 0px 5px;*/
+    color: #000;
+    padding:2px 2px;
+    vertical-align:middle;
+    }
+.GridviewScrollHeader
+{
+background: #f2f3f3;
+    border-width: 0 0 1px 1px;
+    border-color: #e0e3e5;
+    color: #000;
+    font-size: .9em;
+    font-weight: bold;
+    padding: 4px 2px 4px 5px;
+}
+.pbBody, .pbBody a, .pbBody td, .lbBody a, .lbBodyDescription, .list .headerRow .noRowsHeader {
+    color: #000;
+}
+.pbBody table.list tr.dataRow td:first-child {
+    border-left-width: 0;
+    }
+table.list tr.dataRow td {
+    border-width: 0 0 1px 0;
+    vertical-align: middle;
+    text-align:left;
+    
+}
+#GridView1Wrapper table td.zen-deemphasize{ vertical-align:middle;}
+#GridView1Wrapper table td{ padding:0 10px;  word-break: break-all;}
+.GridviewScrollHeader td {
+border-right:0px solid #ededed;
+white-space:nowrap;
+
+}
+.list-custom {
+    margin: 0px;
+    float: left;
+    border: 0px solid #ededed;
+} 
+
+
+
+
+.apexp .bPageBlock.apexDefaultPageBlock.pbBody {width:100%; margin:0px 0; float:left;}
+
+.jobtitle {
+display:none; 
+    background: #fff none repeat scroll 0 0;
+    border: 1px solid #ccc;
+    min-height: 510px;
+    left: 50%;
+    margin-left: -250px;
+    /*margin-top: -265px;*/
+     padding: 10px;
+    position: fixed;
+    top:10%;
+    width: 500px;
+    z-index: 999;
+    border-radius: 3px;
+    box-shadow: 0 0 5px 1px #ccc;
+    -webkit-border-radius: 3px;
+    -webkit-box-shadow: 0 0 5px 1px #ccc;
+    -moz-border-radius: 3px;
+    -moz-box-shadow: 0 0 5px 1px #ccc;
+}
+.jobtitlefolder {
+display:none; 
+    background: #fff none repeat scroll 0 0;
+    border: 1px solid #ccc;
+    min-height: 158px;
+    left: 50%;
+    margin-left: -250px;
+    margin-top: -79px;
+     padding: 10px;
+    position: fixed;
+    top:25%;
+    width: 500px;
+    z-index: 999;
+    border-radius: 3px;
+    box-shadow: 0 0 5px 1px #ccc;
+    -webkit-border-radius: 3px;
+    -webkit-box-shadow: 0 0 5px 1px #ccc;
+    -moz-border-radius: 3px;
+    -moz-box-shadow: 0 0 5px 1px #ccc;
+}
+.jobtitlegraybox
+{
+position:fixed;
+left:0;
+top:0;
+right:0;
+bottom:0;
+}
+.closejobtitle
+{
+background: #605F61 none repeat scroll 0 0;
+    border-radius: 40px;
+    color: #fff !important;
+    display: block;
+    float: right;
+    font-weight: bold;
+    padding: 3px;
+    position: absolute;
+    right: -10px;
+    text-align: center;
+    top: -10px;
+    width: 15px;
+    text-decoration:none;
+}
+.jobtitleHd
+{
+font-weight:bold;
+}
+
+.filetree li span {color:#000}
+.text-left
+{
+text-align:left !important;
+}
+body .pbBody table.list tr.dataRow th, body .pbBody table.list tr.dataRow td
+{
+border-left:1px solid #ECECEC;
+}
+
+.filetree span.folder:hover {cursor:pointer;}
+
+#blanket {position:fixed;}
+.popUpDiv {position:fixed;}
+
+
+.ontop {
+    z-index: 999;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;        
+    position: fixed;                
+    background-color: #000;
+    color: #000;
+    opacity: .8;
+    filter: alpha(opacity = 50);
+}
+
+#popupStatus {
+    width: 385px;
+    /*height: 200px;*/
+    position: fixed;
+    z-index: 999;
+    color: #000000;
+    /*background-color: #ffffff;*/
+    top: 50%; /* To align popup window at the center of screen*/
+    left: 50%;
+    margin-top: -100px;
+    margin-left: -150px;
+}
+
+#popupStatus .pbTitle
+{
+    width:100%;
+}
+.ontop .btn {color:#000;}
+
+.changeExtBtnStatusSec {width:32%; margin:0 auto; overflow:hidden;}
+.changeExtBtnStatusSec input {float:left; margin-right:10px;}
+
+.convertInstruction{
+    display:none;
+}
+.blanket-div {
+    width: 100%;
+    background: #000;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 99;
+    opacity: 0.5;
+}
+
+.tblCustom td
+{
+vertical-align:top;
+}
+.lefttblPart
+{
+position:relative;
+width:70px;
+}
+.lefttblPart_select
+{
+padding:0 !important;
+border: 1px #fff solid;
+width:0px;
+}
+.indicator_lefttbl
+{
+    position: absolute;
+    right: 0;
+    background: url(/resource/1456595250000/SidebarImage) 0 124px;
+    height: 31px;
+    border-radius: 97px; 
+    width: 9px;
+    margin-top:2px;
+}
+.indicator_lefttbl:hover
+{
+background: url(/resource/1456595250000/SidebarImage) 0 93px
+}
+.indicator_lefttblSelect
+{
+background: url(/resource/1456595250000/SidebarImage) 0 186px !important;
+}
+.indicator_lefttblSelect:hover
+{
+background: url(/resource/1456595250000/SidebarImage) 0 155px !important;
+}
+
+ul.leftmenu
+{
+width:90px;
+}
+ul.leftmenu li
+{
+padding:0;
+margin-bottom: 1px;
+margin-left: 0px;
+}
+ul.leftmenu li a
+{
+padding-top: 75px !important;
+text-decoration: none;
+color:#1D647B;
+padding-bottom: 10px !important;
+}
+ul.leftmenu li a.iconOrderFile_1, ul.leftmenu li a.iconOrderFile_1:hover
+{
+padding: 0px;
+text-align:center;
+background-position: center 5px !important;
+background-size: 70px;
+background-color:#cee5ed;
+}
+ul.leftmenu li a.iconOrderinfo_1, ul.leftmenu li a.iconOrderinfo_1:hover
+{
+padding: 0px;
+text-align:center;
+background-position:center 5px !important;
+background-size: 70px;
+background-color:#e2eef2;
+}
+ul.leftmenu li a.iconClassification_1, ul.leftmenu li a.iconClassification_1:hover
+{
+padding: 0px;
+text-align:center;
+background-position:center 5px !important;
+background-size: 70px;
+background-color:#ecf2f4;
+}
+ul.leftmenu li a.iconDir_1, ul.leftmenu li a.iconDir_1:hover
+{
+padding: 0px;
+text-align:center;
+background-position:center 5px !important;
+background-size: 70px;
+background-color:#f6f6f6;
+}
+ul.leftmenu li a:hover, 
+{
+color:#fff;
+}
+body .bPageBlock .pbBody
+{
+overflow:hidden;
+}
+
+.tblPartOrderFile{
+ width: 100%;
+ margin-bottom:0;
+}
+
+.child.collapsable span.fileTypes:first-child
+{
+color:#9C0606 !important;
+font-weight:normal;    
+    
+}
+.child.collapsable span.fileTypes
+{
+    color:#1B2EC3 !important;
+font-weight:bold;
+
+}
+
+
+
+/******************** Grid View****************************/
+#Grid_View{display:none;}
+.productImage {
+    text-align:center;
+    width:100%;
+    overflow:hidden;
+    vertical-align:top;
+    margin:10px 5px;
+    /*height:124px;*/
+}
+.productImage img{
+     max-width: 100%;
+    /*height:120px;*/
+    border:2px solid #ddd;
+}
+.productSelect{
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width:0 50px 50px 0;
+    border-color: transparent #d8ebf2 transparent transparent;
+    position:absolute;
+    right:0;
+    top:0;
+}
+.prodCheckBox {
+   /* display: table-cell;*/
+    padding:0;
+    width: 20px;
+    position:absolute;
+    right: -46px;
+    top: 3px;   
+}
+.productDetailsList {
+    /*display: table-cell;*/
+    padding: 5px;
+}
+.productDetails{ background:#d8ebf2; width:100%;}
+.productDetails ul{ margin:0; padding:0; width:100%; }
+.productDetails ul li{ margin:0; padding:3px 0 3px 0; width:100%; list-style: none; line-height:18px; color:#585858; overflow:hidden;  text-overflow: ellipsis;white-space: nowrap;}
+.productDetails .productName{
+    background: #1796bf none repeat scroll 0 0;
+    color: #fff;
+    font-size: 14px;
+    text-align: center;
+    padding:2px;
+}
+.productDetails ul li span{Color:#000;}
+.productDetails ul li span.productNameLable{
+color:#585858;
+}
+
+
+.refreshListButton {
+background-position: 2px 3px;
+    background-position-x: 2px;
+    background-position-y: 3px;
+    background: url(/resource/1457288657000/refresh) 1px 2px no-repeat !important;
+    width: 22px;
+
+}
+.refreshListButton:hover {
+background-position: 2px 3px;
+    background-position-x: 2px;
+    background-position-y: 3px;
+    background: url(/resource/1457288657000/refresh) 1px -20px no-repeat !important;
+    width: 22px;
+
+}
+
+
+
+
+
+
+    .productImage {
+        text-align:center;
+        width:100%;
+        overflow:hidden;
+        vertical-align:top;
+        margin:10px 5px;
+        /*height:124px;*/
+    }
+    .productImage img{
+         max-width: 100%;
+        /*height:120px;*/
+        border:2px solid #ddd;
+    }
+    .productSelect{
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width:0 50px 50px 0;
+        border-color: transparent #d8ebf2 transparent transparent;
+        position:absolute;
+        right:0;
+        top:0;
+    }
+    .prodCheckBox {
+       /* display: table-cell;*/
+        padding:0;
+        width: 20px;
+        position:absolute;
+        right: -46px;
+        top: 3px;   
+    }
+    .productDetailsList {
+        /*display: table-cell;*/
+        padding: 5px;
+        float:left; background:#d8ebf2; 
+        width:270px;
+    }
+    .productDetails{ background:#d8ebf2; width:100%;}
+    .productDetails ul{ margin:0; padding:0; width:100%; }
+    .productDetails ul li{ margin:0; padding:3px 0 3px 0; width:100%; list-style: none; line-height:18px; color:#585858; overflow:hidden;  text-overflow: ellipsis;white-space: nowrap;}
+    .productDetails .productName{
+        background: #1796bf none repeat scroll
+        color: #fff;
+        font-size: 14px;
+        text-align: center;
+        padding:2px;
+    }
+    .productDetails ul li span{Color:#000;}
+    .productDetails ul li span.productNameLable{
+        color:#585858;
+    }
+    .colBox{ width:280px; float:left; border:2px solid #ddd; margin:10px 5px; position:relative;}
+    .colBox.selectProduct{ border:2px solid #047a60}
+    .colBox.selectProduct .productSelect{ 
+        border-style: solid;
+        border-width:0 50px 50px 0;
+        border-color: transparent #047a60 transparent transparent;
+    }
+    .productDetails ul li.jobNameHeight{ float:left; height:25px; overflow:hidden; position:relative}
+    .dotdotdot{ position:absolute; right:0; bottom:0; color:#000;}
+
+   @media screen and (max-width: 1920px) and (min-width: 1910px) {
+     .colBox{ width:275px;}
+     .productDetailsList { width:265px;}
+    }
+    @media screen and (max-width: 1280px) and (min-width: 1270px) {
+     .colBox{ width:258px;}
+     .productDetailsList { width:248px;}
+    }
+
+    
+/****Tooltip*****/
+
+    .ui-tooltip {
+        padding: 8px;
+        position: absolute;
+        z-index: 9999;
+        max-width: 300px;
+    }
+    .ui-widget-content {
+        background: #33a1c5 none repeat scroll 0 0;
+        border: 1px solid #1497c1;
+        color:#fff;
+        line-height:18px;
+
+
+
+    }
+body .bPageBlock
+{
+margin-bottom:0;
+}
+
+.splitedfiles{color:#F919C7 !important;}
+
+.topPagination
+{
+border:0px !important;
+}
+.topPagination td
+{
+border:0px !important;
+}
+
+
+.legend-content {
+    float: right;
+    width: auto;
+}
+.legend-content ul {
+    float: right;
+    list-style: outside none none;
+    margin: 0 0 5px;
+    padding: 0;
+}
+.legend-content ul li {
+    color: #808080;
+    float: left;
+    font-size: 12px;
+    margin: 0 15px 0 0;
+}
+.legend-content ul li em {
+    float: left;
+    height: 8px;
+    margin: 2px 5px 0 0;
+    width: 8px;
+}
+.splitedColor em {
+    background: #F919C7 none repeat scroll 0 0;
+    border: 1px solid #F919C7;
+}
+.copyColor em {
+    background: #9C0606 none repeat scroll 0 0;
+    border: 1px solid #9C0606;
+}
+.parentColor em{
+    background: #1B2EC3 none repeat scroll 0 0;
+    border: 1px solid #1B2EC3;
+}
+/****noSidebarCell*/
+.noSidebarCell{ padding:10px 0;}
+
+</style>
+<style type="text/css">
+/*
+BODY,TD
+{
+  font-family: Arial,Helvetica,sans-serif;
+  color: #000;
+  font-size: 85%;
+}*/
+
+.orderClassificationSec {padding:10px;}     
+.tableTopSec h3 {color:#000; font-size:16px; clear:both;}       
+.tableTopSec td {padding:5px 2px;}
+.tableTopSec td.font14 {font-size:14px; padding:10px 2px;}
+
+
+.divider {margin-top:0;}
+
+ .changeExtSec {float:left; padding-bottom:10px;}    
+    .changeExtSec .changeExtLabel {width:50%; float:left; padding:2px 0;}
+    .changeExtSec .changeExtTextBox {width:50%; float:left;}
+    .changeExtSec .changeExtTextBox input {width:100%;}
+    .changeExtSec .changeExtTextBox select {width:100%;}
+    .changeExtSec .changeExtTextBox textarea {resize:none;}
+
+    .changeExtBtnSec {width:42%; margin:0 auto; overflow:hidden;}
+    .changeExtBtnSec input {float:left; margin-right:10px;}
+    
+    
+    .changeExtStatusSec {width:100%; float:left; padding-bottom:10px;}
+    .changeExtStatusSec .changeExtLabel {width:45%; float:left; padding:2px 0; margin-left:2%}
+    .changeExtStatusSec .changeExtTextBox {width:50%; float:left;}
+    .changeExtStatusSec .changeExtTextBox input {width:100%; float:left;}
+    .changeExtStatusSec .changeExtTextBox input[type="checkBox"] {float:left; width: 15px}
+    .changeExtStatusSec .changeExtTextBox select {width:100%; float:left;}
+    .changeExtStatusSec .changeExtTextBox textarea {resize:none; float:left; width:98%; }
+    
+    .changeExtBtnStatusSec {width:32%; margin:0 auto; overflow:hidden;}
+    .changeExtBtnStatusSec input {float:left; margin-right:10px;}
+    
+
+
+
+.colBox
+{
+width:320px;
+margin:5px 5px;
+min-height: 290px;
+}
+.productDetailsList
+{
+    width: 310px;
+}
+.productName a
+{
+    word-break: break-all;
+    display: block;
+    min-height: 30px;
+    padding: 2px;
+}
+.productImage
+{
+width:97%;
+}
+
+ </style>
+
+
+
+
+ <script type="text/javascript">
+        $(function(){
+        
+        $('.pbBody').each(function(){  
+            
+            var highestBox = 0;
+            $('.productDetails', this).each(function(){
+            
+                if($(this).height() > highestBox) 
+                   highestBox = $(this).height(); 
+            });  
+            
+            $('.productDetails',this).height(highestBox);
+        
+        });    
+        });
+        </script>
+ 
+ <script type="text/javascript">
+
+    $(function(){
+    
+    $('input[type=checkbox]').click(function() {
+    if(this.checked == true) {      
+        $(this).closest('.colBox').addClass('selectProduct');
+    } else {
+        $(this).closest('.colBox').removeClass('selectProduct');
+        }
+    });
+    
+     $(".switchView li a").on("click", function(){   
+      $(this).parent('li').addClass('active').siblings().removeClass('active');
+        //$(this).parent('li').addClass("active");
+    });
+    
+
+    $("#selectall_Copy").click(function () {
+    
+    $("input:checkbox").prop('checked', $(this).prop("checked"));
+    $("input:checkbox").attr('checked', $(this).attr("checked"));
+
+    });
+     $(".case").click(function(){
+        if($(".case").length == $(".case:checked").length) {
+            $("#selectall_Copy").prop('checked', true);
+
+        } else {
+            $("#selectall_Copy").removeAttr("checked");
+        }
+ 
+    });
+    
+   var flag = false;
+
+    $(".indicator_lefttbl").on("click",function(){
+
+     if(flag == true)
+        {
+           
+           var winwidth = document.body.clientWidth-175;
+            var winheight = window.innerHeight - 350;
+            gridviewScroll(winwidth, winheight);
+            flag = false;            
+        }else
+        {
+        flag = true;
+       
+         var winwidth = document.body.clientWidth-94;
+            var winheight = window.innerHeight - 350;
+            gridviewScroll(winwidth, winheight);            
+            
+        }
+   
+        $(".leftmenu").toggle();
+        $(this).toggleClass("indicator_lefttblSelect");
+        $(".lefttblPart").toggleClass("lefttblPart_select");
+    
+    });
+
+
+});
+
+
+function closeBg()
+{
+    $(".blanket-div").hide();
+    location.reload();
+}
+
+function DisplayList()
+{
+  $("#Grid_View").hide(); 
+   $("#List_View").show(); 
+   DisplayListAction();  
+}
+
+function DisplayGrid()
+{
+    $("#List_View").hide();  
+    $("#Grid_View").show(); 
+    DisplayGridAction();
+}
+
+function gridviewScrollautoNew()
+{
+var winwidth = document.body.clientWidth-175;
+    var winheight = window.innerHeight - 350;
+    gridviewScroll(winwidth, winheight);
+}
+
+
+
+ 
+    
+    var flags = false;
+
+function checkCheckboxes()
+{
+    if(flags == false)
+    {
+        $(".case").prop("checked", true);
+        flags = true;  
+    }else{
+        $(".case").prop("checked", false);
+        flags = false;
+    }   
+}
+</script>
+
+
+
+<script type="text/javascript">
+ var rootflog = false;
+ var count;
+ function selectAll(){
+ if(rootflog == false)
+ {
+    $('.fancyTable tbody tr').find('.childs').prop('checked', 'checked');
+    rootflog=true;
+    count = $(".childs:checked").length;    
+    jQuery('[id$=myPlaceholder]').text(count);
+        if(count>0)
+        jQuery('[id$=count]').css('background','#ffe324');
+        else
+        jQuery('[id$=count]').css('background','#FFF'); 
+        jQuery('[id$=myPlaceholder2]').text(count);
+        if(count>0)
+        jQuery('[id$=count]').css('background','#ffe324');
+        else
+        jQuery('[id$=count]').css('background','#FFF');
+ }
+ else{
+ $('.fancyTable tbody tr').find('.childs').removeProp('checked', 'checked');
+ rootflog=false;
+ count = $(".childs:checked").length;    
+        jQuery('[id$=myPlaceholder]').text(count);
+        if(count>0)
+        jQuery('[id$=count]').css('background','#ffe324');
+        else
+        jQuery('[id$=count]').css('background','#FFF'); 
+        jQuery('[id$=myPlaceholder2]').text(count);
+        if(count>0)
+        jQuery('[id$=count]').css('background','#ffe324');
+        else
+        jQuery('[id$=count]').css('background','#FFF');    
+ }
+        
+ }
+
+    $(document).ready(function() {
+        $(document).on("click", "#checkall", function(){
+         $('.fancyTable tbody tr').find('.childs').prop('checked', this.checked);
+         count = $(".childs:checked").length;    
+        jQuery('[id$=myPlaceholder]').text(count);
+        if(count>0)
+        jQuery('[id$=count]').css('background','#ffe324');
+        else
+        jQuery('[id$=count]').css('background','#FFF');
+        jQuery('[id$=myPlaceholder2]').text(count);
+        if(count>0)
+        jQuery('[id$=count]').css('background','#ffe324');
+        else
+        jQuery('[id$=count]').css('background','#FFF');
+        });
+       
+    
+        $(".childs").on('change',function(){
+          var counts = $('.childs:checked').length;
+          var all_count=$('.fancyTable tbody tr').find(":checkbox").length;
+         
+         if(counts < all_count){
+          $('#checkall').prop('checked',false);
+         }
+         else{
+           $('#checkall').prop('checked',true);
+
+         }
+         
+         count = $(".childs:checked").length;    
+        jQuery('[id$=myPlaceholder]').text(count);
+        if(count>0)
+        jQuery('[id$=count]').css('background','#ffe324');
+        else
+        jQuery('[id$=count]').css('background','#FFF');
+        jQuery('[id$=myPlaceholder2]').text(count);
+        if(count>0)
+        jQuery('[id$=count]').css('background','#ffe324');
+        else
+        jQuery('[id$=count]').css('background','#FFF');
+        });
+        
+        
+
+    });   
+   
+
+
+
+</script>
+
+<script>
+function showQCcheckPopupTest(statusVal){
+alert('Test Called----------');
+$('.changeCategoryDiv').show();
+}
+
+function showQCcheckPopup(statusVal)
+    {
+           //alert('Test Called');
+           console.log('--- Method Called----');
+            checkedValues=$("input[type='checkbox']:checked").map(function() {
+                return this.value;
+            }).get();
+            if(checkedValues=="")
+            {
+                popup('popUpalert','alert','','Please Select Atleast one File to proceed'); 
+                return false;
+            }else{
+             console.log('--- Method Called--222222222222--');
+                    var checkSeleted=$("input[type='checkbox']:checked").map(function() { return this.className; }).get();  
+                    console.log('Selected Ins' + checkSeleted); 
+                    console.log('Selected Ins' +this.Id);
+                   
+                    var output="";
+                    var outputStatus=[];           
+                    /*for (var i = 0; len = checkedValues.length; i<len; i++){
+                        if(checkedValues[i]!='on')
+                        {
+                           // output += checkedValues[i]+',';
+                           output += checkedValues[i].substr(0,18)+',';
+                           outputStatus.push(checkedValues[i].substring(19));
+                        }
+                    }*/
+
+                     var error = false; 
+                        console.log('Before for loop error='+error);    
+                        for(var j=0;j<outputStatus.length;j++){
+                            if(outputStatus[j] != 'On-Hold'){
+                             if(outputStatus[j] != 'Completed')
+                             {                                   
+                                error = true;
+                                console.log('inside if conditon error='+error);                             
+                                break; 
+                            }
+                            }
+                        }
+                        
+                        if(error){
+                            popup('popUpalert','alert','','Please select files\'s have status Completed or On-Hold'); 
+                        }
+                        else{
+                        if(statusVal=='category')
+                        {
+                                         console.log('--- Method Called--33333--');
+                                         //alert('statusVal' + statusVal);
+                            $(".changeCategoryDiv").show(); 
+                            changeCategory(output);
+                        }
+                  } 
+
+            }   
+    }
+    
+      function showChangeCategory()
+        {
+            $('.changeCategoryDiv').show();
+            //alert('TEST:' );
+            // document.getElementById('changeCategoryDiv').style.display = 'none';
+        }
+        
+        function cancelchangeCategory()
+        {
+            $('.changeCategoryDiv').hide();
+            // document.getElementById('changeCategoryDiv').style.display = 'none';
+        }
+        
+        function cancelchangeStatus()
+        {
+             $(".changeCategoryDiv").hide();
+        } 
+        
+        function cancelClassification(){
+            opener.location.reload(true); 
+            self.close();
+        }
+        
+        function refreshParent(){
+            location.reload();  
+            //window.top.close();
+            //opener.location.reload(true); 
+            //self.close();
+            //window.location.reload();     
+            //window.parent.reload();        
+        } 
+
+</script>
+
+    
+    <apex:pageBlock rendered="{!NOT(viewDirectory) && NOT(classification) && NOT(orderInformation) && NOT(orderFiles)}" > 
+    <script type="text/javascript">
+        methodOneInJavascript();
+    </script>
+    </apex:pageBlock>    
+    
+    <apex:form >
+          <apex:actionFunction action="{!getdisplayOrderFiles2}" name="methodOneInJavascript" oncomplete="gridviewScrollautoNew();"></apex:actionFunction> 
+    </apex:form>
+    
+<apex:form >
+
+    
+
+
+
+   
+<html> 
+    <body>
+    
+           <table border="1" width="100%" class="tblCustom">
+                <tr>
+                   
+                    <td>
+            <div class="changeCategoryDiv">
+            <div id="popDiv" class="ontop"></div>
+            <div id="popupStatus">
+            <apex:outputPanel id="changeCategoryId">                    
+                    <apex:pageblock title="Change Category">                       
+                        <apex:pageMessages />                     
+                    
+                    <div class="changeExtStatusSec"> 
+                       
+                        
+                        <div class="changeCategorySec">
+                            <div class="changeExtLabel">Select Category  </div>
+                            <div class="changeExtTextBox">
+                            <apex:outputPanel id="SelectCateg">
+                               <apex:selectList value="{!selectvalueCategory}" size="1" id="elementStatus">
+                                    <apex:selectoptions value="{!AllFileCategory}" />
+                                </apex:selectList>
+                            </apex:outputPanel>    
+                            </div>
+                        </div>
+                    </div>    
+                        
+                    <div class="changeExtBtnStatusSec" style="width:35%;">      
+                          <apex:commandButton value="Submit" action="{!saveChangeCategory}" rerender="changeCategoryId" rendered="{!submitButtonCat}"/>
+                          <apex:commandButton value="Cancel" onclick="cancelchangeCategory()" OnComplete="refreshParent()" rerender="changeCategoryId" rendered="{!submitButtonCat}"/>
+                         <apex:commandButton value="Close" onclick="cancelchangeStatus()" OnComplete="refreshParent()" rendered="{!submitButtonCat==false}" /> 
+                    </div>
+                    </apex:pageblock>    
+
+
+
+                    
+            </apex:outputPanel>                
+            </div>
+        </div> 
+            
+
+      
+          
+              
+             <apex:pageBlock rendered="{!orderFiles}" id="pageOrderFiles">
+             
+             
+    
+             
+             
+             
+                 <div style="width:810px;"><apex:pageMessages id="errorMessages" /></div> 
+                 <div>
+                <!-- <apex:commandButton value="Change Category" onClick="showQCcheckPopupTest('category');" rerender="errorMessages" rendered="{!IF(wrapperList.size > 0,true,false) }" action="{!UpdateCategory}"/> 
+                  rerender="errorMessages"  -->    
+<!--                   -->
+                <apex:commandButton value="Change Category" oncomplete="if('{!multiSelectError}' == 'false') {showQCcheckPopup('category');};" rerender="errorMessages" rendered="{!IF(wrapperList.size > 0,true,false) }" action="{!UpdateCategory}" /> 
+                <apex:commandButton value="Close" onClick="cancelClassification()"/>       
+                    <apex:actionFunction name="changeCategory" action="{!changeCategory}" onComplete="showChangeCategory();" immediate="true" rerender="changeCategoryId" >
+                         <apex:param id="fileCategoryId" name="fileCategoryId" value=""/>
+                   </apex:actionFunction>
+                 </div>
+                <div style="margin-bottom:10px;">
+                  <apex:actionFunction action="{!refresh}" name="status" reRender="gridpanel" />
+                  
+                  <ul class="switchView">                 
+                <li Class="{!IF(showGrid,'','active')}">
+                <a href="javascript:;" onclick="return DisplayList();" class="productlistView"></a>
+                </li>
+                <li Class="{!IF(showGrid,'active','')}">
+                <a href="javascript:;" onclick="return DisplayGrid();" class="productGridView"></a>
+                </li>
+                </ul>
+                
+                </div>
+                  <div style="width:100%;font-weight:bold;">Production Order : <apex:outputText >{!poObjDisplay.Name}</apex:outputText> 
+                   &nbsp; TAT : <apex:outputText >{!datavalues} </apex:outputText></div> 
+                   
+                   <apex:actionStatus id="myDisplayStatus"  startText="Processing..."  stopText=""/>     
+                    
+                    <div class="tblPartOrderFile penalityTableSec">
+                     <apex:outputPanel id="outputPanelId1" rendered="{!wrapperList.size==0}">
+                     <div>No Records Found</div>                     
+                  </apex:outputPanel> 
+                  <!-- -->
+                    <apex:outputPanel rendered="{!NOT(showGrid)}" id="showListID">
+                    <apex:actionFunction name="showSort" action="{!refresh}" /><!-- reRender="pageOrderFiles" -->
+                   <apex:outputPanel rendered="{!IF(wrapperList.size > 0,true,false)}" > 
+                  <table class="topPagination" width="100%" border="0" cellpadding="0" cellspacing="0">
+                    <tr>  
+                    <td width="33%" align="left" class="lefttd">
+                    </td>            
+                    <td align="center" width="34%"><apex:commandButton value="Previous" action="{!Previous}"  status="status" disabled="{!DisablePrevious}" />
+                    <apex:commandButton value="Next" action="{!Next}" status="status" disabled="{!DisableNext}" /></td>
+                    <!-- align="right" class="NOFPage" -->
+                   <td width="33%" style="text-align:right">Sort&nbsp; by &nbsp;<apex:selectList value="{!sortingChoice}" id="sortPicklist"  multiselect="false" size="1" onchange="showSort()">
+                          <apex:selectOptions value="{!sortingoptions}"/>
+                       </apex:selectList>&nbsp; 
+                       <apex:selectList styleClass="sortListAsc" value="{!sortType}"  multiselect="false" size="1"  onchange="showSort()" >
+                          <apex:selectOptions value="{!sortingTypeoptions}"/>
+                       </apex:selectList>&nbsp;</td>
+                    </tr>
+                 </table>               
+
+                <apex:outputpanel >
+                    <div class="container_12 divider freezeTableAutoWidth">
+                      <div class="grid_6">
+                          <table class="fancyTable headerFreezeTable" cellpadding="0" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="checkall" /></th> 
+                                    <!--<th>S.No</th> -->                                  
+                                    <th>File Name</th>
+                                    <th>Status</th>
+                                    <th>Job Name</th>
+                                    <th id="thumbImageHeader">Thumbnail Display</th>
+                                    <th>Total Work Time</th>
+                                    <th>Category</th>
+                                    <th>Operator Incharge</th>
+                                    <th>TL Incharge</th>
+                                    <th>QC Incharge</th>
+                                    <th>QC Comments</th>
+                                    <th style="min-width:220px">File Instructions</th> 
+                                    <th style="min-width:230px">Order Instruction</th>
+                                    <th style="min-width:230px">Handover Instruction</th>
+                                </tr>
+                            </thead>    
+                            <apex:variable var="slNo" value="{!0}" />
+                        <apex:repeat value="{!wrapperList}" var="fileObj">
+                                <apex:variable var="slNo" value="{!slNo+1}" />
+                        <tbody>   
+                            <tr>
+                                <!-- <td>{!slNo}</td>  -->                          
+                               <!--<td><apex:inputCheckbox styleClass="childs" value="{!fileObj.isSelected}" /></td> -->
+                               <td><apex:inputCheckbox styleClass="childs" value="{!fileObj.isSelected}" /></td> 
+                                <td><apex:outputlink value="/{!fileObj.fileWrap.Id}" target="_blank" >{!fileObj.fileWrap.Name}</apex:outputlink> </td>  
+                                <td><apex:outputText >{!fileObj.fileWrap.Status__c}</apex:outputText> </td>
+
+                                <td>
+                                    <div id="jobID{!slNo}">
+                                    </div>
+                                    <script type="text/javascript">
+                                        var jobtitles='{!fileObj.jobTitles}';
+                                        var jobsplioted='';
+                                        jobtitles=jobtitles.split(',');                                        
+                                        for(var incr=0;incr < jobtitles.length;incr++){                                            
+                                            jobsplioted+=jobtitles[incr]+'<br/>';                                            
+                                        }
+                                        $('#jobID{!slNo}').html(jobsplioted);
+                                        
+                                    </script>
+                                </td>
+                                
+                                <td class="thumbImageBody"><apex:outputText value="{!fileObj.fileWrap.Thumbnail_Display__c}" escape="false"/></td>                             
+                                <td><apex:outputText >{!fileObj.fileWrap.Total_WorkTime_for_File__c}</apex:outputText> </td> 
+                                 <td><apex:outputText >{!fileObj.catWrap.Name}</apex:outputText> </td>   
+                                <td><apex:outputtext >{!fileObj.memWrap.Name}</apex:outputtext> </td>
+                                <td><apex:outputText >{!fileObj.fileWrap.TLInCharge__r.Name}</apex:outputText> </td>   
+                                <td><apex:outputText >{!fileObj.fileWrap.QCIncharge__r.Name}</apex:outputText> </td> 
+                                <td><apex:outputText >{!fileObj.fileWrap.QC_Comments__c}</apex:outputText> </td> 
+                                <td style="text-align:left"><apex:outputText >{!fileObj.fileWrap.Instruction__c}</apex:outputText> </td>  
+                                <td style="text-align:left"><apex:outputfield value="{!fileObj.fileWrap.Order_Instructions__c}"></apex:outputfield> </td> 
+                                <td style="text-align:left"><apex:outputfield value="{!fileObj.fileWrap.File_HandOver_Instructions__c}"/> </td>                 
+                     
+                                </tr>
+                            </tbody>    
+                        </apex:repeat>
+                              
+                          </table>
+                        </div>
+                    <div class="clear"></div>
+                </div>
+                </apex:outputpanel>        
+                
+ <div class="paginationNav">
+ <table class="pagefooter" width="100%" border="0" cellpadding="0" cellspacing="0" >
+ 
+  <tr>
+    <apex:actionFunction name="showNext" action="{!refresh}" />
+               <td width="20%" align="left" class="lefttd">Display&nbsp;<apex:selectList value="{!setUserChoice}"  multiselect="false" size="1" onchange="showNext();setWinSize();">
+                      <apex:selectOptions value="{!items}"/>
+                   </apex:selectList>&nbsp; records per page &nbsp;
+                   <td width="13%" id="count" >  <apex:outputText id="myPlaceholder" value="0"/>&nbsp;&nbsp; Records Selected </td>
+
+                   
+                   </td>
+        <td width="34%"><apex:commandButton value="Previous" action="{!Previous}"  status="status" disabled="{!DisablePrevious}" onclick="setWinSize();"/>
+        <apex:commandButton value="Next" action="{!Next}" status="status" disabled="{!DisableNext}" onclick="setWinSize();"/></td>
+
+        <apex:actionStatus id="status1" startText="Please Wait..."/>
+        <apex:actionFunction name="show2" action="{!refreshPageRecords}" /> <!--  -->
+        <td width="33%" align="right" class="NOFPage"> Page &nbsp; <apex:inputText value="{!newFileForPageCount}" id="pageCount" onchange="setWinSize(); show2();" onkeydown="if(event.keyCode==13){this.blur();show2();setWinSize();}"/> &nbsp;  Of &nbsp;  <apex:outputText label="Total" value="{!noOfPages}" escape="false"/></td>
+        </tr>
+        </table>
+                     </div>
+                     </apex:outputPanel> 
+                     </apex:outputPanel>
+
+ <apex:outputPanel rendered="{!showGrid }" id="showGridID">
+ <apex:outputPanel rendered="{!IF(wrapperList.size > 0,true,false)}" > 
+ 
+          <table class="topPagination" width="100%" border="0" cellpadding="0" cellspacing="0">
+            <tr>              
+            <td align="center" width="34%"><apex:commandButton value="Previous" action="{!Previous}"  status="status" disabled="{!DisablePrevious}" />
+            <apex:commandButton value="Next" action="{!Next}" status="status" disabled="{!DisableNext}" /></td>
+            </tr>
+         </table>   
+    <apex:variable var="inc" value="{!0}"/>
+    <apex:repeat value="{!wrapperList}" var="fileObj">              
+        <apex:variable var="inc" value="{!inc+1}"/>
+    <div class="colBox">
+    <div class="productImage">
+       <apex:outputText value="{!fileObj.fileWrap.Thumbnail_Display__c}" escape="false"/>
+    </div>
+    <div class="productDetails">
+    <div class="productSelect">
+    <div class="prodCheckBox">
+   <apex:inputCheckbox value="{!fileObj.isSelected}" styleClass="childs"/>
+    </div>
+    </div>
+    <div class="productDetailsList">
+    <div class="productName">
+        <apex:outputlink value="/{!fileObj.fileWrap.Id}" target="_blank" >{!fileObj.fileWrap.Name}</apex:outputlink>
+    </div>
+    <ul>
+    <li>
+    <span>File Type:</span>{!fileObj.fileWrap.File_Type__c}
+    </li>
+    <li>
+    <span>Status:</span>{!fileObj.fileWrap.Status__c}
+    </li>
+    <li>
+    <span>Category:</span>{!IF(status == 'Estimation' ,fileObj.fileWrap.Estimated_File_Category__r.Name,fileObj.fileWrap.File_Category_Code__r.Name)}
+    </li>
+
+    <li>
+    <span>Operator InCharge:</span>{!fileObj.memWrap.Name}
+    </li>
+    <li>
+    <span>Job Name:</span>
+    <span class="productNameLable">{!fileObj.jobTitles}</span>
+        
+         <script type="text/javascript">         
+          var cont = $('.pbBody').find('.productNameLable');
+            $('.pbBody').tooltip({
+                items: '.productNameLable',
+                track: true,
+                content: function(){
+                return $(this).html();
+                }
+            });    
+         </script>
+         
+    </li>
+    </ul>
+    </div>
+    </div>
+    </div>      
+    </apex:repeat>  
+    </apex:outputPanel> 
+     <apex:outputPanel rendered="{!IF(wrapperList.size > 0,true,false)}" > 
+     <div class="paginationNav">
+     <table class="pagefooter" width="100%" border="0" cellpadding="0" cellspacing="0">
+  <tr>
+    <apex:actionFunction name="show" action="{!refresh}"/><!-- reRender="pageOrderFiles" -->
+               <td width="33%" align="left" class="lefttd">Display&nbsp;<apex:selectList value="{!setUserChoice}"  multiselect="false" size="1" onchange=" show(); setWinSize(); ">
+                      <apex:selectOptions value="{!items}"/>
+                   </apex:selectList>&nbsp; records per page  &nbsp; &nbsp;
+                   <td width="13%" id="count" >  <apex:outputText id="myPlaceholder2" value="0"/>&nbsp;&nbsp; Records Selected </td> 
+                 </td>
+        <td width="34%"><apex:commandButton value="Previous" action="{!Previous}"  status="status" disabled="{!DisablePrevious}" />
+        <apex:commandButton value="Next" action="{!Next}" status="status" disabled="{!DisableNext}" /></td>
+
+        <apex:actionStatus id="status" startText="Please Wait..."/>
+         <apex:actionFunction name="show2" action="{!refreshPageRecords}"/> <!--   -->
+        <td width="33%" align="right" class="NOFPage"> Page &nbsp; <apex:inputText value="{!newFileForPageCount}" onchange="show2()" onkeydown="if(event.keyCode==13){this.blur();show2();}"/> &nbsp;  Of &nbsp;  <apex:outputText label="Total" value="{!noOfPages}" escape="false"/></td>
+        </tr>
+        </table>
+        </div>
+        </apex:outputPanel>
+    </apex:outputPanel>
+ 
+ 
+                   </div>
+              </apex:pageBlock>
+              </td>  
+                </tr>
+                 </table>      
+                      <apex:actionFunction name="DisplayGridAction" action="{!DisplayGrid}"  />
+                      <apex:actionFunction name="DisplayListAction" action="{!DisplayList}" />
+                </body>
+            </html>
+    </apex:form>
+</apex:page>

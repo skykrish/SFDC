@@ -1,0 +1,113 @@
+<apex:page standardController="Files__c" extensions="EPMS_ChangeQCController_file" showHeader="false" sidebar="false">
+    <script src="/soap/ajax/35.0/connection.js"></script>
+    
+    <style>
+        .bPageBlock {
+            background-color: white;
+        }
+    .bPageTitle h3 {
+        font-family: arial,"Times New Roman", Georgia, Serif;
+        font-size: 90% !important; 
+        // you can write this way also font-size: 40px !important;
+    }
+    
+    .bPageTitle h1{
+        font-style: Arial;
+        font-weight: bold;
+        font-size: 150% !important;
+        text-align:center;
+    }  
+    
+    .bPageBlock .detailList tr td, .bPageBlock .detailList tr th, .hoverDetail .bPageBlock .detailList tr td, .hoverDetail .bPageBlock .detailList tr th
+    {
+        border-bottom: 0px solid #e3deb8;
+    }     
+    
+    </style>
+    <style>
+        .tbldates table
+        {
+            width:100%;
+        }
+    .tbldates table th
+    {
+        width:50% !important;
+        text-align:left !important;
+    }
+    .tbldates table select
+    {
+        width:94% !important;
+    }
+    </style>
+    <script>
+        
+        sforce.connection.sessionId = '{!$Api.Session_ID}';
+    var describeSObjectResult = sforce.connection.describeSObject("Files__c");
+    var prefix = describeSObjectResult.keyPrefix;       
+    
+    function ClosePopup(){
+        window.parent.close();
+        var url = location.href;
+        var baseURL = url.substring(0, url.indexOf('/', 14));
+        var filerec = '{!fileRecord}';
+        var basepath = '{!basepath}';
+        if(basepath == 'file'){
+            window.opener.location.href="/" + prefix;;
+        } else if(basepath =='detailpage') {             
+            window.opener.location.href=baseURL+"/"+filerec;
+        } else {             
+            
+            window.parent.close();
+            window.opener.location.reload();
+        }
+    }
+    </script>
+    
+    
+    
+    
+    
+    
+    
+    
+    <apex:form >
+        <apex:sectionHeader title="Change QC for Directory" />
+        <apex:pagemessages > </apex:pagemessages>
+        
+        <center>
+            <apex:pageblock mode="maindetail">
+                <apex:pageblockButtons location="bottom">
+                    <apex:commandbutton action="{!saveChanges}" value="Submit"/>
+                    <apex:commandbutton value="Close" onclick="javascript:ClosePopup();" oncomplete="location.reload()"/> 
+                </apex:pageblockButtons>
+                
+                            
+                                
+                <div class="tbldates">
+                    <apex:pageBlockSection columns="1" id="Sectionid">
+                        <apex:pageblocksectionItem >
+                            <apex:outputText value="Available Shifts" style="font-size: 105%;margin-left:30px;" />
+                            <apex:selectList value="{!selShift}" size="1" multiselect="false">
+                                <apex:actionSupport event="onchange" action="{!changeShift}" reRender="Sectionid"/>
+                                <apex:selectOptions value="{!shiftNames}" />
+                            </apex:selectList>
+                        </apex:pageblocksectionItem> 
+                        <apex:pageblocksectionItem rendered="{!selShift != NULL}">
+                            <apex:outputText value="Available Teams" style="font-size: 105%;margin-left:30px;" />
+                            <apex:selectList value="{!selTeam}" size="1" multiselect="false">
+                                <apex:actionSupport event="onchange" action="{!changeTeam}" reRender="Sectionid"/>
+                                <apex:selectOptions value="{!teamNames}" />
+                            </apex:selectList>
+                        </apex:pageblocksectionItem>
+                        <apex:pageblocksectionItem rendered="{!selTeam != NULL}">
+                            <apex:outputText value="Select QC Name" style="font-size: 105%;margin-left:30px;" />
+                            <apex:selectList value="{!selQC}" size="1" multiselect="false"> 
+                                <apex:selectOptions value="{!QCNames}" />
+                            </apex:selectList>
+                        </apex:pageblocksectionItem>
+                    </apex:pageBlockSection>
+                </div>
+            </apex:pageblock>
+        </center>
+    </apex:form>
+</apex:page>

@@ -1,0 +1,191 @@
+<apex:page controller="SitesContactController" action="{!init}" cache="false" sidebar="false" showHeader="false" standardStylesheets="false">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>お問い合わせ</title>
+
+    <!-- Design Style -->
+    <apex:stylesheet value="{!URLFOR($Resource.SitesContents, 'common/css/import.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.SitesContents, 'common/css/editorial/sub.css')}" />
+
+    <!-- JQuery --> 
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>
+    
+    <!-- Design Script -->
+    <apex:includeScript value="{!URLFOR($Resource.SitesContents, 'common/js/jquery.blend-min.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.SitesContents, 'common/js/scrollsmoothly.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.SitesContents, 'common/js/heightLine.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.SitesContents, 'common/js/common.js')}"/>
+
+    <!--Google Analytics-->
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-17698964-1']);
+  _gaq.push(['_setDomainName', 'none']);
+  _gaq.push(['_setAllowLinker', true]);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+    <!--Google Analytics-->
+
+</head>
+
+<body>
+    <div id="wrapper">
+    <div id="header" class="cf">
+        <div class="left">
+            <h1><a href="http://www.kirinuki.jp/" onclick="_gaq.push(['_link', this.href]); return false;" target="_blank">切り抜きJP</a></h1>
+        </div><!--div.left -->
+        <div class="right">
+        </div><!--div.right -->
+    </div><!--div#header -->
+
+    <div id="container" class="cf">
+    <div id="content" class="cf">
+
+        <!-- 通常モード：登録画面 -->
+        <apex:outputPanel rendered="{!(dispMode=='normal')}">
+            <apex:form >
+                <!-- メッセージ -->
+                <div style="width: 700px; margin: auto;">
+                    <c:SitesMessage msgList="{!msgList}"/>
+                </div>
+
+                <p class="comment_normal">
+                    よくあるご質問を<a href="http://www.kirinuki.jp/faq.html" target="_blank">FAQ</a>に掲載しております。
+                    そちらも是非ご参照ください。
+                </p>
+                <p class="comment_normal">
+                    ※必要事項をご記入の上、最下部の「確認」へ進んで下さい。
+                </p>
+    
+                <table border="0" cellspacing="0" cellpadding="0" class="normal" width="700">
+                    <tr>
+                        <th width="140">会社名</th>
+                        <td>
+                            <apex:inputText value="{!contact.CompanyName__c}" styleClass="textbox2" onblur="Blur(this);" onfocus="Focus(this);"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th width="140">お名前</th>
+                        <td>
+                            <apex:inputText value="{!contact.ContactName__c}" styleClass="textbox2" onblur="Blur(this);" onfocus="Focus(this);"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>メールアドレス</th>
+                        <td>
+                            <apex:inputText value="{!contact.Email__c}" styleClass="textbox2" onblur="Blur(this);" onfocus="Focus(this);"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>お電話番号</th>
+                        <td>
+                            <apex:inputText value="{!phone1}" styleClass="textbox3" onblur="Blur(this);" onfocus="Focus(this);"/>-
+                            <apex:inputText value="{!phone2}" styleClass="textbox3" onblur="Blur(this);" onfocus="Focus(this);"/>-
+                            <apex:inputText value="{!phone3}" styleClass="textbox3" onblur="Blur(this);" onfocus="Focus(this);"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>お問い合わせの内容</th>
+                        <td>
+                            <apex:inputtextarea value="{!contact.Detail__c}" styleClass="upload" onblur="Blur(this);" onfocus="Focus(this);"/>
+                        </td>
+                    </tr>
+                </table>
+    
+                <hr />
+    
+                <!-- ボタン部 -->
+                <p class="inquiry">
+                    <apex:inputCheckbox id="agree" value="{!isAgree}"/>
+                    <apex:outputLabel for="agree" style="vertical-align: 0.25em;">
+                        <a href="http://www.kirinuki.jp/privacy.html" target="_blank" style="color: blue;">プライバシーポリシー</a>と、
+                        <a href="http://www.kirinuki.jp/terms.html" target="_blank" style="color: blue;">利用規約</a>に同意する
+                    </apex:outputLabel>
+                </p>
+                <p class="inquiry">
+                    <apex:commandButton value="確認" action="{!confirm}" styleClass="button"/>&nbsp;&nbsp;&nbsp;
+                    <input type="reset" value="リセット" class="button"/>
+                </p>
+
+                <p>&nbsp;</p>
+
+            </apex:form>
+        </apex:outputPanel>
+    
+        <!-- 確認モード：確認画面 -->
+        <apex:outputPanel rendered="{!(dispMode=='confirm')}">
+            <apex:form onsubmit="_gaq.push(['_linkByPost', this]);">
+                <div class="comment_normal">
+                    <p>下記内容でよろしいですか？</p>
+                </div>
+
+                <table border="0" cellspacing="0" cellpadding="0" class="normal" width="700">
+                    <tr>
+                        <th width="140">会社名</th>
+                        <td>
+                            <apex:outputField value="{!contact.CompanyName__c}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th width="140">お名前</th>
+                        <td>
+                            <apex:outputField value="{!contact.ContactName__c}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>メールアドレス</th>
+                        <td>
+                            <apex:outputField value="{!contact.Email__c}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>お電話番号</th>
+                        <td>
+                            <apex:outputText value="{!phone1}-{!phone2}-{!phone3}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>お問い合わせの内容</th>
+                        <td>
+                            <apex:outputField value="{!contact.Detail__c}"/>
+                        </td>
+                    </tr>
+                </table>
+
+                <p>&nbsp;</p>
+
+                <!-- ボタン部 -->
+                <p class="inquiry">
+                    <apex:commandButton value="送信" action="{!send}" styleClass="button"/>&nbsp;&nbsp;&nbsp;
+                    <apex:commandButton value="戻る" action="{!back}" styleClass="button"/>
+                </p>
+
+                <p>&nbsp;</p>
+                <p>&nbsp;</p>
+                <p>&nbsp;</p>
+                <p>&nbsp;</p>
+                <p>&nbsp;</p>
+
+            </apex:form>
+        </apex:outputPanel>
+
+    </div><!--div#content -->
+    </div><!--div#container -->
+    </div><!--div#wrapper -->
+
+    <!-- copy ritgh -->
+    <div id="copyright">
+        Powered by<a href="http://www.force.com/" target="_blank"> force.com</a>
+    </div><!--div#copyright -->
+</body>
+
+</apex:page>

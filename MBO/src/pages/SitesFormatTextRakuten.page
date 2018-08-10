@@ -1,0 +1,124 @@
+<apex:page controller="SitesFormatTextController" action="{!init}" cache="false" sidebar="false" showHeader="false" standardStylesheets="false">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>定型テキスト保存</title>
+
+    <!-- Design Style -->
+    <apex:stylesheet value="{!URLFOR($Resource.SitesContentsRakuten, 'common/css/import.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.SitesContentsRakuten, 'common/css/editorial/sub.css')}" />
+
+    <!-- 独自のスタイル -->
+    <style type="text/css">
+        input.format-text {
+            border-top: 1px solid #ccc;
+            border-right: 1px solid #999;
+            border-bottom: 1px solid #999;
+            border-left: 1px solid #ccc;
+            padding: 2px 5px;
+            margin-left: 5px;
+            cursor: pointer;
+            color: black;
+        }
+    </style>
+
+    <!-- JQuery --> 
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>
+    
+    <!-- Design Script -->
+    <apex:includeScript value="{!URLFOR($Resource.SitesContentsRakuten, 'common/js/jquery.blend-min.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.SitesContentsRakuten, 'common/js/scrollsmoothly.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.SitesContentsRakuten, 'common/js/heightLine.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.SitesContentsRakuten, 'common/js/common.js')}"/>
+
+    <!-- 独自のScript -->
+    <script type="text/javascript">
+        // 発注フォームへ反映
+        function setFormatText(formatTextId) {
+            // 呼出元ウィンドウが閉じられていないかどうかをチェック
+            try {
+                if (window.opener) {
+                    if (!window.opener.closed) {
+                        var str = $('textarea[id$="' + formatTextId +'"]').val();
+                        window.opener.setFormatText(str);
+                    }
+                }
+            } catch (e) {
+                // 特に何もしない
+            }
+            
+            window.close();
+        }
+    </script>
+
+</head>
+
+<body>
+    <div id="wrapper">
+    <div id="header" class="cf">
+        <div class="left">
+            <h1></h1>
+        </div><!--div.left -->
+        <div class="right">
+        </div><!--div.right -->
+    </div><!--div#header -->
+
+    <div id="container" class="cf">
+    <div id="content" class="cf">
+
+            <apex:form >
+                <!-- メッセージ -->
+                <div style="width: 700px; margin: auto;">
+                    <c:SitesMessage msgList="{!msgList}"/>
+                </div>
+
+                <div class="comment_normal">
+                    <p>よく使う作業指示を３つまで登録できます。</p>
+                </div>
+
+                <table border="0" cellspacing="0" cellpadding="0" class="normal format-text" width="700">
+                    <tr>
+                        <th width="180">作業指示１</th>
+                        <td>
+                            <apex:inputTextarea id="formatText1" value="{!formatText1}" styleClass="upload"/><br/>
+                            <input type="button" value="発注フォームに反映" class="format-text" onclick="javascript:setFormatText('formatText1')"/>
+                            <apex:commandButton value="登録" action="{!saveFormatText1}" styleClass="format-text"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th width="180">作業指示２</th>
+                        <td>
+                            <apex:inputTextarea id="formatText2" value="{!formatText2}" styleClass="upload"/><br/>
+                            <input class="format-text" type="button" value="発注フォームに反映" onclick="javascript:setFormatText('formatText2')"/>
+                            <apex:commandButton value="登録" action="{!saveFormatText2}" styleClass="format-text"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th width="180">作業指示３</th>
+                        <td>
+                            <apex:inputTextarea id="formatText3" value="{!formatText3}" styleClass="upload"/><br/>
+                            <input class="format-text" type="button" value="発注フォームに反映" onclick="javascript:setFormatText('formatText3')"/>
+                            <apex:commandButton value="登録" action="{!saveFormatText3}" styleClass="format-text"/>
+                        </td>
+                    </tr>
+                </table>
+
+                <p>&nbsp;</p>
+
+                <!-- ボタン部 -->
+                <p class="inquiry">
+                    <input class="button" type="button" value="閉じる" onclick="javascript:window.close();"/>
+                </p>
+
+            </apex:form>
+    </div><!--div#content -->
+    </div><!--div#container -->
+    </div><!--div#wrapper -->
+
+    <!-- copy ritgh -->
+    <div id="copyright">
+        Powered by<a href="http://www.force.com/" target="_blank"> force.com</a>
+    </div><!--div#copyright -->
+</body>
+
+</apex:page>

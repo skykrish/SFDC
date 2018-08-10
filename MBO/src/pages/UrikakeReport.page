@@ -1,0 +1,244 @@
+<apex:page title="売掛レポート" controller="UrikakeReportController">
+
+    <!-- 共通スクリプト -->
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>
+
+    <!-- スクリプト処理 -->
+    <!-- <script type="text/javascript">
+
+        /**
+         * ロード画像表示
+         */
+        function dispImgLoading() {
+            $('img#imgLoading').css('display', '');
+        }
+
+        /**
+         * ページング
+         */
+        function paging(nextPageNo) {
+            $('input[id$="dispPage"]').attr('value', parseInt(nextPageNo));
+        }
+    </script> -->
+
+    <!-- タイトル、メッセージ -->
+    <apex:sectionHeader title="売掛レポート" />
+    <apex:pageMessages id="messageArea" showDetail="false" />
+
+    <apex:form >
+        <apex:pageBlock >
+            <!-- 実行条件 -->
+            <apex:pageBlockSection title="実行条件" collapsible="false" />
+            <apex:outputPanel id="conditionArea">
+                <table width="100%">
+                    <tr>
+                        <!-- 日付 -->
+                        <td width="225px">
+                            <apex:outputLabel for="targetDate" value="{!$ObjectType.SeikyuCriteria__c.fields.TargetDate__c.label}"/>&nbsp;&nbsp;
+                            <apex:inputField id="targetDate" value="{!criteria.TargetDate__c}"/>
+                        </td>
+                        <!-- 顧客 -->
+                        <td width="200px">
+                            <apex:outputLabel for="seikyusaki" value="{!$ObjectType.SeikyuCriteria__c.fields.Seikyusaki__c.label}"/>&nbsp;&nbsp;
+                            <apex:inputField id="seikyusaki" value="{!criteria.Seikyusaki__c}"/>
+                        </td>
+                        <!-- 顧客コード -->
+                        <td width="190px">
+                            <apex:outputLabel for="kokyakuCd" value="{!$ObjectType.SeikyuCriteria__c.fields.KokyakuCd__c.label}"/>&nbsp;&nbsp;
+                            <apex:inputField id="kokyakuCd" value="{!criteria.KokyakuCd__c}"/>
+                        </td>
+                        <!-- サンプル除外フラグ -->
+                        <td width="190px">
+                            <apex:inputField id="excludeSampleFlg" value="{!criteria.ExcludeSampleFlg__c}"/>
+                            <apex:outputLabel for="excludeSampleFlg" value="サンプル顧客を含まない"/>
+                        </td>
+                        <!-- 実行ボタン -->
+                        <!-- <td width="160px">
+                            <apex:commandButton value="実行" action="{!execute}" onclick="javascript:dispImgLoading()" reRender="conditionArea, resultArea, messageArea, resumeControl, resumeProgress"/>
+                            <img id="imgLoading" style="display: none;" src="/servlet/servlet.FileDownload?file=01510000000O20g" alt="Loading" title="Loading"/>
+                        </td> -->
+                        <td width="160px">
+                            <apex:commandButton value="実行" action="{!execute}" reRender="conditionArea, resultArea, messageArea, resumeControl, resumeProgress"/>
+                        </td>
+                    </tr>
+                </table>
+            </apex:outputPanel>
+            
+            <!-- START ランド delete 2014/11/19 -->
+            <!-- 実行結果 -->
+            <!-- <apex:outputPanel id="resultArea"> -->
+                <!-- 実行結果：レコードあり -->
+                <!-- 合計行 -->
+                    <!-- <apex:pageBlockTable var="item" value="{!totalUriagegaku}"> -->
+                        <!-- 顧客名 -->
+                        <!-- <apex:column style="width:40%;">
+                            <apex:facet name="header">
+                                <apex:outputText value=""/>
+                            </apex:facet>
+                            <apex:outputText value="合計"/>
+                        </apex:column> -->
+                        <!-- 請求額 -->
+                        <!-- <apex:column style="width:20%;">
+                            <apex:facet name="header">
+                                <apex:outputText value="売上額合計"/>
+                            </apex:facet>
+                            <div style="text-align: right;">
+                                <apex:outputText value="{0, number, ￥###,###}">
+                                    <apex:param value="{!item}"/>
+                                </apex:outputText>
+                            </div>
+                        </apex:column> -->
+                        <!-- 入金額 -->
+                        <!-- <apex:column style="width:20%;">
+                            <apex:facet name="header">
+                                <apex:outputText value="入金額合計"/>
+                            </apex:facet>
+                            <div style="text-align: right;">
+                                <apex:outputText value="{0, number, ￥###,###}">
+                                    <apex:param value="{!totalNyukingaku}"/>
+                                </apex:outputText>
+                            </div>
+                        </apex:column> -->
+                        <!-- 売掛金 -->
+                        <!-- <apex:column style="width:20%;">
+                            <apex:facet name="header">
+                                <apex:outputText value="売掛金残高合計"/>
+                            </apex:facet>
+                            <div style="text-align: right;">
+                                <apex:outputText value="{0, number, ￥###,###}">
+                                    <apex:param value="{!totalUrikakekin}"/>
+                                </apex:outputText>
+                            </div>
+                        </apex:column> -->
+                    <!-- <</apex:pageBlockTable> -->
+
+                    <!-- 明細行 -->
+                    <!-- <apex:pageBlockTable var="itemDetail" value="{!dispList}">
+                        <!-- 顧客名 -->
+                        <!-- <apex:column style="width:40%;">
+                            <apex:facet name="header">
+                                <apex:commandLink action="{!sortData}" value="顧客名 {!IF(sortExpression=='Name', IF(sortDirection=='ASC', '↑', '↓'), '')}" reRender="resultArea, messageArea">
+                                    <apex:param value="Name" assignTo="{!sortExpression}"/>
+                                </apex:commandLink>
+                            </apex:facet>
+                            <apex:outputText value="{!itemDetail.Name}"/>
+                        </apex:column> -->
+                        <!-- 請求額 -->
+                        <!-- <apex:column style="width:20%;">
+                            <apex:facet name="header">
+                                <apex:commandLink action="{!sortData}" value="売上額 {!IF(sortExpression=='Uriagegaku__c', IF(sortDirection=='ASC', '↑', '↓'), '')}" reRender="resultArea, messageArea">
+                                    <apex:param value="Uriagegaku__c" assignTo="{!sortExpression}"/>
+                                </apex:commandLink>
+                            </apex:facet>
+                            <div style="text-align: right;">
+                                <apex:outputField value="{!itemDetail.Uriagegaku__c}"/>
+                            </div>
+                        </apex:column> -->
+                        <!-- 入金額 -->
+                        <!-- <apex:column style="width:20%;">
+                            <apex:facet name="header">
+                                <apex:commandLink action="{!sortData}" value="入金額 {!IF(sortExpression=='Nyukingaku__c', IF(sortDirection=='ASC', '↑', '↓'), '')}" reRender="resultArea, messageArea">
+                                    <apex:param value="Nyukingaku__c" assignTo="{!sortExpression}"/>
+                                </apex:commandLink>
+                            </apex:facet>
+                            <div style="text-align: right;">
+                                <apex:outputField value="{!itemDetail.Nyukingaku__c}"/>
+                            </div>
+                        </apex:column> -->
+                        <!-- 売掛金 -->
+                        <!-- <apex:column style="width:20%;">
+                            <apex:facet name="header">
+                                <apex:commandLink action="{!sortData}" value="売掛金残高 {!IF(sortExpression=='Urikakekin__c', IF(sortDirection=='ASC', '↑', '↓'), '')}" reRender="resultArea, messageArea">
+                                    <apex:param value="Urikakekin__c" assignTo="{!sortExpression}"/>
+                                </apex:commandLink>
+                            </apex:facet>
+                            <div style="text-align: right;">
+                                <apex:outputField value="{!itemDetail.Urikakekin__c}"/>
+                            </div>
+                        </apex:column> -->
+                    <!-- </apex:pageBlockTable> -->
+                    <!-- ページング -->
+                    <!-- <apex:outputPanel layout="none">
+                        <apex:inputHidden id="dispPage" value="{!dispPage}"/>
+                        <div class="paginator">
+                            <span class="prevNextLinks">
+                                <span class="prevNext">
+                                    <apex:outputPanel layout="none" rendered="{!dispPage == 1}">
+                                        <img class="firstoff" src="/s.gif" complete="complete"/>
+                                    </apex:outputPanel>
+                                    <apex:commandLink action="{!paging}" rendered="{!dispPage != 1}" onclick="javascript:paging(1)" reRender="resultArea, messageArea">
+                                        <img title="最初のページ" class="first" alt="最初のページ" src="/s.gif" complete="complete"/>
+                                    </apex:commandLink>
+                                </span>
+                                <span class="prevNext">
+                                    <apex:outputPanel layout="none" rendered="{!dispPage == 1}">
+                                        <img class="prevoff" src="/s.gif" complete="complete"/>
+                                        前へ
+                                    </apex:outputPanel>
+                                    <apex:commandLink action="{!paging}" rendered="{!dispPage != 1}" onclick="javascript:paging({!dispPage - 1})" reRender="resultArea, messageArea">
+                                        <img title="前へ" class="prev" alt="前へ" src="/s.gif" complete="complete"/>
+                                        前へ
+                                    </apex:commandLink>
+                                </span>
+                                <span class="prevNext">
+                                    <apex:outputPanel layout="none" rendered="{!dispPage == lastPage}">
+                                        次へ
+                                        <img class="nextoff" src="/s.gif" complete="complete"/>
+                                    </apex:outputPanel>
+                                    <apex:commandLink action="{!paging}" rendered="{!dispPage != lastPage}" onclick="javascript:paging({!dispPage + 1})" reRender="resultArea, messageArea">
+                                        次へ
+                                        <img title="次へ" class="next" alt="次へ" src="/s.gif" complete="complete"/>
+                                    </apex:commandLink>
+                                </span>
+                                <span class="prevNext">
+                                    <apex:outputPanel layout="none" rendered="{!dispPage == lastPage}">
+                                        <img class="lastoff" src="/s.gif" complete="complete"/>
+                                    </apex:outputPanel>
+                                    <apex:commandLink action="{!paging}" rendered="{!dispPage != lastPage}" onclick="javascript:paging({!lastPage})" reRender="resultArea, messageArea">
+                                        <img title="最後のページ" class="last" alt="最後のページ" src="/s.gif" complete="complete"/>
+                                    </apex:commandLink>
+                                </span>
+                            </span>
+                        </div>
+                    </apex:outputPanel> -->
+                <!-- </apex:pageBlockSection> -->
+                <!-- 検索結果：レコードなし-->
+                <!-- <apex:outputPanel rendered="{!(NOT(ISNULL(dispList))) && (dispList.size == 0)}">
+                    <apex:pageBlockSection title="実行結果" collapsible="false"/>
+                    <apex:outputText >検索条件に該当するデータはありません。</apex:outputText>
+                </apex:outputPanel>
+            </apex:outputPanel> -->
+            <!-- END ランド delete 2014/11/19 -->
+            
+        </apex:pageBlock>
+        
+        <!-- START ランド delete 2014/11/19 -->
+        <!-- リジューム制御エリア（画面上は非表示） -->
+        <!-- <div style="display: none;"> -->
+            <!-- リジューム処理ボタン -->
+            <!-- <apex:commandButton id="btnResumeProcess" value="リジューム" action="{!resumeProcess}" reRender="resumeControl, resumeProgress"/> -->
+            <!-- リジューム終了処理ボタン -->
+            <!-- <apex:commandButton id="btnResumeFinish" value="リジューム終了" action="{!resumeFinish}" reRender="conditionArea, resultArea, messageArea, resumeControl, resumeProgress"/> -->
+            <!-- リジューム制御 -->
+            <!-- <apex:outputPanel id="resumeControl">
+                <script type="text/javascript">
+                    // リジューム制御
+                    var startFlg = {!resume.isStart};
+                    if (startFlg) {
+                        var resumeFlg = {!resume.hasNext};
+                        if (resumeFlg) {
+                            // リジューム処理を起動
+                            $('input[id$="btnResumeProcess"]').click();
+
+                        } else {
+                            // リジューム終了処理を起動
+                            $('input[id$="btnResumeFinish"]').click();
+                        }
+                    }
+                </script>
+            </apex:outputPanel> -->
+        <!-- </div> -->
+        <!-- END ランド delete 2014/11/19 -->
+        
+    </apex:form>
+</apex:page>

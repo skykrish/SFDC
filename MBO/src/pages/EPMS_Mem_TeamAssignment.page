@@ -1,0 +1,286 @@
+<!--<apex:page controller="EPMS_TeamAssignment" docType="html-5.0" sidebar="false"  showHeader="true" tabStyle="Team__c"> -->
+<apex:page Controller="EPMS_Mem_TeamAssignment"  docType="html-5.0" sidebar="false"  showHeader="false" tabStyle="Team__c">
+<html>
+<head>
+<apex:includeScript value="{!URLFOR($Resource.attendance,'jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.attendance,'jquery-ui.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.attendance,'gridviewScroll.js')}"/> 
+    <!---for clearing values-->
+    <script type="text/javascript">
+    
+     function ClosePopup(){
+         if(!window.parent.close()){
+                
+            window.location.assign('{!urlType}');
+             return false;
+         }else{
+            
+            window.parent.close();
+         }
+         return false;
+        }
+     jQuery.noConflict();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </script>
+    <!--End--->
+<style>
+
+div.common_grid {
+    position: relative;
+    border:1px solid #e0e3e5;
+    padding-top:27px;
+    background: #f2f3f3;
+    min-width: 948px;
+    width:99%;
+    margin:0 auto;
+}
+div.positioned {
+    position: absolute;
+    top:100px;
+    left:100px;
+    width:860px;
+    box-shadow: 0 0 15px #333;
+}
+.container {
+    overflow-y: auto;
+    overflow-x:hidden;
+    height: 200px;
+}
+table {
+    border-spacing: 0;
+    width:100%;
+}
+table.fixedtbl
+{
+    border-top: 2px solid #e0e3e5;
+}
+table.fixedtbl td + td {
+    border-left:1px solid #e0e3e5;
+    word-wrap: break-word;
+}
+table.fixedtbl td, th {
+    border-bottom:1px solid #e0e3e5;
+    background: #fff;
+    color: #000;
+    padding: 3px 10px;
+}
+th {
+    height: 0;
+    line-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    color: transparent;
+    border: none;
+    white-space: nowrap;
+}
+th div{
+    position: absolute;
+    background: transparent;
+    color: #000;
+    padding: 9px 10px;
+    top: 0;
+    margin-left: -10px;
+    line-height: normal;
+    border-left: 1px solid #e0e3e5;
+}
+th:first-child div{
+    border: none;
+}
+body .pbBody table.list tr th, body .pbBody table.list tr td
+{
+    border-right: 1px solid #ededed;
+    border-left:0;
+}
+body .pbBody table.list tr.dataRow th, body .pbBody table.list tr.dataRow td
+{
+   border-right: 1px solid #ededed;
+}      
+.bPageBlock .list
+{
+    width:auto;
+}
+ </style>
+
+<apex:includeScript value="{!$Resource.JQuery}"/>
+
+<style>
+
+.pbHeader td.pbTitle {width:43%}
+.pbBottomButtons td.pbTitle {width:43%}
+.shiftAssignmentSec {width:650px; margin:0; padding:10px 0px 0; overflow:hidden;}
+.shiftAssignmentSec .rowSec {width:100%; font-size:12px; color:#4a4a56; padding:0 0 10px; overflow:hidden;}
+.rowSec .leftSec {width:35%; float:left; text-align:left;}
+.rowSec .rightSec {width:63%; float:right;}
+.rowSec .leftSecShiftTeam {width:35%; float:left; text-align:left;}
+.rowSec .rightSecShiftTeam {width:63%; float:right;}
+.rowSec .leftSecSelType {width:35%; float:left; text-align:left;}
+.rowSec .rightSecSelType {width:63%; float:right;}
+.rowSec .rightSec select, .rowSec .rightSecShiftTeam select, .rowSec .rightSecSelType select {width:380px; float:right;}
+.paddingTop10 {padding-top:10px !important;}
+.paddingBotton10 {padding-bottom:10px !important;}
+.paddingBotton-none {padding-bottom:0 !important;}
+.rightSecInnerDiv {width:380px; float:right;}
+.FromToInnerDiv {width:380px; float:right;}
+.FromToInnerDiv span.dateInput {float:left;} 
+.pbBody, .pbBody a, .pbBody td, .lbBody a, .lbBodyDescription, .list .headerRow .noRowsHeader {
+    color: #000;    
+}
+.pbBody table.list tr.dataRow td:first-child {
+    border-left-width: 0;
+ }
+table.list tr.dataRow td {
+    border-width: 0 0 1px 0;
+    vertical-align: middle;
+    text-align: left;
+}
+/****** Team Assignment 22-12-2015 *********/
+.clear
+{
+    clear:both;
+    margin:10px
+}
+.formWrpper
+{
+    width: 800px;
+}
+.innerwrapper
+{
+    padding:5px;
+}
+.innerwrapper .lbl
+{
+    display: inline-block;
+    width: 280px;
+}
+.combolist
+{
+    min-width: 44%;
+}
+.listViewer{
+    border: 1px solid #ececec;
+    padding: 5px;
+    margin-top: 10px;
+    width: 638px;
+    border-radius:3px;
+}
+.list_Assignment, .multilist
+{
+    height:300px;
+    width:100%;
+}
+.displayblock
+{
+    margin-bottom: 10px;
+    display: block;
+}
+td.selectCell
+{
+    width:45%;
+} 
+</style>
+</head> 
+<body>
+
+<apex:form id="form">
+
+
+
+
+
+
+
+    <apex:outputPanel id="myHiddenField" />               
+    <apex:pageblock >
+    <apex:pageblockbuttons >
+      <apex:commandbutton value="Save" action="{!saveMemberstoTeam}" />
+       <apex:commandbutton value="Close"  onclick="ClosePopup();return false;"/>
+       
+    </apex:pageblockbuttons>
+
+    <div class="shiftAssignmentSec">
+       <table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="pbTitle">&nbsp;<h3>Team Assignments</h3></td></tr></tbody></table>
+       <div class="paddingBotton10"> 
+            <apex:outputPanel id="thePageBlock">
+                <apex:pageMessages />
+            </apex:outputPanel>
+        </div>
+
+    
+        <div class="rowSec">
+            <div class="leftSec">
+                <apex:outputlabel value="Location"  />
+            </div>
+            <div class="rightSec">
+                <div class="rightSecInnerDiv">
+                <apex:outputPanel id="locationid">
+                    <apex:outputPanel >
+                    <apex:selectList value="{!selectvalue}" size="1" id="elementLocation" >
+                      <apex:selectoptions value="{!AllLocations}" />
+                      <apex:actionSupport event="onchange" action="{!getallContacts}" reRender="team,memberlistIDs,thePageBlock" />
+                    </apex:selectList>          
+                    </apex:outputPanel>
+                </apex:outputPanel>
+                </div>
+            </div>
+        </div>
+    
+        <div class="rowSec paddingBotton-none">
+            <apex:outputPanel >
+                <div class="leftSecShiftTeam">
+                    <apex:outputlabel value="Teams"  />
+                </div>  
+                <div class="rightSecShiftTeam paddingBotton10">
+                  <div class="rightSecInnerDiv">
+
+                  <apex:selectList value="{!CurrentTeams}" size="1" id="team" >
+                    <apex:selectoptions value="{!LocationTeams}" />
+                     <apex:actionSupport event="onchange" action="{!getallContacts}" reRender="memberlistIDs" />    
+                   
+                  </apex:selectList>
+
+                  </div>
+                </div>
+            </apex:outputPanel>
+         </div>
+  
+        <div class="listViewer" id='memberlistID'>
+
+            <apex:selectList value="{!membersTypeOption}" size="1"  id="membersTypeId">
+                 <apex:selectoptions value="{!memberTypes}"/>
+                <apex:actionSupport event="onchange" action="{!getallContacts}" reRender="memberlistIDs" />    
+            </apex:selectList>
+            
+
+            <apex:outputPanel id="memberlistIDs">            
+            <c:MultiselectPicklist leftLabel="Members"
+                    leftOption="{!allContacts}"
+                    rightLabel="Selected Members"
+                    rightOption="{!selectedContacts}"
+                    size="14"
+                    width="100%"/>
+             </apex:outputPanel>
+        </div>
+    </div>     
+</apex:pageblock>
+
+
+</apex:form>
+</body>
+</html>
+</apex:page>

@@ -1,0 +1,188 @@
+<apex:page controller="EPMS_Fileinstruction" sidebar="false" showHeader="false" >
+<apex:form >
+
+        <apex:stylesheet value="{!URLFOR($Resource.instructiondownload,'treeview/css/jquery.treeview.css')}" /> 
+        <apex:stylesheet value="{!URLFOR($Resource.instructiondownload,'treeview/css/screen.css')}" /> 
+        
+        <apex:includeScript value="{!URLFOR($Resource.instructiondownload,'treeview/js/jquery.js')}" />
+        <apex:includeScript value="{!URLFOR($Resource.instructiondownload,'treeview/js/jquery.cookie.js')}" />
+        <apex:includeScript value="{!URLFOR($Resource.instructiondownload,'treeview/js/jquery.treeview.js')}" />
+        
+        <apex:stylesheet value="{!URLFOR($Resource.Classification,'css/defaultTheme.css')}" />
+        <apex:stylesheet value="{!URLFOR($Resource.Classification,'css/myTheme.css')}" />
+                
+        <!-- <apex:includescript value="{!URLFOR($Resource.Classification,'js/jquery.min.js')}" /> -->
+        <apex:includescript value="{!URLFOR($Resource.Classification,'js/jquery.fixedheadertable.js')}" />
+        <!-- <apex:includescript value="{!URLFOR($Resource.Classification,'js/custom-table.js')}" /> -->
+         
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Order</title>
+
+<script type="text/javascript">
+$(document).ready(function(){
+    
+    $("#browser").treeview();
+    
+    
+    $('#myTable02').fixedHeaderTable({height: '250' });
+        //alert($('#myTable02').height());
+    
+    if($('#myTable02').height()<="277"){
+      $('.fht-tbody').css("height","auto");
+      $('.fht-table').css("width","100%");   
+      $('.last').css('padding-right','5px');
+    }   
+ 
+});
+
+function closeWindow(){
+window.close();
+}
+
+</script>
+
+<style type="text/css">
+.treeMenuPart {width:auto;}
+.filetree span.folder:hover, 
+.filetree span.file:hover {
+    text-decoration:underline; cursor:pointer; color:#015ba7;
+}
+.treeview div.lastCollapsable-hitarea, .treeview div.lastExpandable-hitarea {
+    background-position:inherit;
+}
+span.folder {font-weight:bold;}
+.divider {margin:0px 7px 0;}
+
+.centerAlign {width:100%; margin:5px auto; text-align:center;}
+.pageTitle {
+    font-size: 15px;
+}
+
+
+</style>
+
+
+</head>
+
+<script type="text/javascript">
+                 
+      function ClosePopup(){
+     
+       var url = location.href;
+       var basepath = '{!basepath}';
+     
+        var baseURL = url.substring(0, url.indexOf('/', 14));      
+        if(basepath == 'file'){
+            window.opener.location.href=baseURL+"/a0i";
+        }
+        if(baseURL)
+        {
+            window.top.close();     
+        }
+        refreshParentPage();
+    }
+    
+    function refreshParentPage() 
+    {
+        alert(window.opener.location.href)
+        var redirectURL = window.opener.location.href;
+        if(redirectURL)
+        {
+            window.opener.location.href = window.opener.location.href;
+            if (window.opener.progressWindow) 
+            {
+                window.opener.progressWindow.close();
+            }
+            window.close();
+        }
+    }
+             
+    </script>
+
+
+<body style="overflow-x:hidden;overflow-y:hidden;">
+
+<div class="centerAlign pageTitle">
+    File Name:<b><apex:outputText value="{!Selectfilename}" /></b> 
+</div> 
+    
+<div class="treeMenuPart" style="height:240px; margin:10px 7px; overflow-y:scroll; border:1px solid #CCC;">
+    <div id="main">
+             <apex:outputpanel rendered="{!(SelectedFile!=null)}">
+        <ul id="browser" class="filetree">
+         
+             <li><span class="folder">{!orderName}</span>
+                <ul>
+             
+                    <apex:repeat value="{!Filesinstructions}" var="ins" >                 
+                        <li>
+                             <span class="file">
+                               <apex:commandLink value="{!ins.ImagesFiles}" action="{!gotoURL}" target="_blank" onComplete="closeWindow();">
+                               <apex:param name="myUrl" value="{!ins.instructionFiles}"/>
+                               </apex:commandLink>
+                             </span>
+                        </li>                
+                    </apex:repeat>
+                  
+
+                </ul>
+            </li> 
+          
+        </ul>
+          </apex:outputpanel>
+           <apex:outputpanel rendered="{!(SelectedFile==null)}">
+           NO Attachments Found 
+            </apex:outputpanel>
+             
+          
+          
+    </div>
+</div>
+     
+
+
+
+<div class="container_12 divider">
+    <div class="grid_8 height304">
+        <table class="fancyTable" id="myTable02" cellpadding="0" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th class="last">Attachment</th>
+                </tr>
+            </thead>
+            <tbody>
+           
+                <tr>
+                    <td>File Instruction</td>
+                    <td class="numeric">
+                        <apex:repeat value="{!Filesinstructions}" var="att"> 
+                            <table>
+                                <tr>
+                                    <td style="border:0;">
+                                        <apex:commandLink value="{!att.ImagesFiles}" action="{!gotoURL}" target="_blank">
+                                            <apex:param name="myUrl" value="{!att.instructionFiles}"/>
+                                        </apex:commandLink>
+                                    </td>
+                                </tr>
+                            </table>
+                        </apex:repeat>
+                    </td>
+                </tr> 
+                           
+            </tbody>
+        </table>
+    </div>
+    <div class="clear"></div>
+</div>
+
+
+<div style="width:90px; margin:5px auto;">
+    <apex:commandbutton value="Close" onclick="closeWindow();" /> 
+</div> 
+
+</body>
+</apex:form> 
+</apex:page>

@@ -1,0 +1,264 @@
+<apex:page controller="EPMS_TeamAssign" tabStyle="Team__c" sidebar="false" showHeader="false">
+
+
+<style type="text/css">
+        BODY,TD
+        {
+          font-family: Arial,Helvetica,sans-serif;
+          color: #000;
+          font-size: 85%;
+          
+
+        }
+        table.list
+        {
+        background-color: #fff;
+    border-top: 1px solid #e0e3e5;
+        }
+        .list td, .list th, body.oldForecast .list .last td, body.oldForecast .list .last th {
+    padding: 10px 2px 0px 5px;
+    
+   
+       
+    color: #000;
+   
+}
+.GridviewScrollHeader
+{
+background: #f2f3f3;
+    border-width: 0 0 1px 1px;
+    border-color: #e0e3e5;
+    color: #000;
+    font-size: .9em;
+    font-weight: bold;
+   padding: 4px 2px 4px 5px;
+}
+.pbBody, .pbBody a, .pbBody td, .lbBody a, .lbBodyDescription, .list .headerRow .noRowsHeader {
+    color: #000;
+    
+}
+.pbBody table.list tr.dataRow td:first-child {
+    border-left-width: 0;
+    
+}
+table.list tr.dataRow td {
+    border-width: 0 0 1px 0;
+    vertical-align: middle;
+    text-align: left;
+    
+    
+    
+}
+.GridviewScrollHeader td {
+border-right:0px solid #ededed;
+}
+.list-custom {
+    margin: 0px;
+    float: left;
+    border: 1px solid #ededed;
+
+}
+.list-custom tr td
+{
+    vertical-align:top !important;
+    
+}
+
+.vtext {
+   -moz-transform: rotate(-90deg);  /* FF3.5+ */
+   -o-transform: rotate(-90deg);  /* Opera 10.5 */
+   -webkit-transform: rotate(-90deg);  /* Saf3.1+, Chrome */
+   filter:  progid:DXImageTransform.Microsoft.BasicImage(rotation=3);  /* IE6,IE7 */
+   -ms-filter: "progid:DXImageTransform.Microsoft.BasicImage(rotation=3)"; /* IE8 */
+    text-align:center;
+   padding: 35px 0px;
+   width:20px;
+   height:10px;
+   
+} 
+.list-custom-inner
+{
+    width:99% !important;
+    margin-bottom:10px;
+    margin-right:3px;
+}
+
+.list-custom-inner th
+{
+    background: #f2f3f3;
+    padding:3px;
+    font-weight:normal;
+}
+body .pbBody table.list tr th, body .pbBody table.list tr td
+{
+        border: 1px solid #ededed !important;
+    color: #000;
+}
+.buttonwrapper
+{
+    margin-bottom:10px;
+}
+ </style>
+ 
+ <script type="text/javascript">
+    
+     function ClosePopup(){
+         if(!window.parent.close()){
+             return false;
+         }else{
+            
+            window.parent.close();
+         }
+         return false;
+        }
+ </script>
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="gridviewScroll.js">
+  </script>
+  <script>
+      var index = 1;
+       var indexes = 1;
+       var index2 =1;
+    function getValue(){
+     index = index + 01;
+    }
+    
+    function getValue1(){
+     indexes = indexes + 01;
+    }
+    
+    function getValue2(){
+     index2 = index2 + 1;
+    }
+  </script>
+  
+  <script type="text/javascript">
+        $(document).ready(function () {
+        var winwidth = screen.width - 10;
+        var winheight = screen.height- 300;
+         gridviewScroll(winwidth, winheight);
+         
+            
+        });
+
+        function gridviewScroll(winwidth, winheight ) {
+            gridView1 = $('#GridView1').gridviewScroll({
+                width: 820,
+                height: 200,
+                railcolor: "#F0F0F0",
+                barcolor: "#CDCDCD",
+                barhovercolor: "#606060",
+                bgcolor: "#F0F0F0",
+               
+                arrowsize: 30,
+                varrowtopimg: "Images/arrowvt.png",
+                varrowbottomimg: "Images/arrowvb.png",
+                harrowleftimg: "Images/arrowhl.png",
+                harrowrightimg: "Images/arrowhr.png",
+                headerrowcount: 1,
+                railsize: 16,
+                barsize: 8
+            });
+        }
+        
+
+
+    </script>
+  
+ <apex:form >        
+      <apex:pageblock >
+      
+      <div class="buttonwrapper">
+    <div class="pbTitle">
+  <h3>Team Assignment Details</h3> 
+    </div>
+   
+    <!--<apex:commandButton value="Add Performance Rating" styleclass="btn"  title="Add Performance Rating"  /> -->
+     </div>
+      
+      <table width="800" id="GridView1" class="list list-custom" cellpadding="0" cellspacing="0" border="0">
+     
+          <tr class="GridviewScrollHeader">
+           <!-- <td><apex:inputCheckbox id="selectall"/></td> -->
+            <td>Team ID</td>
+            <td>Team Lead</td>
+            <td>Quality Checker</td>
+            <td>Employee</td>
+
+          </tr>
+          
+          <apex:repeat value="{!MemberWrappers}" var="memObj">
+          <tr class="GridviewScrollItem dataRow even first">
+               <!-- <td><apex:outputText value="<script>document.write(index2);getValue2();</script>" escape="false"/></td> -->
+        
+                <!-- {!memObj} -->
+              
+                    <td> <apex:outputText >{!memObj.teamName} </apex:outputText> </td>
+               
+                    <td>
+                        
+                        <apex:outputText >{!memObj.teamLeadName} </apex:outputText>
+                    </td> 
+                    
+                    <td>
+                        
+                        <apex:outputText >{!memObj.qcontrolName} </apex:outputText>
+                    </td> 
+                    
+                <td>
+                <apex:variable var="inc" value="{!0}"/>
+                <apex:outputPanel id="employeeTable" rendered="{!memObj.membersList.size>0}">
+                    
+                    <table width="100%" border="0" class="list list-custom list-custom-inner" cellpadding="0" cellspacing="0" >
+                      <tr>
+                  
+                        <th width="10">SI No</th>
+                        <th width="70">Employee</th>
+                      
+                      </tr>
+                       
+                       <apex:repeat value="{!memObj.membersList}" var="memHol">
+                       <apex:variable var="inc" value="{!inc+1}"/>
+                      <tr>
+                        
+                        <td><apex:outputText value="{!inc}" escape="false"/></td>
+                       
+                        <td>
+                            <apex:outputText >  {!memHol.Name}</apex:outputText>
+                             
+                        </td>
+                    
+                      </tr>
+                       
+                        
+                    
+                    </apex:repeat>
+                    
+                     
+                      
+                      
+                     </table>
+                 </apex:outputPanel>
+                 <apex:outputText rendered="{!memObj.membersList.size=0}" value="Not Yet Assigned"/>
+                 
+              </td>
+
+       </tr>
+     
+      </apex:repeat>
+       </table> 
+        <apex:pageBlockButtons >   
+            <apex:commandButton value="<<"  action="{!beginning}" disabled="{!prev}"/>
+            <apex:commandButton value="<"  action="{!previous}" disabled="{!prev}"/>
+            <apex:commandButton value=">"  action="{!next}" disabled="{!nxt}"/>
+            <apex:commandButton value=">>"  action="{!end}" disabled="{!nxt}"/>
+                                 
+      </apex:pageBlockButtons> 
+      
+     <apex:pageblockSection > 
+       <h1> Showing Page # {!pageNumber} of {!totalPages} </h1>
+     </apex:pageblockSection>       
+       </apex:pageblock>     
+ </apex:form>               
+</apex:page>

@@ -1,0 +1,1294 @@
+<apex:page controller="EPMS_EnhancedViewPOController" tabStyle="Production_Order__c">
+    
+    <apex:pageMessages id="errorMessages"/>
+    <apex:stylesheet value="{!URLFOR($Resource.View_Directory,'css/jquery.treeview.css')}" /> 
+    <apex:stylesheet value="{!URLFOR($Resource.View_Directory,'css/custom.css')}" /> 
+    
+    <apex:includeScript value="{!URLFOR($Resource.View_Directory,'js/jquery.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.View_Directory,'js/jquery.treeview.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.View_Directory,'js/jquery-checktree.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.View_Directory,'js/custom.js')}" />
+    
+    <apex:includeScript value="{!URLFOR($Resource.csspopup,'add-style.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.csspopup,'css-pop.js')}" />
+    
+    <apex:includeScript value="{!URLFOR($Resource.attendance,'jquery-ui.min.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.attendance,'gridviewScroll.js')}"/>
+    
+    <apex:stylesheet value="{!URLFOR($Resource.Classification,'css/defaultTheme.css')}" /> 
+    <apex:stylesheet value="{!URLFOR($Resource.Classification,'css/myTheme.css')}" />
+    
+    <apex:includescript value="{!URLFOR($Resource.Classification,'js/jquery.fixedheadertable.js')}" />
+    <apex:includescript value="{!URLFOR($Resource.Classification,'js/custom-table.js')}" /> 
+    
+    <style type="text/css">
+        
+        .pbHeader .btn{display:inline-blcok !important; padding: 4px 3px !important;}
+        .freez_statwidth{width:725px !important;}
+        td.pbTitle {display: none;}
+        td.prodcut_width_increase span{ width:350px !important; display: inline-block; font-size:12px;text-align:left;}
+        td.TLChange { word-wrap: break-word;}
+        td.TLChange span{ width:200px !important; display: inline-block; font-size:12px;}
+        td.title_widthh_incre span{ width:100px !important; display: inline-block; font-size:12px;}
+        td.title_widthh_incre a{ color:#015ba7 !important;}
+        td.POTat span{ width:130px !important; display: inline-block; font-size:12px;}
+        td.Status { word-wrap: break-word;}
+        td.Status span{ width:150px !important; display: inline-block; font-size:12px;}
+        td.Pname span{ width:140px !important; display: inline-block; font-size:12px;}
+        td.FileCount span{ width:150px !important; display: inline-block; font-size:12px;}
+        td.Uptime span{ width:170px !important; display: inline-block; font-size:12px;}
+        td.NewFile span{ width:100px !important; display: inline-block; font-size:12px;}
+        td.TotalFiles span{ width:130px !important; display: inline-block; font-size:12px;}
+        td.CountF span{ width:100px !important; display: inline-block; font-size:12px;}
+        td.Qcfile span{ width:90px !important; display: inline-block; font-size:12px;}
+        td.ApproveFile span{ width:130px !important; display: inline-block; font-size:12px;}
+        td.Redo span{ width:110px !important; display: inline-block; font-size:12px;}
+        td.HandoverFile span{ width:150px !important; display: inline-block; font-size:12px;}        
+        td.QCharge { word-wrap: break-word;}
+        td.QCharge span{ width:200px !important; display: inline-block; font-size:12px;}
+        td.Jobs span{ width:250px !important; display: inline-block; font-size:12px;text-align:left;}
+        td.Location span{ width:150px !important; display: inline-block; font-size:12px;}
+        td.Attach span{ width:150px !important; display: inline-block; font-size:12px;}
+        td.Act span{ width:50px !important; display: inline-block; font-size:12px;}
+        td.rec span{ width:50px !important; display: inline-block; font-size:12px;}
+        td.OrderAtt span{ width:50px !important; display: inline-block; font-size:12px;}
+        
+        pageTitleIcon {
+        background-image: url(/img/icon/custom51_100/balls32.png);
+        background-position: 0 0;
+        width: 32px;
+        height: 32px;
+        }
+        td.count_bg{ vertical-align:middle; text-align:center;}
+        .norecord_foundtable{ 
+        /*width: 100%;*/
+        width: calc(100% - 200px);
+        height:200px;
+        overflow: scroll;
+        overflow-y: hidden;
+        padding-bottom: 20px;
+        }
+        
+        tr.noBorder td {
+        border: 0;
+        }
+        
+        table.pagefooter td.lefttd
+        {
+        text-align:left !important;
+        }
+        
+        .btn.refreshListButton {
+        background-position: 2px 3px;
+        background-position-x: 2px;
+        background-position-y: 3px;
+        background: url(/resource/1457288657000/refresh) 2px 3px no-repeat !important;
+        width: 23px;     
+        height: 23px; 
+        padding:4px 0  !important; 
+        text-align:center;        
+        }
+        
+        .fancyTable tbody tr td.textLeft {text-align:left;}
+        .fancyTable tbody tr td.textRight {text-align:right;}
+        .fancyTable thead  tr th.textLeft {text-align:left;}
+        .fancyTable thead  tr th.textRight {text-align:right;}
+        
+    </style>
+    <script type="text/javascript">
+    var __sfdcSessionId = '{!GETSESSIONID()}';
+    </script>
+    
+    <script src="/soap/ajax/37.0/connection.js" type="text/javascript"></script>
+    <script src="soap/ajax/31.0/apex.js" type="text/javascript"></script>
+    
+    <script type="text/javascript">
+    
+    function popupCenter(url, name, w, h) {
+        // Fudge factors for window decoration space.
+        // In my tests these work well on all platforms & browsers.
+        w += 32;
+        h += 56;
+        wleft = (screen.width - w) / 2;
+        wtop = (screen.height - h) / 2;
+        // IE5 and other old browsers might allow a window that is
+        // partially offscreen or wider than the screen. Fix that.
+        // (Newer browsers fix this for us, but lets be thorough.)
+        if (wleft < 0) {
+            w = screen.width;
+            wleft = 0;
+        }
+        if (wtop < 0) {
+            h = screen.height-400;
+            wtop = 200;
+        }
+        var win = window.open(url,
+                              name,
+                              'width=' + w + ', height=' + h + ', ' +
+                              'left=' + wleft + ', top=' + wtop + ', ' +
+                              'location=no, menubar=no, ' +
+                              'status=no, toolbar=no, scrollbars=no, resizable=no');
+        // Just in case width and height are ignored
+        win.resizeTo(w, h);
+        // Just in case left and top are ignored
+        win.moveTo(wleft, wtop);
+        win.focus();
+    }
+    
+    $(document).ready(function () {
+        
+        $(".case").removeAttr("checked");
+        $("#browser").treeview({
+            toggle: function() {
+                console.log("%s was toggled.", $(this).find(">span").text());
+            }   
+        });
+        
+        var winwidth = document.body.clientWidth-140;
+        var winheight = window.innerHeight - 350;
+        gridviewScroll(winwidth, winheight);
+        gridviewScrollauto();
+    });
+    
+    $(window).resize(function() {
+        
+        var winwidth = document.body.clientWidth-140;
+        var winheight = window.innerHeight - 350;
+        gridviewScroll(winwidth, winheight);
+        gridviewScrollauto();
+        
+        setWinSize();
+        
+        setTimeout(function(){
+            $(".sortListAsc").focus();
+        },2000);
+    });
+    
+    
+    /*$( '#GridView1Wrapper' ).load(function() {                
+                gridviewScrollauto();               
+            });*/
+    
+    $( '#GridView1Wrapper' ).load(function() {  
+        location.reload(true);
+    });
+    
+    function gridviewScrollauto()
+    {
+        
+        var winwidth = document.body.clientWidth-140;
+        var winheight = window.innerHeight - 350;
+        setTimeout(function(){
+            gridviewScroll(winwidth, winheight);
+        },2000);
+    }
+    
+    function gridviewScroll(winwidth, winheight ) {
+        
+        gridView1 = $('#GridView1').gridviewScroll({
+            width: winwidth,
+            height: winheight,
+            railcolor: "#F0F0F0",
+            barcolor: "#CDCDCD",
+            barhovercolor: "#606060",
+            bgcolor: "#F0F0F0",
+            arrowsize: 30,
+            varrowtopimg: "{!URLFOR($Resource.attendance,'Images/arrowvt.png')}",               
+            varrowbottomimg: "{!URLFOR($Resource.attendance,'Images/arrowvb.png')}",
+            harrowleftimg:"{!URLFOR($Resource.attendance,'Images/arrowhl.png')}",
+            harrowrightimg: "{!URLFOR($Resource.attendance,'Images/arrowhr.png')}",
+            headerrowcount: 1,
+            railsize: 16,
+            barsize: 8,
+            
+        });
+        
+        $('#browser').checktree();
+    }
+    
+    function setWinSize(){
+        var winwidth = document.body.clientWidth-70;
+        //var winheight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+        var winheight = window.innerHeight-250;
+        
+        $(".freezeTableAutoWidth").css('width', winwidth+"px");      
+        
+        $('.headerFreezeTable').fixedHeaderTable({ altClass: 'odd', height:winheight+"px"});            
+        $('.headerFreezeTable th.last').css('padding-right', '0px');
+        
+        //$(".freezeTableAutoWidth").css('height', b);   
+    }    
+    $(document).ready(function() {  
+        setWinSize();
+        
+        setTimeout(function(){
+            $(".sortListAsc").focus();
+        },2000);
+        
+    });
+    
+    $(window).load(function(){
+        var array = new Array();
+        $('.thumbImageBody').each(function() {
+            var a = $(this).width();
+            //alert($(this).width());
+            array.push(a);
+        });
+        var maxWidth = Math.max.apply(Math, array);
+        //alert (maxWidth); 
+        $('#thumbImageHeader .fht-cell').css('width',(maxWidth+1) + "px");
+        //alert($('#thumbImageHeader').width());
+    });
+    $(window).load(function(){
+        gridviewScrollautoNew();
+    });
+    
+    function gridviewScrollautoNew()
+    {
+        var winwidth = document.body.clientWidth-175;
+        var winheight = window.innerHeight - 350;
+        //var winwidth = screen.width - 175;
+        //  var winheight = screen.height- 300;
+        gridviewScroll(winwidth, winheight);
+    }
+    
+    
+    
+    function selectAllCheckboxes(obj,receivedInputID){
+        var inputCheckBox = document.getElementsByTagName("input");
+        for(var i=0; i<inputCheckBox.length; i++){
+            if(inputCheckBox[i].id.indexOf(receivedInputID)!=-1){
+                inputCheckBox[i].checked = obj.checked;
+            }
+        }
+    }    
+    function showpopup5(jobdiv){
+        document.getElementById(jobdiv).style.display='block';        
+    } 
+    
+    function ViewDirectory(){
+        var checkedValues="";       
+        checkedValues=$("input[type='checkbox']:checked").map(function() { return this.outerHTML.split(',')[1].match(/'([^']+)'/)[1] }).get();     
+        
+        var temp = 1;
+        if(document.getElementById("checkall").checked == true){
+            temp = 2;
+        }
+        
+        if(checkedValues==""){
+            console.log(checkedValues);
+            popup('popUpalert','alert','','Please Select Atleast One Production Order to View'); 
+            return false;
+        }else if(checkedValues.length > temp){
+            console.log(checkedValues);
+            popup('popUpalert','alert','','Please Select Only One Production Order to View'); 
+            return false;
+        }else {
+            temp = 0;
+            if(document.getElementById("checkall").checked == true){
+                temp = 1;
+            }
+            window.location.assign("apex/EPMS_PO_ViewDirectory?id="+checkedValues[temp]);  
+        }
+    }
+    
+    function ChangeQc(){
+        var authorise = false; 
+        var nolocation = false; 
+        var pname='{!$Profile.Name}'; 
+        if(pname == 'システム管理者'){ 
+            authorise = true; 
+        }else if(pname == 'Production Administrator'){ 
+            authorise = true; 
+        } else if(pname == 'Shift Administrator'){ 
+            authorise = true;   
+        } else if(pname == 'Quality Control'){ 
+            authorise = true; 
+        } 
+            else if(pname == 'Country Administrator'){ 
+                authorise = true; 
+            } 
+        
+                else if(pname == 'Team Leader'){ 
+                    authorise = true; 
+                } 
+        if(authorise == false){ 
+            alert('{!$Label.EPMS_MBO_Not_have_access}'); 
+        }
+        var checkedValues="";
+        checkedValues=$("input[type='checkbox']:checked").map(function() { return this.outerHTML.split(',')[1].match(/'([^']+)'/)[1] }).get();     
+        
+        if(checkedValues==""){
+            console.log(checkedValues);
+            popup('popUpalert','alert','','{!$Label.EPMS_MBO_Select_Atleast_One_Record}'); 
+            return false;
+        }else{
+            var SelectedIds = ''; 
+            var first = true; 
+            var error = false; 
+            
+            var temp = 0;
+            if(document.getElementById("checkall").checked == true){
+                temp = 1;
+            }
+            
+            for(var i=temp;i<checkedValues.length;i++){ 
+                if(first){ 
+                    SelectedIds+="'"+checkedValues[i]+"'"; 
+                    first = false; 
+                }else 
+                    SelectedIds+=",'"+checkedValues[i]+"'"; 
+            } 
+            var result = sforce.connection.query("Select Id, Production_Order_Status__c, Mbo_Location__c from Production_Order__c where Id in ("+SelectedIds+")"); 
+            var records = result.getArray("records"); 
+            var filerecords = sforce.connection.query("Select id,Name,Files_To_open__c from Files__c where Production_order__c in ("+SelectedIds+") and Files_To_open__c=1 AND Status__c='QC'"); 
+            var file_records = filerecords.getArray("records");
+            var location1 = ''; 
+            var locationerror = false; 
+            for(var i=0;i<records.length;i++){ 
+                if(i == 0){ 
+                    location1 = records[i].Mbo_Location__c; 
+                } 
+                if(records[i].Mbo_Location__c== null){ 
+                    nolocation=true; 
+                    break; 
+                } 
+                if(records[i].Production_Order_Status__c != 'New'){ 
+                    if(records[i].Production_Order_Status__c != 'Handover'){ 
+                        if(records[i].Production_Order_Status__c != 'Assigned'){ 
+                            if(records[i].Production_Order_Status__c != 'WIP'){ 
+                                if(records[i].Production_Order_Status__c != 'QCIP'){ 
+                                    error = true; 
+                                    break; 
+                                } 
+                            } 
+                        } 
+                    } 
+                } 
+                if(i > 0){ 
+                    if(location1 != records[i].Mbo_Location__c){ 
+                        locationerror = true; 
+                        break; 
+                    } 
+                } 
+            }
+            if(nolocation){ 
+                alert('{!$Label.No_Location_specified_in_selected_order}'); 
+            } else if(error){ 
+                alert('Please select order having status with New/Handover/WIP/QCIP/Assigned'); 
+            } else if(locationerror){ 
+                alert('{!$Label.Please_select_production_order_in_same_location}'); 
+            } 
+                else if(file_records.length>0) 
+                { 
+                    alert('The Selected PO Files are Opened in Photoshop,Cant change QC Now. Please try again.'); 
+                    
+                }else{ 
+                    var ids ='';
+                    for(var i=0;i<checkedValues.length;i++){ 
+                        if(first){ 
+                            ids+=checkedValues[i].substr(0,18); 
+                            first = false; 
+                        }else 
+                            ids+=','+checkedValues[i].substr(0,18);
+                    } 
+                    if (ids.length) { 
+                        
+                        var url2 = 'apex/EPMS_ChangeQCIncharge_EV?ids='+ids; 
+                        
+                        if(authorise == true){ 
+                            window.open(url2, "", "scrollbars=1,width=700, height=500"); 
+                        } 
+                    } else { 
+                        alert('{!$Label.Select_one_or_more_production_order}'); 
+                    } 
+                }       
+        }
+        
+    }
+    
+    function ChangeTL(){
+        var authorise = false; 
+        var nolocation = false; 
+        var pname='{!$Profile.Name}'; 
+        if(pname == 'システム管理者'){ 
+            authorise = true; 
+        }else if(pname == 'Production Administrator'){ 
+            authorise = true; 
+        } else if(pname == 'Shift Administrator'){ 
+            authorise = true; 
+        } else if(pname == 'Team Leader'){ 
+            authorise = true; 
+        } 
+            else if(pname == 'Country Administrator'){ 
+                authorise = true; 
+            } 
+        
+        if(authorise == false){ 
+            alert('{!$Label.EPMS_MBO_Not_have_access}'); 
+        } else {
+            
+            var checkedValues="";
+            checkedValues=$("input[type='checkbox']:checked").map(function() { return this.outerHTML.split(',')[1].match(/'([^']+)'/)[1] }).get();     
+            if(checkedValues==""){
+                console.log(checkedValues);
+                popup('popUpalert','alert','','{!$Label.EPMS_MBO_Select_Atleast_One_Record}'); 
+                return false;
+            }else{
+                
+                var SelectedIds = ''; 
+                var first = true; 
+                var error = false; 
+                
+                var temp = 0;
+                if(document.getElementById("checkall").checked == true){
+                    temp = 1;
+                }
+                
+                for(var i=temp;i<checkedValues.length;i++){ 
+                    if(first){ 
+                        SelectedIds+="'"+checkedValues[i]+"'"; 
+                        first = false; 
+                    }else 
+                        SelectedIds+=",'"+checkedValues[i]+"'"; 
+                }
+                var result = sforce.connection.query("Select Id, Production_Order_Status__c, FTP_Download_Status__c, Mbo_Location__c from Production_Order__c where Id in ("+SelectedIds+")"); 
+                var records = result.getArray("records"); 
+                var location1 = ''; 
+                var locationerror = false; 
+                var downloadError = false;
+                
+                for(var i=0;i<records.length;i++){  
+                    var downstat = records[i].FTP_Download_Status__c; 
+                    if(downstat == "false"){ 
+                        downloadError = true; 
+                        break; 
+                    } 
+                    if(i == 0){ 
+                        location1 = records[i].Mbo_Location__c; 
+                    } 
+                    if(records[i].Mbo_Location__c== null){ 
+                        nolocation=true; 
+                        break; 
+                    } 
+                    if(records[i].Production_Order_Status__c != 'New'){ 
+                        if(records[i].Production_Order_Status__c != 'Handover'){ 
+                            if(records[i].Production_Order_Status__c != 'Assigned'){ 
+                                if(records[i].Production_Order_Status__c != 'WIP'){ 
+                                    error = true; 
+                                    break; 
+                                } 
+                            } 
+                        } 
+                    } 
+                    if(i > 0){ 
+                        if(location1 != records[i].Mbo_Location__c){ 
+                            locationerror = true; 
+                            break; 
+                        } 
+                    } 
+                } 
+                if(nolocation){ 
+                    alert('{!$Label.No_Location_specified_in_selected_order}'); 
+                } else if(downloadError){ 
+                    alert('Production Order Files are not yet downloaded. Cant Assign TL or QC.'); 
+                }else if(error){ 
+                    alert('{!$Label.Please_select_the_order_status_TBI_or_HandOver}'); 
+                } else if(locationerror){ 
+                    alert('{!$Label.Please_select_production_order_in_same_location}'); 
+                } 
+                    else{ 
+                        var ids ='';
+                        for(var i=0;i<checkedValues.length;i++){ 
+                            if(first){ 
+                                ids+=checkedValues[i].substr(0,18); 
+                                first = false; 
+                            }else 
+                                ids+=','+checkedValues[i].substr(0,18);
+                        } 
+                        if (ids.length) { 
+                            
+                            
+                            var url2 = 'apex/EPMS_ChangeTLIncharge_EV?ids='+ids; 
+                            if(authorise==true){ 
+                                window.open(url2, "", "scrollbars=1,width=700, height=500"); 
+                            } 
+                        } else { 
+                            alert('{!$Label.Select_one_or_more_production_order}'); 
+                        } 
+                    }
+            }
+        }
+    }
+    
+    function fileDowload() {
+        var url2 = 'apex/EPMS_FilesWithoutFileManger?type=FM'; 
+        window.open(url2, "", "scrollbars=1,width=700, height=400");
+    }
+    
+    function myDirectories() {
+        window.location.assign('apex/EPMS_MyDirectory');
+    }
+    
+    function HandOverPO(){
+        var Errorflag=false; 
+        function PopupCenter(pageURL, title,w,h) { 
+            var left = (screen.width/2)-(w/2); 
+            var top = (screen.height/2)-(h/2); 
+            var targetWin = window.open (pageURL, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left); 
+        }
+        var location1 = ''; 
+        var locationerror = false; 
+        var checkedValues="";
+        checkedValues=$("input[type='checkbox']:checked").map(function() { return this.outerHTML.split(',')[1].match(/'([^']+)'/)[1] }).get();     
+        
+        if(checkedValues==""){
+            console.log(checkedValues);
+            popup('popUpalert','alert','','{!$Label.EPMS_MBO_Select_Atleast_One_Record}'); 
+            return false;
+        }else{
+            
+            if(document.getElementById("checkall").checked == true){
+                checkedValues.splice(0, 1);
+            }
+            var CheckProductionorder = sforce.connection.query('select Production_Order_Status__c,Id,Name,Mbo_Location__c from Production_Order__c where Id IN (\'' + checkedValues.join('\',\'') + '\')' ); 
+            var Productionorder = CheckProductionorder.getArray("records"); 
+            for (var i=0; i< Productionorder.length; i++){ 
+                if(i == 0){ 
+                    location1 = Productionorder[i].Mbo_Location__c; 
+                } 
+                if((Productionorder[i].Production_Order_Status__c =='Completed') || (Productionorder[i].Production_Order_Status__c =='Uploaded') || (Productionorder[i].Production_Order_Status__c =='QC') || 
+                   (Productionorder[i].Production_Order_Status__c =='Cancelled') || (Productionorder[i].Production_Order_Status__c =='Pending')){ 
+                    
+                    Errorflag=true; 
+                } 
+                if(i > 0){ 
+                    if(location1 != Productionorder[i].Mbo_Location__c){ 
+                        locationerror = true; 
+                        break; 
+                    }   
+                } 
+            }
+            if(locationerror==true){ 
+                alert('{!$Label.EPMS_MBO_File_Same_Location}'); 
+            } else if(Errorflag==true){ 
+                alert('{!$Label.EPMS_MBO_Should_not_Select_Record}'); 
+                
+            }else if(Errorflag == false){ 
+                var SelectedIds = ''; 
+                var first = true; 
+                var error = false; 
+                
+                for(var i=0;i<checkedValues.length;i++){ 
+                    
+                    if(first){ 
+                        SelectedIds+="'"+checkedValues[i]+"'"; 
+                        first = false; 
+                    }else 
+                        SelectedIds+=",'"+checkedValues[i]+"'"; 
+                } 
+                
+                var result = sforce.connection.query("Select Id,Name from Production_Order__c where Id in ("+SelectedIds+")");
+                var ids ='';
+                for(var i=0;i<checkedValues.length;i++){ 
+                    if(first){ 
+                        ids+=checkedValues[i].substr(0,18); 
+                        first = false; 
+                    }else 
+                        ids+=','+checkedValues[i].substr(0,18);
+                }            if (ids.length) {
+                    
+                    var url2 = '/apex/EPMS_HandOverProd_EV?ids=' + ids+'&type=order'; 
+                    PopupCenter(url2,"EPMSOrder",700,300); 
+                } else { 
+                    alert('{!$Label.Select_one_or_more_orders}'); 
+                }
+            }
+            
+        }
+    }
+    function AdminHandOver(){
+        var location1 = ''; 
+        var locationerror = false; 
+        var checkedValues="";
+        var profilename = '{!$Profile.Name}'; 
+        var operatorPS = '{!$Label.EPMS_MEMBER_DESIG_OPERATOR_PS}';
+        if(profilename == 'Quality Control' || profilename == operatorPS || profilename == 'Sales Region' || profilename == 'File Managers' || profilename == 'Team Leader'){ 
+            alert('{!$Label.EPMS_MBO_Not_have_access}'); 
+        } else {
+            checkedValues=$("input[type='checkbox']:checked").map(function() { return this.outerHTML.split(',')[1].match(/'([^']+)'/)[1] }).get();     
+            if(checkedValues==""){
+                console.log(checkedValues);
+                popup('popUpalert','alert','','{!$Label.EPMS_MBO_Select_Atleast_One_Record}'); 
+                return false;
+            }else{
+                var Errorflag=false; 
+                function PopupCenter(pageURL, title,w,h) { 
+                    var left = (screen.width/2)-(w/2); 
+                    var top = (screen.height/2)-(h/2); 
+                    var targetWin = window.open (pageURL, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=no, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left); 
+                }  
+                if(document.getElementById("checkall").checked == true){
+                    checkedValues.splice(0, 1);
+                }
+                var result = sforce.connection.query('select Production_Order_Status__c,Id,Name,Mbo_Location__c from Production_Order__c where Id IN (\'' + checkedValues.join('\',\'') + '\')' ); 
+                //alert('result : ' + result);  
+                var records = result.getArray("records"); 
+                //alert(records);
+                var ProdSelectedIds =''; 
+                var firstPO = true; 
+                for (var i=0; i< records.length; i++){      
+                    var Prod_order_ID = records[i].Id;  
+                    if(firstPO){ 
+                        ProdSelectedIds+="'"+Prod_order_ID+"'"; 
+                        firstPO = false; 
+                    }else 
+                        ProdSelectedIds+=",'"+Prod_order_ID+"'"; 
+                    
+                    if(i == 0){ 
+                        location1 = records[i].Mbo_Location__c; 
+                    } 
+                    if(records[i].Production_Order_Status__c !='New') { 
+                        
+                        Errorflag=true; 
+                    } 
+                    if(i > 0){ 
+                        if(location1 != records[i].Mbo_Location__c){ 
+                            locationerror = true; 
+                            break; 
+                        }   
+                    } 
+                }
+                if(locationerror==true){ 
+                    alert('{!$Label.EPMS_MBO_File_Same_Location}'); 
+                } else if(Errorflag==true){ 
+                    alert('selected production order Status (or) files having status other than New.Please select Order and files having status NEW'); 
+                }else if(Errorflag == false){       
+                    var first = true;       
+                    var statusError = false; 
+                    if(ProdSelectedIds.length>0) 
+                    { 
+                        var fileResult = sforce.connection.query("Select Id,Name,Status__c from Files__c where Production_Order__c in ("+ProdSelectedIds+")"); 
+                        var fileResultRecord = fileResult.getArray("records"); 
+                        for(var jj=0;jj<fileResultRecord.length;jj++){ 
+                            if(fileResultRecord[jj].Status__c !='New') { 
+                                statusError = true; 
+                                break; 
+                            } 
+                        } 
+                        
+                        if(statusError == false) 
+                        { 
+                            var ids ='';
+                            for(var i=0;i<checkedValues.length;i++){ 
+                                if(first){ 
+                                    ids+=checkedValues[i].substr(0,18); 
+                                    first = false; 
+                                }else 
+                                    ids+=','+checkedValues[i].substr(0,18);
+                            } 
+                            if (ids.length) { 
+                                
+                                var url2 = '/apex/EPMS_Production_Admin_Handover_EV?ids=' + ids+'&type=handPO'; 
+                                PopupCenter(url2,"EPMSOrder",700,300); 
+                            } else { 
+                                alert('{!$Label.Select_one_or_more_orders}'); 
+                            } 
+                        }else if(statusError == true) 
+                        { 
+                            alert('selected production order Status (or) files having status other than New'); 
+                        } 
+                    }
+                }       
+                
+            }
+        }
+    }
+    
+    function QCCheck(){
+        var Errorflag=false;
+        
+        function popupCenter(url, name, w, h) 
+        { 
+            w += 32; 
+            h += 56; 
+            wleft = (screen.width - w) / 2; 
+            wtop = (screen.height - h) / 2; 
+            if (wleft < 0) { 
+                w = screen.width; 
+                wleft = 0; 
+            } 
+            if (wtop < 0) { 
+                h = screen.height-400; 
+                wtop = 200; 
+            } 
+            var win = window.open(url, 
+                                  name, 
+                                  'width=' + w + ', height=' + h + ', ' + 
+                                  'left=' + wleft + ', top=' + wtop + ', ' + 
+                                  'location=no, menubar=no, ' + 
+                                  'status=no, toolbar=no, scrollbars=no, resizable=no'); 
+            win.resizeTo(w, h); 
+            win.moveTo(wleft, wtop); 
+            win.focus(); 
+        }
+        var profilename = '{!$Profile.Name}'; 
+        var operatorPS = '{!$Label.EPMS_MEMBER_DESIG_OPERATOR_PS}';
+        if(profilename == 'Team Leader' || profilename == operatorPS || profilename == 'Sales Region' || profilename == 'File Managers' ){ 
+            alert('{!$Label.EPMS_MBO_Not_have_access}'); 
+        } else { 
+            var location1 = ''; 
+            var locationerror = false; 
+            var checkedValues="";
+            checkedValues=$("input[type='checkbox']:checked").map(function() { return this.outerHTML.split(',')[1].match(/'([^']+)'/)[1] }).get();     
+            // alert('checkedValues : ' + checkedValues);
+            if(checkedValues==""){
+                // console.log(checkedValues);
+                popup('popUpalert','alert','','{!$Label.EPMS_MBO_Select_Atleast_One_Record}'); 
+                return false;
+            }else{
+                if(document.getElementById("checkall").checked == true){
+                    checkedValues.splice(0, 1);
+                }
+                var result = sforce.connection.query('select Production_Order_Status__c,Id,Name,Mbo_Location__c from Production_Order__c where Id IN (\'' + checkedValues.join('\',\'') + '\')' ); 
+                var records = result.getArray("records"); 
+                var orderName = ''; 
+                for (var i=0; i< records.length; i++){ 
+                    
+                    if(i == 0){ 
+                        orderName = records[i].Name; 
+                        location1 = records[i].Mbo_Location__c; 
+                    } 
+                    if(records[i].Production_Order_Status__c !='QCIP') { 
+                        if(records[i].Production_Order_Status__c !='WIP') { 
+                            
+                            Errorflag=true; 
+                        } 
+                    } 
+                    
+                    if(i > 0){ 
+                        if(location1 != records[i].Mbo_Location__c){ 
+                            locationerror = true; 
+                            break; 
+                        }   
+                    } 
+                }
+                var first = true; 
+                if(locationerror==true){ 
+                    alert('{!$Label.EPMS_MBO_File_Same_Location}'); 
+                }else if(Errorflag==true){ 
+                    alert('Please Select Order in QCIP or WIP Status'); 
+                } else if(Errorflag == false){
+                    var ids ='';
+                    for(var i=0;i<checkedValues.length;i++){ 
+                        if(first){ 
+                            ids+=checkedValues[i].substr(0,18); 
+                            first = false; 
+                        }else 
+                            ids+=','+checkedValues[i].substr(0,18);
+                    }
+                    if (ids.length) { 
+                        var url2 = '/apex/EPMS_MyDirectoryQCcheckSearch_IT_EV?id=' + orderName+'&type=order'; 
+                        var paramsW = screen.width-100; 
+                        var paramsH = screen.height-100; 
+                        var params = 'width='+screen.width-100; 
+                        params += ', height='+screen.height-100; 
+                        params += ', top=100, right=100' 
+                        params += ', fullscreen=yes'; 
+                        
+                        popupCenter(url2,"EPMSOrder", paramsW,paramsH); 
+                        
+                    } else { 
+                        alert('{!$Label.Select_one_or_more_orders}'); 
+                    }
+                    
+                }
+                
+            }
+        }  
+    }
+    
+    function OpenFolders(){
+        var checkedValues="";       
+        var updateRecords = []; 
+        checkedValues=$("input[type='checkbox']:checked").map(function() { return this.outerHTML.split(',')[1].match(/'([^']+)'/)[1] }).get();     
+        if(checkedValues==""){
+            console.log(checkedValues);
+            popup('popUpalert','alert','','Please Select Atleast one record to proceed'); 
+            return false;
+        }else{
+            var SelectedIds = ''; 
+            var first = true; 
+            var temp = 0;
+            if(document.getElementById("checkall").checked == true){
+                temp = 1;
+            }
+            for(var i=temp;i<checkedValues.length;i++){ 
+                
+                if(first){ 
+                    SelectedIds+="'"+checkedValues[i]+"'"; 
+                    first = false; 
+                }else 
+                    SelectedIds+=",'"+checkedValues[i]+"'"; 
+            }
+            var Files = sforce.connection.query("Select Id, Name ,Files_To_open__c from Files__c where (File_type__c ='Image' or File_type__c='Directory') and Production_Order__c in ("+SelectedIds+")"); 
+            var records = Files.getArray("records");            
+            var recordsize = Files.size;
+            if(recordsize > 200){
+                alert('Selected Production Orders should not have Uploaded more than 200 Files');
+            }
+            for(var i=0;i<recordsize;i++) { 
+                var update_Files = new sforce.SObject("Files__c");                 
+                update_Files.Id = records[i].Id;                
+                update_Files.Files_To_open__c=1;              
+                updateRecords.push(update_Files);               
+            } 
+            var resultupdate = sforce.connection.update(updateRecords); 
+            alert('{!$Label.Selected_Files_Are_Marked_to_Open}'); 
+            window.location.reload(); 
+        }
+    }
+    
+    function ClearQueue(){
+        var updateRecords = []; 
+        var errorexist = false; 
+        var checkedValues="";
+        var userid=sforce.connection.getUserInfo().userId; 
+        var pname = '{!$Profile.Name}'; 
+        var operatorPS = '{!$Label.EPMS_MEMBER_DESIG_OPERATOR_PS}';
+        if(pname == 'Team Leader' || pname == 'IT Administrator' || pname == operatorPS ){ 
+            alert('Only Production Administrator/ Shift Administrator/QC can clear the QC Files from queue.'); 
+            window.location.reload(); 
+        }else {
+            checkedValues=$("input[type='checkbox']:checked").map(function() { return this.outerHTML.split(',')[1].match(/'([^']+)'/)[1] }).get();     
+            if(checkedValues==""){
+                console.log(checkedValues);
+                popup('popUpalert','alert','','Please Select Atleast one record to proceed'); 
+                return false;
+            }else{
+                var SelectedIds = ''; 
+                var first = true;
+                var temp = 0;
+                if(document.getElementById("checkall").checked == true){
+                    temp = 1;
+                }
+                for(var i=temp;i<checkedValues.length;i++){ 
+                    if(first){ 
+                        SelectedIds+="'"+checkedValues[i]+"'"; 
+                        first = false; 
+                    }else 
+                        SelectedIds+=",'"+checkedValues[i]+"'"; 
+                }
+                var Files = sforce.connection.query("Select Id, Name ,Status__c,File_PS_Version__c,Files_To_open__c,Member__r.User_Id__c from Files__c where Status__c = 'QC' AND Files_To_open__c = 1 AND Production_Order__c in ("+SelectedIds+")"); 
+                var records = Files.getArray("records"); 
+                var statusError = false; 
+                var recordsize = Files.size;
+                if(recordsize == 0){ 
+                    alert('In Selected Order, No QC Files are open in Photoshop.'); 
+                    window.location.reload(); 
+                } else {
+                    for(var i=0;i<recordsize ;i++) {    
+                        var update_Files = new sforce.SObject("Files__c"); 
+                        update_Files.Id = records[i].Id; 
+                        update_Files.File_PS_Version__c='CS6'; 
+                        update_Files.Files_To_open__c=0; 
+                        updateRecords.push(update_Files); 
+                        errorexist = true; 
+                    }
+                    
+                }       
+                
+            }
+            var resultupdate = sforce.connection.update(updateRecords); 
+            if(errorexist==true){ 
+                
+                alert('Selected Order QC Files are Cleared From Queue'); 
+                window.location.reload(); 
+            }
+        } 
+    }
+    
+    function ChangeJobTitle(){
+        
+        var profilename = '{!$Profile.Name}'; 
+        var operatorPS = '{!$Label.EPMS_MEMBER_DESIG_OPERATOR_PS}';
+        if(profilename == operatorPS){ 
+            alert('{!$Label.EPMS_MBO_Not_have_access}'); 
+        } else{ 
+            var checkedValues="";
+            checkedValues=$("input[type='checkbox']:checked").map(function() { return this.outerHTML.split(',')[1].match(/'([^']+)'/)[1] }).get();     
+            if(checkedValues==""){
+                console.log(checkedValues);
+                popup('popUpalert','alert','','{!$Label.EPMS_MBO_Select_Atleast_One_Record}'); 
+                return false;
+            }else{
+                var SelectedIds = ''; 
+                var Ids = ''; 
+                var first = true; 
+                var error = false; 
+                var temp = 0;
+                if(document.getElementById("checkall").checked == true){
+                    temp = 1;
+                }
+                for(var i=temp;i<checkedValues.length;i++){ 
+                    if(first){ 
+                        Ids+="'"+checkedValues[i]+"'"; 
+                        SelectedIds+=checkedValues[i]; 
+                        first = false; 
+                    }else{ 
+                        Ids+=",'"+checkedValues[i]+"'"; 
+                        SelectedIds+=","+checkedValues[i]; 
+                    } 
+                } 
+                var stat; 
+                var filesToOpen = false; 
+                var result = sforce.connection.query("Select Id, Name, Production_Order_Status__c from Production_Order__c where Id in ("+Ids+")"); 
+                var records = result.getArray("records"); 
+                for(var i=0;i<records.length;i++){ 
+                    if(records[i].Production_Order_Status__c != 'New' && records[i].Production_Order_Status__c != 'Pending' && records[i].Production_Order_Status__c != 'Estimation Request' && records[i].Production_Order_Status__c != 'Awaiting Approval'){ 
+                        stat = "'New' or 'Pending' or 'Estimation Request' or 'Awaiting Approval'"; 
+                        error = true; 
+                        break; 
+                    } 
+                }
+                
+                if (error == true){ 
+                    alert("Please select Production Order status in " + stat); 
+                } else if (filesToOpen == true){ 
+                    alert("The Selected Files are Opened in Photoshop,Cant change job title Now. Please try again."); 
+                } else { 
+                    var jobTitleUrl = '/apex/EPMS_ChangeJobTitle?ids='+SelectedIds+'&type=polistpage'; 
+                    var winfeature = 'directories=no, titlebar=no,toolbar=no,width=500,height=580, left=200,top=50,location=no,status=0,menubar=no,scrollbars=yes,resizable=no'; 
+                    window.childWin = window.open(jobTitleUrl, '_blank', winfeature); 
+                    
+                    window.intervalId = window.setInterval('window.checkIfChildWindowIsClosed()', 5*1000);   
+                }           
+            }
+        }
+        //add check function to window 
+        window.checkIfChildWindowIsClosed = function() 
+        { 
+            if(window.childWin.closed) 
+            { 
+                window.clearInterval(window.intervalId); 
+                window.parent.location.href = window.parent.location.href; 
+            } 
+        }
+        
+    }
+    
+    function doCheckboxChange(cb,itemId)
+    {
+        if(cb.checked==true){
+            aSelectItem(itemId);
+        }
+        else{
+            aDeselectItem(itemId);
+        }        
+    }  
+    </script>   
+    
+    <script type="text/javascript">
+    var rootflog = false;
+    var count;
+    function selectAll(){
+        if(rootflog == false)
+        {
+            $('.fancyTable tbody tr').find('.childs').prop('checked', 'checked');
+            rootflog=true;
+            count = $(".childs:checked").length;    
+            jQuery('[id$=myPlaceholder]').text(count);
+            if(count>0)
+                jQuery('[id$=count]').css('background','#ffe324');
+            else
+                jQuery('[id$=count]').css('background','#FFF'); 
+            jQuery('[id$=myPlaceholder2]').text(count);
+            if(count>0)
+                jQuery('[id$=count]').css('background','#ffe324');
+            else
+                jQuery('[id$=count]').css('background','#FFF');
+        }
+        else{
+            $('.fancyTable tbody tr').find('.childs').removeProp('checked', 'checked');
+            rootflog=false;
+            count = $(".childs:checked").length;    
+            jQuery('[id$=myPlaceholder]').text(count);
+            if(count>0)
+                jQuery('[id$=count]').css('background','#ffe324');
+            else
+                jQuery('[id$=count]').css('background','#FFF'); 
+            jQuery('[id$=myPlaceholder2]').text(count);
+            if(count>0)
+                jQuery('[id$=count]').css('background','#ffe324');
+            else
+                jQuery('[id$=count]').css('background','#FFF');    
+        }
+        
+    }
+    
+    $(document).ready(function() {
+        $(document).on("click", "#checkall", function(){
+            $('.fancyTable tbody tr').find('.childs').prop('checked', this.checked);
+            count = $(".childs:checked").length;    
+            jQuery('[id$=myPlaceholder]').text(count);
+            if(count>0)
+                jQuery('[id$=count]').css('background','#ffe324');
+            else
+                jQuery('[id$=count]').css('background','#FFF');
+            jQuery('[id$=myPlaceholder2]').text(count);
+            if(count>0)
+                jQuery('[id$=count]').css('background','#ffe324');
+            else
+                jQuery('[id$=count]').css('background','#FFF');
+        });
+        
+        
+        $(".childs").on('change',function(){
+            var counts = $('.childs:checked').length;
+            var all_count=$('.fancyTable tbody tr').find(":checkbox").length;
+            
+            if(counts < all_count){
+                $('#checkall').prop('checked',false);
+            }
+            else{
+                $('#checkall').prop('checked',true);
+                
+            }
+            
+            count = $(".childs:checked").length;    
+            jQuery('[id$=myPlaceholder]').text(count);
+            if(count>0)
+                jQuery('[id$=count]').css('background','#ffe324');
+            else
+                jQuery('[id$=count]').css('background','#FFF');
+            jQuery('[id$=myPlaceholder2]').text(count);
+            if(count>0)
+                jQuery('[id$=count]').css('background','#ffe324');
+            else
+                jQuery('[id$=count]').css('background','#FFF');
+        });      
+    });
+    
+    </script>
+    <script>
+    function sortTable(n) {
+        var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+        table = document.getElementById("myTable");
+        switching = true;
+        //Set the sorting direction to ascending:
+        dir = "asc"; 
+        /*Make a loop that will continue until no switching has been done:*/
+        while (switching) {
+            //start by saying: no switching is done:
+            switching = false;
+            rows = table.getElementsByTagName("TR");
+            /*Loop through all table rows (except the first, which contains table headers):*/
+            for (i = 1; i < (rows.length - 1); i++) {
+                //start by saying there should be no switching:
+                shouldSwitch = false;
+                /*Get the two elements you want to compare, one from current row and one from the next:*/
+                x = rows[i].getElementsByTagName("TD")[n];
+                y = rows[i + 1].getElementsByTagName("TD")[n];
+                /*check if the two rows should switch place, based on the direction, asc or desc:*/
+                if (dir == "asc") {
+                    if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                        //if so, mark as a switch and break the loop:
+                        shouldSwitch= true;
+                        break;
+                    }
+                } else if (dir == "desc") {
+                    if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                        //if so, mark as a switch and break the loop:
+                        shouldSwitch= true;
+                        break;
+                    }
+                }
+            }
+            if (shouldSwitch) {
+                /*If a switch has been marked, make the switch and mark that a switch has been done:*/
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+                //Each time a switch is done, increase this count by 1:
+                switchcount ++;      
+            } else {
+                /*If no switching has been done AND the direction is "asc",
+  set the direction to "desc" and run the while loop again.*/
+                if (switchcount == 0 && dir == "asc") {
+                    dir = "desc";
+                    switching = true;
+                }
+            }
+        }
+    }
+    </script>
+    
+    <apex:form id="accsTable">
+        <!-- <apex:actionFunction name="aSelectItem" action="{!doSelectItem}" rerender="NONE" status="loader">
+<apex:param name="contextItem" value="" assignTo="{!contextItem}"/>
+</apex:actionFunction>
+
+<apex:actionFunction name="aDeselectItem" action="{!doDeselectItem}" rerender="NONE" status="loader">
+<apex:param name="contextItem" value="" assignTo="{!contextItem}"/>
+</apex:actionFunction> -->
+        <apex:actionFunction name="isSelectAllItem" action="{!isSelectedAll}"  rerender="NONE">
+            <apex:param name="isSelectedALL" value="" assignTo="{!selectedAllProperties}"/>
+        </apex:actionFunction>
+        <br/>
+        
+        <img src="/img/s.gif" alt="Production Order" class="pageTitleIcon" title="Production Order"/>
+        <apex:outputPanel >
+            <apex:actionStatus id="ajaxStatus" onstart="startSplash();" onstop="endSplash();" />
+            <apex:actionFunction name="showNext" action="{!refresh}" />
+            <apex:selectList value="{!POFilterId}" multiselect="false" size="1" onchange="showNext();setWinSize();">
+                <apex:selectOptions value="{!POExistingViews}"></apex:selectOptions>
+                <apex:actionSupport event="onchange"  action="{!resetFilter}" rerender="POTable" status="ajaxStatus"/>
+            </apex:selectList><br/>    
+            <br/> <br/>  
+        </apex:outputPanel>
+        
+        <apex:pageBlock id="POTable">
+            <apex:outputPanel rendered="{!AllPOrders.size==0}" style="font-size:13px;">
+                No records to display
+            </apex:outputPanel>            
+            <apex:outputpanel rendered="{!AllPOrders.size > 0}" >
+                <table class="topPagination" width="100%" border="0" cellpadding="0" cellspacing="0">
+                    <tr> 
+                        <td width="33%" align="left" class="lefttd"></td>
+                        <apex:actionFunction name="showSort" action="{!sortmethod}"/> 
+                        <td width="33%" style="text-align:right">Sort&nbsp; by: &nbsp;<apex:selectList value="{!sortingChoice}"  multiselect="false" size="1" onchange="showSort();setWinSize();" >
+                            <apex:selectOptions value="{!sortingoptions}" />
+                            </apex:selectList>&nbsp; 
+                            <apex:selectList styleClass="sortListAsc" value="{!sortType}"  multiselect="false" size="1"  onchange="showSort();setWinSize();" >
+                                <apex:selectOptions value="{!sortingTypeoptions}"/>
+                            </apex:selectList>&nbsp;</td>
+                    </tr>
+                </table>                    
+                <div class="container_12 divider freezeTableAutoWidth">
+                    <div class="grid_6">
+                        <table class="fancyTable headerFreezeTable" cellpadding="0" cellspacing="0" id="myTable" >
+                            <thead>
+                                <tr>
+                                    <!-- <th><apex:inputCheckbox onclick="selectAllCheckboxes(this,'inputId')" /></th> -->
+                                    <th><input type="checkbox" id="checkall" onclick="selectAllCheckboxes(this,'inputId')" /></th>     
+                                    <th class="textLeft">PO - TAT </th>                                    
+                                    <th class="textLeft"> Production Order Name </th>  
+                                    <th class="textLeft">PO - Status </th>
+                                    <th class="textLeft" >PO - Instructions </th>                                    
+                                    <th class="textLeft">Total File Count(Anken) </th>
+                                    <th class="textLeft">No of New Files </th>
+                                    <th class="textLeft">Total Files Assigned </th>
+                                    <th class="textLeft">No of WIP Files </th>
+                                    <th class="textLeft">No of QC Files </th>
+                                    <th class="textLeft">No of Approved Files </th> 
+                                    <th class="textLeft">No of REDO Files</th>
+                                    <th class="textLeft">No of HANDOVER Files</th>
+                                    <th class="textLeft">TL Incharge </th> 
+                                    <th class="textLeft">QC Incharge </th> 
+                                    <th class="textLeft">Jobs Title</th>
+                                    <th class="textLeft">MBO Location </th>
+                                    <th class="textLeft">Order Attachments </th>
+                                    
+                                </tr>
+                            </thead>    
+                            <apex:repeat value="{!AllPOrders}" var="p" >
+                                <tbody>   
+                                    <tr>
+                                        <!--<td> <apex:inputCheckbox value="{!p.chkBox}" id="inputId" onclick="doCheckboxChange(this,'{!p.prOrd.id}')"/></td> -->
+                                        <td class="Act"><span> <apex:inputCheckbox styleClass="childs" value="{!p.chkBox}" onclick="selectAllCheckboxes(this,'{!p.prOrd.id}')" disabled="false"/></span></td>
+                                        <!--  <td class="title_widthh_incre" > <span> <apex:outputLink title="" value="/{!p.prOrd.id}/e?retURL=/apex/{!$CurrentPage.Name}" style="font-weight:#333435;">Edit</apex:outputLink>&nbsp;|&nbsp;
+<apex:commandLink action="{!deletePO}" onclick="if(!confirm('Are you sure?')) return false;" style="font-weight:#333435;">Del
+<apex:param value="{!p.prOrd.id}" name="idToDel" assignTo="{!delid}"/>
+</apex:commandLink></span>
+</td>   -->                                     
+                                        <td class="POTat textLeft"> <apex:outputfield value="{!p.prOrd.Production_Order_TAT__c}" />                                             
+                                        </td>
+                                        <td class="Pname textLeft">
+                                            <span>
+                                                <apex:outputlink value="/{!p.prOrd.id}" target="_blank">{!p.prOrd.name}</apex:outputlink>  
+                                                
+                                            </span>
+                                        </td>                                            
+                                        <td class="Status textLeft"><apex:outputfield value="{!p.prOrd.Production_Order_Status__c}"/></td>
+                                        <td class="prodcut_width_increase"><apex:outputfield value="{!p.prOrd.Production_Order_Instruction__c}"/></td>                                           
+                                        <td class="FileCount textRight"><apex:outputfield value="{!p.prOrd.Total_Anken_Count__c}" /> </td>
+                                        <td class="NewFile textRight"><apex:outputfield value="{!p.prOrd.New_Files_Count__c}" /> </td>
+                                        <td class="TotalFiles textRight"><apex:outputfield value="{!p.prOrd.Total_Files_Assigned__c}" /> </td>
+                                        <td class="CountF textRight"><apex:outputfield value="{!p.prOrd.WIP_Files_Count__c}" /> </td>                                    
+                                        <td class="Qcfile textRight"><apex:outputfield value="{!p.prOrd.No_of_QC_Files__c}" /></td>                             
+                                        <td class="ApproveFile textRight"><apex:outputfield value="{!p.prOrd.Approved_File_Count__c}" /> </td>
+                                        <td class="Redo textRight"><apex:outputfield value="{!p.prOrd.Redo_Files_Count__c}" /> </td>
+                                        <td class="HandoverFile textRight"><apex:outputfield value="{!p.prOrd.Handover_File_Count__c}" /> </td>                                      
+                                        <td class="TLChange textLeft"> <apex:outputfield value="{!p.prOrd.TL_Incharge__c}" /></td>                                        
+                                        <td class="QCharge textLeft"><apex:outputfield value="{!p.prOrd.QC_Incharge__c}" /> </td> 
+                                        <td class="Jobs"><apex:outputfield value="{!p.prOrd.Jobs_List__c}"/></td>                                      
+                                        <td class="Location textLeft"><apex:outputfield value="{!p.prOrd.Mbo_Location__c}"/></td> 
+                                        <td class="OrderAtt textLeft"><apex:outputfield value="{!p.prOrd.Order_Attachments__c}"/></td>
+                                    </tr>
+                                </tbody>    
+                            </apex:repeat>
+                            
+                        </table>                       
+                    </div>
+                    <div class="clear">
+                        
+                    </div>
+                </div>
+            </apex:outputpanel> <br/> 
+            
+            <apex:outputPanel rendered="{!AllPOrders.size > 0}" id="PageRefresh">
+                <div class="paginationNav">
+                    <table class="pagefooter" width="100%" border="0" cellpadding="0" cellspacing="0" id="myTable">
+                        <tr>
+                            <td width="20%" align="left" class="lefttd">Display&nbsp;                               
+                                <apex:selectList value="{!size}" size="1">
+                                    <apex:selectOption itemValue="20" itemLabel="20"></apex:selectOption>                                    
+                                    <apex:selectOption itemValue="50" itemLabel="50"></apex:selectOption>
+                                    <apex:selectOption itemValue="100" itemLabel="100"></apex:selectOption>
+                                    <apex:selectOption itemValue="200" itemLabel="200"></apex:selectOption>
+                                    <apex:selectOption itemValue="500" itemLabel="500"></apex:selectOption>
+                                    <apex:actionSupport event="onchange" action="{!refreshPageS}"/>
+                                </apex:selectList>&nbsp; records per page                                 
+                                
+                                <td width="13%" id="count" class="count_bg" > 
+                                    <div>
+                                        <apex:outputText id="myPlaceholder" value="0"/> &nbsp;&nbsp; Records Selected &nbsp;&nbsp; <!--<apex:outputLabel value="{!selectedCount} Records Selected" id="NONE"/>--> 
+                                    </div>
+                            </td> 
+                        </td>
+                    <td width="34%" style="text-align:center;"> 
+                        <apex:commandButton value="First" action="{!doFirst}" disabled="{!!HasPrevious}" onclick="setWinSize();"/>
+                        &nbsp;&nbsp;
+                        <apex:commandButton value="<<Previous" action="{!doPrevious}" disabled="{!!HasPrevious}" onclick="setWinSize();"/>
+                        &nbsp;&nbsp;
+                        <apex:commandButton value="Next>>" action="{!doNext}" disabled="{!!hasnext}" onclick="setWinSize();"/>
+                        &nbsp;&nbsp;
+                        <apex:commandButton value="Last" action="{!doLast}" disabled="{!!hasnext}" onclick="setWinSize();"/> 
+                        &nbsp;&nbsp; &nbsp;&nbsp;  &nbsp;&nbsp;  &nbsp;&nbsp;  &nbsp;&nbsp;  &nbsp;&nbsp;  &nbsp;&nbsp;  &nbsp;&nbsp;
+                        &nbsp;&nbsp;
+                        &nbsp;&nbsp;
+                        <apex:outputText > &nbsp; {!(pageNumber * size)+1-size} - {!IF((pageNumber * size)>POCountList, POCountList,(pageNumber * size))} of {!POCountList} </apex:outputText>&nbsp;                    
+                    </td>                
+                </tr>
+            </table>                  
+        </div>  
+    </apex:outputPanel>
+    <div>
+        <apex:pageBlockButtons location="Top" id="POTable"> 
+            <apex:commandButton value="My Directories" action="{!MyDirectories}"/>
+            <!-- <apex:commandButton value="My Directories"  onclick="myDirectories();" oncomplete="return false;"/> -->
+            <apex:commandbutton value="View Directory" onclick="ViewDirectory();" oncomplete="return false;" immediate="true"/>
+            <apex:commandButton value="Change QC Incharge" onclick="ChangeQc();" oncomplete="return false;" immediate="true"/> 
+            <apex:commandButton value="Change TL Incharge" onclick="ChangeTL();" oncomplete="return false;" immediate="true"/>                    
+            <apex:commandButton value="File Download Without FileManger" onclick="javascript:fileDowload();" immediate="true"/>      
+            <apex:commandButton value="Handover ProductionOrder" onclick="javascript:HandOverPO();" oncomplete="return false;" immediate="true"/>
+            <apex:commandButton value="Open Folders" onclick="OpenFolders();" oncomplete="return false;" immediate="true"/>
+            <apex:commandButton value="Production Admin Handover" onclick="AdminHandOver();" oncomplete="return false;" immediate="true"/>
+            <apex:commandButton value="QC Check" onclick="QCCheck();" oncomplete="return false;" immediate="true"/>
+            <apex:commandButton value="Clear Queue" onclick="ClearQueue();" oncomplete="return false;" immediate="true"/>   
+            <apex:commandButton value="Change Job Title" onclick="ChangeJobTitle();" oncomplete="return false;" immediate="true"/>
+            <apex:commandButton value=" " title="Refresh" styleclass="refreshListButton" onclick="window.location.top.reload();"/>         
+        </apex:pageBlockButtons>
+    </div>
+</apex:pageBlock>
+</apex:form>
+</apex:page>

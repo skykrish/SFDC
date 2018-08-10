@@ -1,0 +1,15 @@
+<apex:page controller="EPMS_checkLogin">
+  
+<script src="{!"/resource/1446456168000/csspopup/add-style.js"}"/>     
+<script src=" {!"/resource/1446456168000/csspopup/css-pop.js"}"/>
+
+ 
+<apex:outputPanel rendered="{!CheckSize==0}">
+     <script type="text/javascript">
+     
+       alert('Member Not Yet Activate! Contact Administrator');
+       window.location.assign("/secur/logout.jsp");
+
+    </script>
+</apex:outputPanel>
+</apex:page>

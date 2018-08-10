@@ -1,0 +1,143 @@
+<apex:page controller="EPMS_PO_Assignment_Estimator_Controller" showHeader="false" sidebar="false">
+
+ <script src="/soap/ajax/35.0/connection.js"></script>
+
+  <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+    <html>
+    <head>
+    <style>
+input[type='checkbox']:checked {
+    background: blue;
+}
+.lookupTab div.srch {
+    padding: 4px 3px;
+    font-family: "Arial", "Helvetica", sans-serif;
+    font-weight: bold;
+    font-size: 118%;
+}
+
+
+.pbHeader td.pbTitle {width:43%}
+.pbBottomButtons td.pbTitle {width:43%}
+
+.orderAssignmentSec {width:650px; margin:0 auto; padding:10px 0px 0; overflow:hidden;}
+.orderAssignmentSec .rowSec {width:100%; font-size:12px; color:#4a4a56; padding:0 0 10px; overflow:hidden;}
+.rowSec .leftSec {width:35%; float:left; text-align:left;}
+.rowSec .rightSec {width:63%; float:right;}
+.rowSec .leftSecShiftTeam {width:35%; float:left; text-align:left;}
+.rowSec .rightSecShiftTeam {width:63%; float:right;}
+.rowSec .leftSecSelType {width:35%; float:left; text-align:left;}
+.rowSec .rightSecSelType {width:63%; float:right;}
+.rowSec .rightSec select, .rowSec .rightSecShiftTeam select, .rowSec .rightSecSelType select {width:380px; float:right;}
+
+.paddingTop10 {padding-top:10px !important;}
+.paddingBotton10 {padding-bottom:10px !important;}
+.paddingBotton-none {padding-bottom:0 !important;}
+
+.rightSecInnerDiv {width:380px; float:right;}
+.FromToInnerDiv {width:380px; float:right;}
+.FromToInnerDiv span.dateInput {float:left;}
+
+.orderAssignmentSec td.pbTitle {padding:5px 12px 5px 0px;}
+
+</style>
+     <script>
+     
+      sforce.connection.sessionId = '{!$Api.Session_ID}';
+       var describeSObjectResult = sforce.connection.describeSObject("Production_Order__c");
+       var prefix = describeSObjectResult.keyPrefix;       
+     $(document).keydown(function(e) {
+    // ESCAPE key pressed
+    if (e.keyCode == 27) {
+            window.parent.close();
+           var url = location.href;
+           var filerec = '{!fileRecord}';
+           var baseURL = url.substring(0, url.indexOf('/', 14));         
+           if(basepath =='detailpage') {             
+               window.opener.location.href="/"+filerec;
+           } else {             
+               window.opener.location.href="/" + prefix;
+               window.location.reload();
+           }
+    }
+    });
+      function ClosePopup(){
+           window.parent.close();
+           var url = location.href;
+           var baseURL = url.substring(0, url.indexOf('/', 14));
+           var filerec = '{!fileRecord}';
+            var basepath = '{!basepath}';
+           if(basepath == 'directory'){
+               window.opener.location.href=baseURL+"/apex/EPMS_MyDirectory";
+           } else if(basepath =='detailpage') {             
+               window.opener.location.href=baseURL+"/"+filerec;
+           } else {             
+               window.opener.location.href="/" + prefix;;
+           }
+        }
+
+    function refreshtest(){
+        window.opener.location.reload();
+    }        
+
+     </script>
+    </head>
+    <apex:form id="form">
+    <apex:pageblock >    
+    <apex:pageblockbuttons >
+    
+        <apex:commandbutton value="Assign" action="{!assignPO}"  disabled="{!diableButton}" /> 
+        <apex:commandbutton value="Close" action="{!Cancel}" onclick="ClosePopup();" oncomplete="refreshtest();" />
+         
+    </apex:pageblockbuttons>
+    <div class="orderAssignmentSec">
+    
+        <table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="pbTitle"><h3>Estimator Assignments </h3></td></tr></tbody></table>
+        <div class="paddingBotton10"> 
+           <apex:outputPanel id="thePageBlock">
+              <apex:pageMessages />
+            </apex:outputPanel>
+        </div>
+
+    <div class="rowSec">
+         <div class="leftSec">
+            <apex:outputlabel value="Production Location Name"/>
+        </div>
+        <div class="rightSec">
+            <div class="rightSecInnerDiv">
+                <apex:outputLabel value="{!productionLocation}"/>
+            </div>    
+        </div>
+    </div>
+    
+
+     <apex:outputPanel id="fileAssignSection"> 
+     
+    <div class="rowSec">  <!--  paddingBotton-none -->
+            <div class="leftSec">
+                <apex:outputlabel value="Select Estimator"/>
+            </div>
+            <div class="rightSec">
+                <div class="rightSecInnerDiv">    
+                <apex:selectList value="{!selectedEstimator}" size="1">
+                    <apex:selectoptions value="{!Estimators}" />
+                </apex:selectList>
+                </div>
+            </div>
+     </div>
+         </apex:outputPanel>
+    </div>
+    
+    <apex:outputPanel rendered="{!isBulkUpdate}">
+        <apex:outputLabel style="font-weight:bold;margin-left:20px;">Estimator Assignment is :</apex:outputLabel>
+        <apex:outputText style="font-weight:bold;color:blue;margin-left:20px;" value="{!batchStatus}" id="status" rendered="{!isBulkUpdate}"/>
+        <apex:actionPoller action="{!checkJobStatus}" rerender="status,errorId" interval="10"/>
+    </apex:outputPanel>    
+   
+    </apex:pageblock>
+    
+    </apex:form>
+ 
+  
+    </html>
+</apex:page>

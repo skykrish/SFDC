@@ -1,0 +1,67 @@
+<apex:page controller="EPMS_Handover_ProductionOrder_Controller" showHeader="false"> 
+
+<apex:includeScript value="{!URLFOR($Resource.attendance,'jquery-ui.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.attendance,'jquery.min.js')}"/>
+
+<script>   
+     function ClosePopup(){
+     
+       var url = location.href;
+       var basepath = '{!basepath}';
+       
+        var baseURL = url.substring(0, url.indexOf('/', 14));      
+        if(basepath == 'handPO'){
+            window.opener.location.href=baseURL+"/a0y";
+        }else if(basepath =='order')
+        {
+            window.opener.location.href=baseURL+"/a0f";
+        }
+        if(baseURL)
+        {
+            window.top.close();     
+        }
+        refreshParentPage();
+    }
+    
+    function refreshParentPage() 
+    {
+        alert(window.opener.location.href)
+        var redirectURL = window.opener.location.href;
+        if(redirectURL)
+        {
+            window.opener.location.href = window.opener.location.href;
+            if (window.opener.progressWindow) 
+            {
+                window.opener.progressWindow.close();
+            }
+            window.close();
+        }
+    }
+      
+ 
+</script>   
+
+    
+        
+    <apex:form >
+          <apex:sectionHeader title="Handover Production Order" />
+
+        <apex:pagemessages id="error"/>
+        <apex:pageBlock >
+            <apex:outputPanel id="teamSelectionSection" styleClass="requiredInput" layout="block"> 
+                <apex:outputtext value="Select Location to Handover :"/>&nbsp;
+               <apex:selectList value="{!selectvalue}" size="1" styleClass="form-select">
+                    <apex:selectOptions value="{!LocOptionList}"/>
+               </apex:selectList>
+            </apex:outputPanel> 
+            
+        <apex:pageblockbuttons location="top">   
+            <apex:commandbutton value="Save" action="{!Handover}" rerender="error,teamSelectionSection"/>
+            <apex:commandbutton value="Close" onclick="ClosePopup();return false;" immediate="true"/>                 
+
+        </apex:pageblockbuttons>
+        
+     </apex:pageBlock>
+     
+    </apex:form>
+</apex:page>

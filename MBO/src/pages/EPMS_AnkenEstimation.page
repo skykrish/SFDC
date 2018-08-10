@@ -1,0 +1,228 @@
+<apex:page controller="EPMS_AnkenEstimation" id="AC"
+    sidebar="false" showHeader="false" readOnly="true">
+
+    <apex:stylesheet value="{!URLFOR($Resource.Classification,'css/defaultTheme.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.Classification,'css/myTheme.css')}" />
+
+    <apex:includescript value="{!URLFOR($Resource.Classification,'js/jquery.min.js')}" />
+    <apex:includescript value="{!URLFOR($Resource.Classification,'js/jquery.fixedheadertable.js')}" />
+    <apex:includescript value="{!URLFOR($Resource.Classification,'js/custom-table.js')}" />
+
+    <style type="text/css">
+BODY, TD {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #000;
+    /*font-size: 85%;*/
+}
+
+.orderClassificationSec {
+    padding: 10px;
+}
+
+.tableTopSec h3 {
+    color: #000;
+    font-size: 16px;
+    clear: both;
+}
+
+.tableTopSec td {
+    padding: 5px 2px;
+}
+
+.tableTopSec td.font14 {
+    font-size: 14px;
+    padding: 10px 2px;
+}
+
+.divider {
+    margin-top: 0;
+}
+
+.fancy_table_heigtauto .fht-table-wrapper {
+    height: auto !important;
+}
+
+.font_increase {
+    font-size: 16px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.tableTopSec td.padding_top15 {
+    padding-top: 15px;
+}
+</style>
+
+    <script type="text/javascript">
+    
+    function ClosePopup(){
+        
+        window.close();
+        opener.location.reload(true); 
+        
+    }
+    
+    function popupCenter(url, name, w, h)
+    {
+        // Fudge factors for window decoration space.
+        // In my tests these work well on all platforms & browsers.
+        w += 32;
+        h += 56;
+        wleft = (screen.width - w) / 2;
+        wtop = (screen.height - h) / 2;
+        // IE5 and other old browsers might allow a window that is
+        // partially offscreen or wider than the screen. Fix that.
+        // (Newer browsers fix this for us, but lets be thorough.)
+        if (wleft < 0) {
+            w = screen.width;
+            wleft = 0;
+        }
+        if (wtop < 0) {
+            h = screen.height-400;
+            wtop = 200;
+        }
+        var win = window.open(url,
+                              name,
+                              'width=' + w + ', height=' + h + ', ' +
+                              'left=' + wleft + ', top=' + wtop + ', ' +
+                              'location=no, menubar=no, ' +
+                              'status=no, toolbar=no, scrollbars=1, resizable=1');
+        // Just in case width and height are ignored
+        win.resizeTo(w, h);
+        // Just in case left and top are ignored
+        win.moveTo(wleft, wtop);
+        win.focus();
+    }
+    
+    function callClassifcation(url){
+        var paramsW = screen.width-100;
+        var paramsH = screen.height-100;
+        var params = 'width='+screen.width-100;
+        params += ', height='+screen.height-100;
+        params += ', top=100, right=100'
+        params += ', fullscreen=yes';
+        var name = '';
+        popupCenter(url, name, paramsW, paramsH);
+        
+    }    
+    
+    function refreshParent(){
+        opener.location.reload(true); 
+        self.close();
+        
+    }   
+    
+    </script>
+
+    <apex:form >
+        <apex:pageBlock >
+            <apex:actionFunction name="showRedoList"
+                action="{!refreshRedoRecords}" />
+            <div class="orderClassificationSec">
+                <table width="100%" cellpadding="0" cellspacing="0" border="0"
+                    class="tableTopSec">
+                    <tr>
+                        <td class="font14">Anken Order Name
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <b>{!ankenquery.Name}</b>
+                        </td>
+                        <!--<td class="font14">Production Order Name : <b>{!POquery.Name}</b></td>-->
+                    </tr>
+                    <tr>
+                        <td class="font14">Production Order Name  : <b>{!ankenquery.Name}</b>
+                        </td>               
+                    </tr>
+                    <tr>
+                        <td class="font14">Total File Count (Anken) : <b>{!POquery.Total_Anken_Count__c}</b></td>
+                    </tr>
+                </table>
+                <!-- To add ExportExcel Button based on issue No:499 in View Classification detail page -->
+                <table width="100%" cellpadding="0" cellspacing="0" border="0"
+                    class="exportExcel_btnSec">
+                    <tr>
+                        <td align="Center">
+                            <apex:commandButton value="Export in Excel" action="{!ExportToExcelEstimation}" rerender="classificationDiv" />
+                            <span style="margin-left:10px;"><apex:commandButton value="Close" onclick="ClosePopup()" /></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td height="15"></td>
+                    </tr>
+                </table>
+                <apex:outputPanel id="classificationDiv">
+                    <h1 class="font_increase">Order Classification Details</h1>
+                    <div class="container_12 divider fancy_table_heigtauto">
+                        <div class="grid_8">
+                            <table class="fancyTable" id="myTable02" cellpadding="0"
+                                cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>Estimation Classification</th>
+                                        <th class="last">Number of Files</th>
+                                    </tr>
+                                </thead>
+                                <tfoot>
+                                    <tr>
+                                        <td>Total Files</td>
+                                        <td class="last">{!SumOfTotal}</td>
+                                    </tr>
+                                </tfoot>
+                                <tbody>
+                                    <apex:repeat value="{!FilesClassification}" var="FileObj">
+                                        <tr>
+                                            <td>{!FileObj.ClassificationName}</td>
+                                            <!-- <td class="numeric">{!FileObj.TotalFilesCount}</td>  -->
+                                            <td class="numeric"><apex:outputLink value="#" onclick="callClassifcation('/apex/EPMS_View_Classifications?ids={!POquery.Name},{!FileObj.ClassificationName}&status={!selectedCategory}');" >{!FileObj.TotalFilesCount}</apex:outputLink></td>
+                                        </tr>
+                                    </apex:repeat>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                </apex:outputPanel>
+                <table width="100%" cellpadding="0" cellspacing="0" border="0"
+                    class="exportExcel_btnSec">
+
+                    <tr>
+                        <td height="35"></td>
+                    </tr>
+                </table>
+                <apex:outputPanel id="classification">
+                    <h1 class="font_increase">Optional Job Details</h1>
+                    <div class="container_12 divider">
+                        <div class="grid_8 height304">
+
+                            <table class="fancyTable" id="myTable02" cellpadding="0"
+                                cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>Optional Job Name</th>
+                                        <th class="last">Number of Files</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <apex:repeat value="{!mapInteger}" var="mapKey">
+                                        <tr>
+                                            <td>{!mapKey}</td>
+                                            <td>{!mapInteger[mapKey]}</td>
+                                        </tr>
+                                    </apex:repeat>
+                                </tbody>
+                            </table>
+
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0"
+                                class="tableTopSec">
+                                <tr>
+                                    <td colspan="2" align="center" class="padding_top15">
+                                        <apex:commandButton value="Close" onclick="ClosePopup()" />
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                </apex:outputPanel>
+            </div>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

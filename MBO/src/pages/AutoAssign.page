@@ -1,0 +1,808 @@
+<apex:page standardController="Production_Order__c" extensions="AutoAssign" showHeader="false" sidebar="false" action="{!updatePOorder}">
+
+      <apex:includeScript value="{!URLFOR($Resource.View_Directory,'js/jquery.js')}" />
+     <apex:includeScript value="{!URLFOR($Resource.TingleModal,'TingleModal/tingle.js')}"/>
+      <apex:stylesheet value="{!URLFOR($Resource.TingleModal,'TingleModal/tingle.css')}"/> 
+
+    <style>
+        * { 
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', 'Helvetica', sans-serif;
+        }
+        .select_item_sec select{ width:70%;   height: 40px !important;
+    margin-bottom: 10px; border: 1px solid #ccc !important; 
+         }
+         .custom_option_boxheight select{   height: 25px !important;}
+        .select_item_sec h3 {
+    background: #e7e7e7;
+    width: 100%; 
+    display: inline-block;
+    padding: 5px;
+    margin-bottom: 0;
+    border: 1px solid #ccc; border-bottom:0;
+}
+        .select_item_sec { margin-bottom:10px; }
+        .main {
+            width: 90%;
+            margin: 0 auto;
+        }
+
+        .statusStyle {
+            background: url(/img/loading.gif) no-repeat 0 0;
+            padding-left: 20px;
+            margin-left: 10px; 
+            padding-bottom: 5px;
+        }
+
+        .title {padding-bottom:5px;}
+
+        
+
+        .title h1 {
+            margin: 2px 0;
+            display: block;
+            width: 100%;
+            font-size:13px;
+        }
+      
+
+     
+        td img {
+            max-width: 100%;
+        }
+
+
+
+        thead,
+        tbody tr {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+            /*even columns width , fix width of table too*/
+        }
+       
+       
+
+        .tableContainer {
+            float: left;
+            width: 48%;
+            margin-top: 20px;
+
+        }
+        
+        
+        .tableContainer_Main {width:100%; margin:20px auto 20px; float:left; border:0px solid #ccc;}
+        .tableContainer_Top {width:100%; float:left; margin-bottom:20px; border:0px solid #555;}
+        .tableContainer_Left {width:49%; float:left; border:0px solid #555;}
+        .tableContainer_Right {width:49%; float:right; border:0px solid #555;}
+        .productDetailTable_sec {width:100%; border:0px solid #555;}
+        .selectTeam_sec {width:100%; border:0px solid #555;}
+        .selectMemberTable_sec {width:100%; border:0px solid #555;}
+        
+        
+        .autoAssignTable_rec {border-left:1px solid #ccc; border-top:1px solid #ccc; width:100%; border-collapse:collapse;}     
+        .autoAssignTable_rec thead {width:100%;}        
+        .autoAssignTable_rec th, .autoAssignTable_rec td {border-bottom:1px solid #ccc; border-right:1px solid #ccc; padding:2px 5px 3px; font-size:12px; text-align:center;}
+        .autoAssignTable_rec th {background:#DDD;}      
+        .autoAssignTable_rec th:last-child {text-align:left;}               
+        .autoAssignTable_rec td:last-child {padding:0;}     
+        .autoAssignTable_rec td:last-child .orderInstruction {padding:5px 8px; height:100px; overflow-y:scroll; text-align:left; line-height:20px;}     
+        
+                
+
+        
+        
+        
+        
+        thead {width:calc( 100% + -1.8%);}
+        
+        /*@media (min-width: 828px) and (max-width: 1600px) {
+            .filetable thead {width:calc( 100% + -2.3%) !important;}
+            .selectMemberTable_details thead {width:calc( 100% + -2.3%) !important;}
+        }
+        
+        
+        @media (min-width: 662px) and (max-width: 1366px) {
+            .filetable thead {width:calc( 100% + -2.8%) !important;}
+            .selectMemberTable_details thead {width:calc( 100% + -3.4%) !important;}
+        }*/
+        
+        
+        
+        
+        
+        @media (min-width: 828px) and (max-width: 1600px) {
+            .filetable thead {width:calc( 100% + -2.3%) !important;}
+            .selectMemberTable_details thead {width:calc( 100% + -2.3%) !important;}
+        }
+        
+        
+        @media (min-width: 662px) and (max-width: 1366px) {
+            .filetable thead {width:calc( 100% + -2.8%) !important;}
+            .selectMemberTable_details thead {width:calc( 100% + -2.8%) !important;}
+        }
+        
+        
+        
+        
+        .filetable {border:1px solid #ccc; /*border-left:1px solid #ccc; border-top:1px solid #ccc; border-right:1px solid #ccc;*/ width:100%; border-collapse:collapse; background:#e7e7e7;}
+        .filetable tbody {
+            display: block;
+           max-height: 56vh; 
+            overflow-y: scroll;
+            overflow-x: hidden;
+        }   
+        /*.filetable th, .filetable td {border-bottom:1px solid #ccc; border-right:1px solid #ccc; padding:5px 5px; font-size:13px; text-align:center;}
+        .filetable th {background:#DDD;}*/
+        .filetable th {border-bottom:1px solid #ccc; border-right:1px solid #ccc; padding:2px 4px 3px; font-size:12px; text-align:center;}
+        .filetable td {border-bottom:1px solid #ccc; border-right:1px solid #ccc; padding:6px 4px; font-size:12px; text-align:left;}
+        .filetable th {background:#e7e7e7;}     
+        .filetable th:last-child {border-right:0;}
+        .filetable td:last-child {border-right:0;}
+        .filetable tr:last-child td {border-bottom:0;}
+        .filetable tr:nth-child(odd) {background:#fff;}
+        .filetable tr:nth-child(even) {background:#eaedf4;}
+        .filetable_footer {clear:both; padding:5px 0;}
+        .filetable_footer select {width:50px; padding:3px 0;}
+        
+        
+
+        .selectTeam_list {border-left:1px solid #ccc; border-top:1px solid #ccc; width:100%; border-collapse:collapse;}     
+        .selectTeam_list thead {width:100%;}
+        .selectTeam_list th {background:#e7e7e7; border-right:1px solid #ccc; border-bottom:0px solid #ccc; padding:2px 5px 3px; font-size:12px; text-align:left;}
+        .selectTeam_list td {padding:0; border:0; font-size:12px;}      
+        /*.selectTeam_list td .teamCurrentList {padding:5px 8px; height:100px; overflow-y:scroll; text-align:left; line-height:18px;}*/ 
+        .selectTeam_list_footer {clear:both; padding:5px 0;}
+        
+        
+        #teams select {width:100%; padding:0px; border:1px solid #ccc; border-left:0;}
+        #teams select option {padding:3px 5px 3px; border-bottom:1px solid #ddd;}
+        #teams select option:hover {background:#eaedf4; cursor:pointer;}
+        
+        
+        
+        
+        .selectMemberTable_details {border:1px solid #ccc; width:100%; border-collapse:collapse; background:#e7e7e7;}
+        .selectMemberTable_details tbody {
+            display: block;
+           max-height: 38vh;
+            overflow-y: scroll;
+            overflow-x: hidden;
+        }
+        .selectMemberTable_details th {border-bottom:1px solid #ccc; border-right:1px solid #ccc; padding:2px 4px 3px; font-size:12px; text-align:center;}
+        .selectMemberTable_details td {border-bottom:1px solid #ccc; border-right:1px solid #ccc; padding:6px 4px; font-size:12px; text-align:left;}
+        .selectMemberTable_details th {background:#e7e7e7;}     
+        .selectMemberTable_details th:last-child {border-right:0;}
+        .selectMemberTable_details td:last-child {border-right:0;}
+        .selectMemberTable_details tr:last-child td {border-bottom:0;}
+        .selectMemberTable_details tr:nth-child(odd) {background:#fff;}
+        .selectMemberTable_details tr:nth-child(even) {background:#eaedf4;}
+        
+        .selectMember_footer {clear:both; padding:5px 0;}
+        
+        
+        .selectMemberTable_details th.selMember_tHeader_1 {width:5%;}
+        .selectMemberTable_details th.selMember_tHeader_2 {width:24%;}
+        .selectMemberTable_details th.selMember_tHeader_3 {width:15%;}
+        .selectMemberTable_details th.selMember_tHeader_4 {width:20%;}
+        .selectMemberTable_details th.selMember_tHeader_5 {width:24%;}
+        .selectMemberTable_details th.selMember_tHeader_6 {width:12%;}      
+        
+        .selectMemberTable_details td.selMember_tBody_1 {width:5%;}
+        .selectMemberTable_details td.selMember_tBody_2 {width:24%;}
+        .selectMemberTable_details td.selMember_tBody_3 {width:15%;}
+        .selectMemberTable_details td.selMember_tBody_4 {width:20%;}
+        .selectMemberTable_details td.selMember_tBody_5 {width:24%;}
+        .selectMemberTable_details td.selMember_tBody_6 {width:12%;}
+        
+        
+        
+        
+        
+        body input.btn {background:#f6f6f6; color:#000; padding:5px 10px; border-radius:5px; font-size:12px;}
+        body input.btnDisabled {background:#f6f6f6; color:#909090; padding:5px 5px; border-radius:5px; font-size:12px;}
+        
+        
+        
+        
+        
+        
+
+        td.chekboxstle,
+        th.chekboxstle {
+            width: 5%;
+            text-align: center;
+            padding: 0 !important;
+        }
+
+       
+        
+        
+        /* For tingle */
+        .tingle-demo{
+          display: none;
+        }
+        .tingle-btn {
+          background: #008cd1;
+        }
+
+
+.leftbutton{
+float:right;
+}
+
+.ascbut{
+padding:1px !important;
+border-radius:0 !important;
+font-family: monospace !important;
+
+}
+
+.incbuttons{
+align-items:center;
+display:flex;
+justify-content:space-between;
+}
+     .auto_asign_table_left{ float:left; width:80%;}
+   .auto_asign_table_right{ float:right; width:19%;}
+    .auto_asign_table_left .leftbutton, .auto_asign_table_right .leftbutton{ float:left;}
+   .ref_buto_size_custom .btn {
+    padding: 3px 5px;
+    font-size: 11px;
+    margin: 5px 4px 0;
+}
+
+.assignPageTitle {width:100%; margin:20px auto 0; text-align:center;}
+.assignPageTitle h1 {font-size:16px;}
+
+</style>
+
+
+<script>
+
+        var fileNum = 0;
+
+        var memNum = 0;
+
+        /* toggle files selectall */
+        function togglecheck(source) {
+
+            checkboxes = document.getElementsByClassName('checkfile');
+            for (var i = 0; i < checkboxes.length; i++) {
+
+                checkboxes[i].checked = source.checked;
+
+
+            }
+           
+            if (source.checked) {
+                fileNum = checkboxes.length;
+            } else {
+                fileNum = 0;
+            }
+
+
+            document.getElementById("selectedfiles").innerHTML = fileNum+" Files Selected";;
+        }
+
+        /* toogle member selectall  */
+
+        function togglecheckMem(source) {
+
+
+            checkboxes = document.getElementsByClassName('checkmem');
+            for (var i = 0; i < checkboxes.length; i++) {
+                checkboxes[i].checked = source.checked;
+            }
+            if (source.checked) {
+                memNum = checkboxes.length;
+            } else {
+                memNum = 0;
+            }
+
+            document.getElementById("selectedMem").innerHTML = memNum+" Members Selected";
+        }
+
+        /* get the checked files count */
+        function oncheck(source) {
+            if (source.className == "checkfile" && source.checked) {
+                fileNum = fileNum + 1;
+            } else if (source.className == "checkfile" && !source.checked) {
+            document.getElementById("j_id0:j_id5:fileselectall").checked = false;
+                fileNum = fileNum - 1;
+            }
+
+
+            document.getElementById("selectedfiles").innerHTML = fileNum +" Files Selected";
+
+        }
+
+        /* get the checked member count  */
+        
+        function oncheckMem(source) {
+            if (source.className == "checkmem" && source.checked) {
+                memNum = memNum + 1;
+               
+
+            } else if (source.className == "checkmem" && !source.checked) {
+                memNum = memNum - 1;
+                 document.getElementById("j_id0:j_id5:memselectall").checked = false;
+            }
+            document.getElementById("selectedMem").innerHTML = memNum+" Members Selected";
+
+            }
+
+            /* reset the member count */
+            
+        function resetMemCheck(source){
+            var memselectall = document.getElementById("j_id0:j_id5:memselectall");
+            memselectall.checked = false;
+          
+            memNum = 0;
+            document.getElementById("selectedMem").innerHTML = "";
+        }
+        
+        
+        
+        
+        
+        function res(getc) {
+            if(getc==1){ 
+                var timec=1000;
+            }else{ 
+                var timec=100;
+            }
+            setTimeout(function(){ 
+                $('.filetable tbody').css('height',($.w.outerHeight()-250)+'px');
+                $('.selectMemberTable_details tbody').css('height',($.w.outerHeight()-235)+'px');       
+            },timec);
+        }
+        
+        
+        function resetFileCheck(source){
+       
+           var resetselall = document.getElementById("j_id0:j_id5:fileselectall");
+            resetselall.checked = false;
+        document.getElementsByClassName('chekboxstle').innerHTML = "";
+            res(1);
+            fileNum = 0;
+            document.getElementById("selectedfiles").innerHTML ="";
+
+
+      
+            
+        }
+        
+        /* Modal Functionality for js notifictions  */
+        
+        
+        
+        
+       
+        function validate(){
+           
+
+            console.log(fileNum);
+            console.log(memNum);
+        
+          console.log('entered');
+          var modalButtonOnly = new tingle.modal({
+            closeMethods: [],
+            footer: true,
+            stickyFooter: true
+          });
+        
+          modalButtonOnly.addFooterBtn('Cancel', 'tingle-btn tingle-btn--primary tingle-btn--pull-right', function(){
+              modalButtonOnly.close();
+              
+          });
+
+          if(memNum<=fileNum){
+            var selctedmems = []; //fill this javascript array by processings.
+           var memcheckboxes = document.getElementsByClassName('checkmem');
+
+            for (var i = 0; i < memcheckboxes.length; i++) {
+                if (memcheckboxes[i].checked) {
+                    console.log(memcheckboxes[i].title);
+                    selctedmems.push(memcheckboxes[i].title);
+                }
+            }
+          
+            console.log(selctedmems);
+            afterValidate(selctedmems.toString());
+          }else{
+            modalButtonOnly.setContent('<p style="font-size:20px;background-color:orange;border:1px solid yellow;">Selected Members are more than selected files.</p>');
+            modalButtonOnly.open();
+          }
+       
+          
+        }
+
+        function finalMessage()
+        {
+        sanitize();
+           console.log('entered final message');
+             var fileMessage = document.getElementById("filehidden").value;
+             var formatedMessage = '<p style= "font-size:20px; background-color:aqua;">'+fileMessage+'</p>';
+             resetMemCheck();
+            resetFileCheck();
+        
+         
+         var modalButtonOnly = new tingle.modal({
+            closeMethods: [],
+            footer: true,
+            stickyFooter: true
+          });
+          modalButtonOnly.setContent(formatedMessage);
+            modalButtonOnly.open();
+
+        
+          modalButtonOnly.addFooterBtn('OK', 'tingle-btn tingle-btn--primary tingle-btn--pull-right', function(){
+              modalButtonOnly.close();
+
+
+        });
+        location.reload();
+        
+    }
+    
+    function sanitize(){
+    var imgs = document.getElementsByClassName("imagcls");
+
+    for(var i=0;i<imgs.length;i++){
+    var image = imgs[i].innerText;
+    console.log(image);
+    imgs[i].innerHTML = image;
+    }
+
+    }
+        
+        
+        
+    function myFunction(el) { 
+        var x = document.getElementsByClassName("thumbImg");        
+        if(el.innerHTML =="Hide"){  
+            el.innerHTML ="Show";           
+            for(i=0; i < x.length; i++) {
+                x[i].style.display = "none";
+            }
+          }else{ 
+            el.innerHTML ="Hide";
+            for(i=0; i < x.length; i++) {
+            x[i].style.display = "block";
+            }
+          }
+    }
+
+
+</script>
+
+<script type="text/javascript">
+$(document).ready(function () {
+var imgs = document.getElementsByClassName("imagcls");
+
+    for(var i=0;i<imgs.length;i++){
+    var image = imgs[i].innerText;
+    console.log(image);
+    imgs[i].innerHTML = image;
+    }
+
+
+    $(function(){
+        $.w = $(window);
+        $.w.on('resize', res);
+        res(0);
+    });
+
+});
+</script>
+
+
+     
+    <apex:form styleClass="tingle-content-wrapper" >
+            <!-- Tingle tiny content -->
+            <div class="tingle-demo modalContent">
+                <h1>Forcing the user to use the close button</h1>
+                <p>Aenean lacinia bibendum nulla sed consectetur. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.</p>
+            </div>
+            <!-- /Tingle tiny content -->
+        <apex:pageMessages />
+        
+       
+                                           
+        
+        
+        
+        
+        
+        
+        
+    <apex:outputpanel id="filemessage">
+     <input type="hidden"  id="filehidden" value="{!fileMessage}"/>
+      </apex:outputpanel>
+           
+       
+        <div class="main">
+            <div class="assignPageTitle"><h1>Assignment Page</h1></div>
+            <div class="tableContainer_Main">
+                <div class="tableContainer_Left">
+                <div class="cutom_top_podetailtable">
+                      <apex:outputpanel id="PODetailsRefresh">
+                <div class="tableContainer_Top">
+                    <table border="0" class="autoAssignTable_rec" cellspacing="0" cellpadding="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th width="20%">Production Order</th>
+                                <th width="15%">New Files</th>
+                                <th width="15%">TAT</th>
+                                <th width="50%">Order Instruction</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td width="20%"><apex:outputField value="{!pOrder.name}" /></td>
+                                <td width="15%">{!total_size}</td>
+                                <td width="15%"><apex:outputField value="{!pOrder.Production_Order_TAT__c}" /></td>
+                                <td width="50%">
+                                    <div class="orderInstruction">
+                                        <apex:outputField value="{!pOrder.Production_Order_Instruction__c}" />
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                </div>
+                </apex:outputpanel>
+                </div>
+                
+                    <div class="productDetailTable_sec">
+                        <apex:outputpanel id="filecontainer">
+                    
+                     <meta http-equiv="Content-Type" content="text/html; charset=iso-2022-jp"/>
+                            <table border="0" class="filetable" cellspacing="0" cellpadding="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th class="chekboxstle">
+                                            <apex:inputCheckbox value="{!selectAll}" id="fileselectall" onclick="togglecheck(this);" />
+                                        </th>
+                                        <th>FileName</th>
+                                        <!-- <th class="thumbIcon_column">Thumbnail</th> -->
+                                        <th class="thumbIcon_column">Thumbnail&nbsp;&nbsp;&nbsp;<a href="#" onclick="myFunction(this);">Hide</a></th>
+                                        <th>Job Title</th>
+                                        <th>File Instruction</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <apex:repeat value="{!Files}" var="f">
+                                        <tr>
+                                            <td class="chekboxstle">
+                                                <apex:inputCheckbox value="{!f.selected}" styleClass="checkfile" onclick="oncheck(this)" />
+                                            </td>
+                                            <td>{!f.file.Name}</td>
+                                            <td class="imagcls thumbImg">
+                                             <!--<apex:image url="{!f.file.File_Server_Host__c}/{!SUBSTITUTE(f.thumbNailUri,'#','%23')}"/>-->
+                                        
+                                            {!f.thumbNailUri}
+                                                <!--<apex:outputText value="{!f.file.Thumbnail_Display__c}" lang="ja" escape="false" styleClass="thumbImg" />-->
+                                                <!--<apex:outputText value="{!SUBSTITUTE(f.thumbNailUri,'#','%23')}"  escape="false" styleClass="thumbImg" />-->
+                                            </td>
+                                            <td>
+                                                <apex:outputText value="{!f.file.Job_List__c}" escape="false" />
+                                            </td>
+                                            <td>
+                                                <apex:outputText value="{!f.file.Instruction__c}" escape="false" />
+                                            </td>
+                                        </tr>
+                                    </apex:repeat>
+                                </tbody>
+                            </table>
+                        </apex:outputpanel>
+                        
+                        <apex:outputpanel id="buttons">
+                        <table border="0" class="filetable_footer" cellspacing="0" cellpadding="0" width="100%">
+                            <tr>
+                                <td width="10%" align="left" class="custom_option_boxheight">
+                                    
+                                <apex:selectList value="{!selectedSize}" size="1" multiselect="False" style="height:20vh;" >
+                                <apex:actionSupport event="onchange" action="{!RefreshingPageNumbers}" reRender="filecontainer,buttons" oncomplete="sanitize();" status="pagesize"/>
+                                <apex:actionStatus id="pagesize" startText="" stopText="" startStyleClass="statusStyle" />
+                                                <apex:selectOptions value="{!perPageLimitOptions}" />
+                                </apex:selectList>  
+                        
+                            
+                                    
+                                </td>
+                                <td width="22%" align="left"><div id="selectedfiles"></div></td>
+                                <td width="33%" align="center">
+                                    <apex:commandButton action="{!prevPage}" id="prevbutton" value="<< Prev" reRender="filecontainer,buttons" status="filestatus" disabled="{!DisabledPrevious}" onclick="resetFileCheck(this);" oncomplete="sanitize();"/>                                   
+                                    <apex:commandButton action="{!nextPage}" id="nextbutton" value=">> Next" reRender="filecontainer,buttons" status="filestatus" disabled="{!DisabledNext}" onclick="resetFileCheck(this);" oncomplete="sanitize();"/>
+                                </td>
+                                <td width="35%" align="right">
+                                        <apex:outputpanel id="pagesized">
+                                    Showing {!currentPageStart} to {!currentPageEnd} of {!total_size} Files
+                                   </apex:outputpanel>
+                                    <apex:actionStatus id="filestatus" startText="" stopText="" startStyleClass="statusStyle" />
+                                </td>
+                            </tr>
+                        </table>
+                        </apex:outputpanel>
+                    </div>
+                </div>
+                
+
+
+
+      
+
+
+               
+                <div class="tableContainer_Right">
+<div class="selectTeam_sec" id="teams">
+                    <div class="auto_asign_table_left">
+                    <div class="select_item_sec custom_option_boxheight">
+                     <h3> Select Shift </h3> <apex:selectList value="{!selectedShiftId}" size="1" multiselect="False" style="height:20vh;">
+                           
+                                                <apex:selectOptions value="{!shiftOptions}" />
+                    </apex:selectList>
+                    <apex:actionStatus id="shiftstatus" startText="Loading members....." stopText="" startStyleClass="statusStyle" />
+                     </div>
+                     </div>
+                     <div class="auto_asign_table_right">
+                 <div class="leftbutton">                    
+                         <apex:commandButton value="submit" action="{!ShiftAssign}"  reRender="mempanel,TeamContainer" status="memberStatus" onclick="resetMemCheck(this);" styleClass="getMemberIcon"/>
+                 </div>
+                        </div>                    
+       
+             
+   
+       
+                     <apex:outputpanel id="TeamContainer">
+                      <div class="auto_asign_table_left">
+                        <table border="0" class="selectTeam_list" cellspacing="0" cellpadding="0" width="100%">
+                            <thead>
+                                <tr>
+                                    <th><apex:outputLabel >Select Teams in Current Shift </apex:outputLabel></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="teamCurrentList">
+                                            <apex:selectList value="{!selectedTeamId}" size="1" multiselect="true" style="height:20vh;">
+                                                <apex:selectOptions value="{!ListOfTeams}" />
+                                            </apex:selectList>
+                                            <apex:actionStatus id="teamStatus" startText="Loading Members....." stopText="" startStyleClass="statusStyle" />
+                                        </div>
+                                    </td>
+                                        
+                                    
+                                </tr>
+                            </tbody>
+                            
+                        </table>
+                        </div>
+                        </apex:outputpanel>
+                 <div class="auto_asign_table_right">       
+        <div class="leftbutton">  
+            <apex:commandButton id="memact" value="Get Members"  action="{!ListofMembers}"  reRender="mempanel" status="memberStatus" onclick="resetMemCheck(this);" styleClass="getMemberIcon" />
+                        
+        </div></div>
+                 
+                    </div>
+                    
+    
+       
+                
+                
+                    <div class="selectMemberTable_sec" id="memcontainer">
+                    
+                        <table border="0" class="selectMember_footer title" cellspacing="0" cellpadding="0" width="100%">
+                            <tr>
+                                <td width="30%"><h1><apex:outputLabel >Select Members </apex:outputLabel></h1></td>
+                                 <td width="50%" class="ref_buto_size_custom">
+                                    <apex:outputpanel id="RefreshButtons">
+        <apex:commandButton value="{!IF(TLInclude==true,'Exclude TL','Include TL' )}" action="{!TLInclude}" reRender="mempanel,RefreshButtons" status="memberStatus" />
+          <apex:commandButton value="{!IF(QCInclude==true,'Exclude QC','Include QC' )}" action="{!QCInclude}" reRender="mempanel,RefreshButtons" status="memberStatus" />
+      </apex:outputpanel>
+                                </td>
+                                <td width="20%"><apex:actionStatus id="memberStatus" startText="Loading Members..." stopText="" startStyleClass="statusStyle" /></td>
+                               
+                            </tr>
+                        </table>
+                        
+                        <apex:outputpanel id="mempanel">
+                            <table border="0" class="selectMemberTable_details" cellspacing="0" cellpadding="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th class="chekboxstle selMember_tHeader_1" >
+                                            <apex:inputCheckbox value="{!selectAll}" id="memselectall" selected="false" onclick="togglecheckMem(this)" />
+                                        </th>
+                                        <th class="selMember_tHeader_2">Member Name</th>
+                                        <th class="selMember_tHeader_3">
+                                        <span class="incbuttonsRRR">
+                                        <apex:commandButton styleClass="ascbut" value="↑" action="{!AscendingRating}" reRender="mempanel"/>
+                                         <span>Rating</span>
+                                        <apex:commandButton styleClass="ascbut" value="↓" action="{!DescendingRating}" reRender="mempanel"/>
+                                        </span>
+                                        </th>                   
+                                        
+                                        <th class="selMember_tHeader_4">Designation</th>
+                                        <th class="selMember_tHeader_5">
+                                            <span class="incbuttonsRRR">
+                                                <apex:commandButton styleClass="ascbut" value="↑" action="{!Ascending}" reRender="mempanel"/>
+                                                <span>Assigned Load</span>
+                                                <apex:commandButton styleClass="ascbut" value="↓" action="{!Descending}" reRender="mempanel"/>
+                                            </span>
+                                        </th>
+                                        <th class="selMember_tHeader_6">WIP Load</th>
+                                        
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <apex:repeat value="{!Members}" var="m">
+                                        <tr>
+                                            <td class="chekboxstle selMember_tBody_1">
+                                                <apex:inputCheckbox value="{!m.selected}" title="{!m.memid}"  styleClass="checkmem" onclick="oncheckMem(this)" />
+                                                <apex:inputHidden value="{!m.memid}"/>
+
+                                            </td>
+                                            <td class="selMember_tBody_2">{!m.Name}</td>
+                                            <td class="selMember_tBody_3">{!m.rating}</td>
+                                            <td class="selMember_tBody_4">{!m.Designation}</td>
+                                            <td class="selMember_tBody_5">{!m.AssignedStatusCount }</td>
+                                            <td class="selMember_tBody_6">{!m.WIPStatusCount}</td>
+                                            
+                                            
+                                        </tr>
+                                    </apex:repeat>
+                                </tbody>
+                            </table>
+                        </apex:outputpanel>
+                        
+                        <table border="0" class="selectMember_footer" cellspacing="0" cellpadding="0" width="100%">
+                            <tr>
+                            <td>
+                             <apex:selectList value="{!selectedMemSize}" size="1" multiselect="False" >
+                                <apex:actionSupport event="onchange" action="{!ListofMembers}" onsubmit="resetMemCheck(this);" reRender="mempanel" status="memPagesize"/>
+                                <apex:actionStatus id="memPagesize" startText="" stopText="" startStyleClass="statusStyle" />
+                                                <apex:selectOptions value="{!perMemPgLmt}" />
+                                </apex:selectList>  
+                            </td>
+                                <td width="40%" align="left">
+                                    <apex:commandButton id="getmem" value="Assign Files" onclick="validate();return false;" />
+                                    
+                                    
+
+                                    <apex:actionFunction name="afterValidate" action="{!processSelectedFiles}" oncomplete="finalMessage()"  reRender="filemessage,mempanel,filecontainer,PODetailsRefresh,pagesized"  status="memberStatus">
+                                            <apex:param name="sendmems" assignTo="{!selctedmems}" value="" />
+                                    </apex:actionFunction>
+                               
+                            </td>
+                                <td width="40%" align="right"><div id="selectedMem"></div></td>
+                            
+                            </tr>
+      
+      
+      
+                        </table>
+                        
+                       
+                        
+                    </div>
+                </div>
+                
+            </div>
+        
+                
+        </div>
+        
+    </apex:form>
+
+
+</apex:page>

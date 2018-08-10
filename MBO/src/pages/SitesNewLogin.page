@@ -1,0 +1,4 @@
+<apex:page controller="SitesLoginController" action="{!login}" cache="false" sidebar="false" showHeader="false" standardStylesheets="false">
+<!-- Begin Default Content REMOVE THIS -->
+<!-- End Default Content REMOVE THIS -->
+</apex:page>

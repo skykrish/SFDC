@@ -1,0 +1,109 @@
+<apex:page title="見積書一括送付（ステータス変更無し）" standardController="Anken__c" extensions="SendMitsumorisyoStatusNoChangeController" recordSetVar="records" action="{!initCheckAll}">
+
+    <!-- 共通スクリプト -->
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>
+
+    <apex:sectionHeader title="見積書一括送付" />
+    <apex:pageMessages id="messagearea" showDetail="false" />
+
+    <apex:form >
+        <!-- 初期表示チェックOK時 -->
+        <apex:pageBlock title="対象案件一覧">
+            <!-- ボタンエリア -->
+            <apex:pageBlockButtons location="both">
+                <!-- 初期表示チェックOK時 -->
+                <apex:commandButton value="見積書送付" action="{!sendPdf}" rendered="{!isInitCheck}"/>
+                <apex:commandButton value="キャンセル" action="{!cancel}" immediate="true" rendered="{!isInitCheck}"/>
+                <!-- 初期表示チェックNG時 -->
+                <apex:commandButton value="戻る" action="{!cancel}" immediate="true" rendered="{!(!isInitCheck)}"/>
+            </apex:pageBlockButtons>
+
+            <!-- 詳細エリア -->
+            <apex:pageBlockTable var="item" value="{!records}">
+
+                <!-- 伝票番号 -->
+                <apex:column style="width:110px">
+                    <apex:facet name="header">
+                        <apex:outputText value="{!$ObjectType.Anken__c.fields.Name.label}"/>
+                    </apex:facet>
+                    <apex:outputLink value="{!URLFOR($Action.Anken__c.View, item.Id)}">{!item.Name}</apex:outputLink>
+               </apex:column>
+
+                <!-- 案件名 -->
+                <apex:column style="width:210px">
+                    <apex:facet name="header">
+                        <apex:outputText value="{!$ObjectType.Anken__c.fields.AnkenName__c.label}"/>
+                    </apex:facet>
+                    <apex:outputfield style="width:200px" value="{!item.AnkenName__c}"/> 
+                </apex:column>
+
+                <!-- 顧客名 -->
+                <apex:column style="width:110px">
+                    <apex:facet name="header">
+                        <apex:outputText value="{!$ObjectType.Account.fields.Name.label}"/>
+                    </apex:facet>
+                    <apex:outputfield style="width:100px" value="{!item.KokyakuName__c}"/> 
+                </apex:column>
+
+                <!-- ステータス -->
+                <apex:column style="width:110px">
+                    <apex:facet name="header">
+                        <apex:outputText value="{!$ObjectType.Anken__c.fields.Status__c.label}"/>
+                    </apex:facet>
+                    <apex:outputfield style="width:100px" value="{!item.Status__c}"/> 
+                </apex:column>
+
+                <!-- 受注日時 -->
+                <apex:column style="width:110px">
+                    <apex:facet name="header">
+                        <apex:outputText value="{!$ObjectType.Anken__c.fields.JuchuDateTime__c.label}"/>
+                    </apex:facet>
+                    <apex:outputfield style="width:100px" value="{!item.JuchuDateTime__c}"/> 
+                </apex:column>
+
+                <!-- 納期 -->
+                <apex:column style="width:110px">
+                    <apex:facet name="header">
+                        <apex:outputText value="{!$ObjectType.Anken__c.fields.Nouki_Date__c.label}"/>
+                    </apex:facet>
+                    <apex:outputfield style="width:100px" value="{!item.Nouki_Date__c}"/> 
+                </apex:column>
+
+                <!-- 納品日時 -->
+                <apex:column style="width:110px">
+                    <apex:facet name="header">
+                        <apex:outputText value="{!$ObjectType.Anken__c.fields.NohinDateTime__c.label}"/>
+                    </apex:facet>
+                    <apex:outputfield style="width:100px" value="{!item.NohinDateTime__c}"/> 
+                </apex:column>
+
+                <!-- 見積もり合計金額（税込み） -->
+                <apex:column style="width:110px">
+                    <apex:facet name="header">
+                        <apex:outputText value="{!$ObjectType.Anken__c.fields.MitsumoriTotalKingaku_Tax__c.label}"/>
+                    </apex:facet>
+                    <apex:outputfield style="width:100px" value="{!item.MitsumoriTotalKingaku_Tax__c}"/> 
+                </apex:column>
+
+                <!-- 合計金額（税込み） -->
+                <apex:column style="width:110px">
+                    <apex:facet name="header">
+                        <apex:outputText value="{!$ObjectType.Anken__c.fields.JuchuTotalKingaku_Tax__c.label}"/>
+                    </apex:facet>
+                    <apex:outputfield style="width:100px" value="{!item.JuchuTotalKingaku_Tax__c}"/> 
+                </apex:column>
+
+                <!-- 見積もり担当者 -->
+                <apex:column style="width:110px">
+                    <apex:facet name="header">
+                        <apex:outputText value="{!$ObjectType.Anken__c.fields.MitsumoriTantosya__c.label}"/>
+                    </apex:facet>
+                    <apex:outputfield style="width:100px" value="{!item.MitsumoriTantosya__c}"/> 
+                </apex:column>
+
+            </apex:pageBlockTable>
+        </apex:pageBlock>
+
+    </apex:form>
+
+</apex:page>

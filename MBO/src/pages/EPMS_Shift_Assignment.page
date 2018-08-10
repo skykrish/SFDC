@@ -1,0 +1,494 @@
+<apex:page Controller="EPMS_Shift_Assignment_Controller"  docType="html-5.0" sidebar="false"  showHeader="false" tabStyle="Team__c">
+<html>
+<head>
+
+<apex:includeScript value="{!URLFOR($Resource.attendance,'jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.attendance,'jquery-ui.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.attendance,'gridviewScroll.js')}"/> 
+    <script src="/soap/ajax/35.0/connection.js"></script>
+
+    
+    <script>
+      sforce.connection.sessionId = '{!$Api.Session_ID}';
+       var describeSObjectResult = sforce.connection.describeSObject("Shift_Assignments__c");
+       var prefix = describeSObjectResult.keyPrefix; 
+    
+        function ClosePopup(){
+     
+       var url = location.href;
+       var basepath = '{!basepath}';
+       
+        var baseURL = url.substring(0, url.indexOf('/', 14));      
+        if(basepath == 'assign'){
+            window.opener.location.href="/" + prefix;
+        }
+        else
+        {
+            window.parent.location.href="/" + prefix + "/o";
+            return true;
+
+        }        
+        if(baseURL)
+        {
+            window.top.close(); 
+            refreshParentPage();
+        }
+        
+    }
+    
+    function refreshParentPage() 
+    {
+        alert(window.opener.location.href)
+        var redirectURL = window.opener.location.href;
+        if(redirectURL)
+        {
+            window.opener.location.href = window.opener.location.href;
+            if (window.opener.progressWindow) 
+            {
+                window.opener.progressWindow.close();
+            }
+            window.close();
+        }
+    }
+        
+        jQuery.noConflict();
+
+        function clearSelectBoxLocation(shift,team,type,panel,fromtime,totime,elementshift,selectShiftAdminTeam){
+            jQuery(document).ready(function() {    
+             
+            
+             if(document.getElementById(shift)){
+             document.getElementById(shift).selectedIndex = 0 ;
+             }
+             if(document.getElementById(team)){
+             document.getElementById(team).selectedIndex = 0 ;
+             }
+             if(document.getElementById(type)){
+             document.getElementById(type).selectedIndex = 0 ;
+             }
+             
+             if(document.getElementById(elementshift)){
+             document.getElementById(elementshift).selectedIndex = 0 ;
+             }
+             
+             if(document.getElementById(selectShiftAdminTeam)){
+             document.getElementById(selectShiftAdminTeam).selectedIndex = 0 ;
+             }
+             if(document.getElementById(fromtime)){
+             document.getElementById(fromtime).value= "" ;
+             }
+             
+             if(document.getElementById(totime)){
+             document.getElementById(totime).value= "" ;
+             }
+             
+             if(document.getElementById(panel)){
+             document.getElementById(panel).style.display="none";
+             }
+             
+         }); 
+        }
+       
+    </script>
+    
+<style>
+
+div.common_grid {
+  position: relative;
+  border:1px solid #e0e3e5;
+  padding-top:20px;
+  background: #f2f3f3;
+  min-width: 628px;
+  width:99%;
+  margin:0 auto;
+}
+div.positioned {
+  position: absolute;
+  top:100px;
+  left:100px;
+  width:500px;
+  box-shadow: 0 0 15px #333;
+}
+.container {
+  overflow-y: auto;
+   overflow-x:hidden;
+  height: 90px;
+}
+table {
+  border-spacing: 0;
+  width:100%;
+}
+table.fixedtbl
+{
+border-top: 2px solid #e0e3e5;
+}
+table.fixedtbl td + td {
+  border-left:1px solid #e0e3e5;
+  word-wrap: break-word;
+}
+table.fixedtbl td, th {
+  border-bottom:1px solid #e0e3e5;
+  background: #fff;
+  color: #000;
+  padding: 3px 10px;
+}
+th {
+  height: 0;
+  line-height: 7px;
+  padding-top: 0;
+  padding-bottom: 0;
+  color: transparent;
+  border: none;
+  white-space: nowrap;
+}
+th div{
+position:absolute;
+  background: transparent;
+  color: #000;
+  padding: 9px 10px;
+  top: 0;
+  margin-left: -10px;
+  line-height: normal;
+  border-left: 1px solid #e0e3e5;
+}
+table.detailList td {
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+}
+table.fixedtbl td {
+    padding: 5px 5px !important;
+}
+th:first-child div{
+  border: none;
+}
+.headcls {
+    line-height:11px;
+}
+.headcls-min {
+    padding-top: 5px;
+}
+.tablescroll
+{
+    width:100%;
+    /*overflow-X: auto;*/
+}
+.checkboxCls{ width:30px; }
+.membernameCls{width:100px;}
+.memberidCls{width:70px}
+.memberdesignationCls{width:130px}
+.userCls{width:130px}
+.firstnameCls {width:90px}
+.secondnameCls{width:90px}
+</style>
+    
+    <style>
+    .vtext{
+        -ms-transform: rotate(-90deg);
+        -moz-transform: rotate(-90deg);  /* FF3.5+ */
+        -o-transform: rotate(-90deg);  /* Opera 10.5 */
+        -webkit-transform: rotate(-90deg);  /* Saf3.1+, Chrome */
+        filter:  progid:DXImageTransform.Microsoft.BasicImage(rotation=3);  /* IE6,IE7 */
+        -ms-filter: "progid:DXImageTransform.Microsoft.BasicImage(rotation=3)"; /* IE8 */            
+    } 
+    .GridviewScrollHeader{
+        background: #f2f3f3;
+        border-width: 0 0 1px 1px;
+        border-color: #e0e3e5;
+        color: #000;
+        font-size: .9em;
+        font-weight: bold;
+        padding: 4px 2px 4px 5px;
+    }
+    .GridviewScrollItem{
+        vertical-align: middle;
+        text-align: center;
+    }    
+    body .pbBody table.list tr th, body .pbBody table.list tr td
+    {
+        border-right: 1px solid #ededed;
+        border-left:0;
+    }
+    body .pbBody table.list tr.dataRow th, body .pbBody table.list tr.dataRow td
+    
+    {
+       border-right: 1px solid #ededed;
+    }      
+    .bPageBlock .list
+    {
+        width:auto;
+    }
+    .GridName {
+        text-align: left;
+    }
+    </style>
+
+<apex:includeScript value="{!$Resource.JQuery}"/>
+
+<style>
+input[type='checkbox']:checked {
+    background: blue;
+}
+.lookupTab div.srch {
+    padding: 4px 3px;
+    font-family: "Arial", "Helvetica", sans-serif;
+    font-weight: bold;
+    font-size: 118%;
+}
+
+
+.pbHeader td.pbTitle {width:43%}
+.pbBottomButtons td.pbTitle {width:43%}
+
+.shiftAssignmentSec {width:650px; margin:0; padding:10px 0px 0; overflow:hidden;}
+.shiftAssignmentSec .rowSec {width:100%; font-size:12px; color:#4a4a56; padding:0 0 10px; overflow:hidden;}
+.rowSec .leftSec {width:35%; float:left; text-align:left;}
+.rowSec .rightSec {width:63%; float:right;}
+.rowSec .leftSecShiftTeam {width:35%; float:left; text-align:left;}
+.rowSec .rightSecShiftTeam {width:63%; float:right;}
+.rowSec .leftSecSelType {width:35%; float:left; text-align:left;}
+.rowSec .rightSecSelType {width:63%; float:right;}
+.rowSec .rightSec select, .rowSec .rightSecShiftTeam select, .rowSec .rightSecSelType select {width:380px; float:right;}
+
+.paddingTop10 {padding-top:10px !important;}
+.paddingBotton10 {padding-bottom:10px !important;}
+.paddingBotton-none {padding-bottom:0 !important;}
+
+.rightSecInnerDiv {width:380px; float:right;}
+.FromToInnerDiv {width:380px; float:right;}
+.FromToInnerDiv span.dateInput {float:left;}
+
+.GridviewScrollHeader
+{
+background: #f2f3f3;
+    border-width: 0 0 1px 1px;
+    border-color: #e0e3e5;
+    color: #000;
+    font-size: .9em;
+    font-weight: bold;
+   padding: 4px 2px 4px 5px;
+}
+.pbBody, .pbBody a, .pbBody td, .lbBody a, .lbBodyDescription, .list .headerRow .noRowsHeader {
+    color: #000;
+    
+}
+.pbBody table.list tr.dataRow td:first-child {
+    border-left-width: 0;
+    
+}
+table.list tr.dataRow td {
+    border-width: 0 0 1px 0;
+    vertical-align: middle;
+    text-align: left;
+    
+    
+    
+}
+.GridviewScrollHeader td {
+border-right:0px solid #ededed;
+}
+.list-custom {
+    margin: 0px;
+    float: left;
+    border: 1px solid #ededed;
+}
+.vtext {
+   -moz-transform: rotate(-90deg);  /* FF3.5+ */
+   -o-transform: rotate(-90deg);  /* Opera 10.5 */
+   -webkit-transform: rotate(-90deg);  /* Saf3.1+, Chrome */
+   filter:  progid:DXImageTransform.Microsoft.BasicImage(rotation=3);  /* IE6,IE7 */
+   -ms-filter: "progid:DXImageTransform.Microsoft.BasicImage(rotation=3)"; /* IE8 */
+    text-align:center;
+   padding: 35px 0px;
+   width:20px;
+   height:10px;
+   
+} 
+
+
+/****** Team Assignment 22-12-2015 *********/
+.clear
+{
+    clear:both;
+    margin:10px
+}
+.formWrpper
+{
+    width: 800px;
+
+}
+.innerwrapper
+{
+    padding:5px;
+}
+.innerwrapper .lbl
+{
+    display: inline-block;
+    width: 280px;
+}
+.combolist
+{
+    min-width: 44%;
+}
+.listViewer{
+    border: 1px solid #ececec;
+    padding: 5px;
+    margin-top: 10px;
+    width: 638px;
+    border-radius:3px;
+}
+.list_Assignment, .multilist
+{
+    height:300px;
+    width:100%;
+}
+.displayblock
+{
+    margin-bottom: 10px;
+    display: block;
+}
+td.selectCell
+{
+width:45%;
+}
+ 
+</style>
+
+ 
+</head> 
+<body>
+
+<apex:form id="form">
+<apex:outputPanel id="myHiddenField" />               
+<apex:pageblock >
+
+<apex:pageblockbuttons >
+  
+  <apex:commandbutton value="Save" action="{!Save}" />
+  <apex:commandbutton value="Close"  onclick="ClosePopup();return false;"/>
+</apex:pageblockbuttons>
+
+
+<div class="shiftAssignmentSec">
+<table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="pbTitle">&nbsp;<h3>Shift Assignments</h3></td></tr></tbody></table>
+   <div class="paddingBotton10"> 
+   <apex:outputPanel id="thePageBlock">
+      <apex:pageMessages />
+    </apex:outputPanel>
+    </div>
+    
+    <div class="rowSec">
+        <div class="leftSec">
+            <apex:outputlabel value="Location"  />
+        </div>
+        <div class="rightSec">
+            <div class="rightSecInnerDiv">
+            <apex:outputPanel id="locationid">
+                <apex:outputPanel >
+                <apex:selectList value="{!selectvalue}" size="1" id="elementLocation" >
+                  <apex:selectoptions value="{!location}" />
+                  <apex:actionSupport event="onchange" action="{!ShowPanel}" rerender="chooseTeamsToAssignment2,chooseAssignment2,shiftAdminid,showShift,shifts,showAssignmentPanel,thePageBlock,team,shiftOnlyMember,showMemberAssignmentDetails" onsubmit="clearSelectBoxLocation('{!$Component.shifts}','{!$Component.team}','{!$Component.type}','{!$Component.showAssignmentPanel}','{!$Component.fromtime}','{!$Component.totime}','{!$Component.elementshift}','{!$Component.selectShiftAdminTeam}');"/>
+                </apex:selectList>          
+                </apex:outputPanel>
+            </apex:outputPanel>
+            </div>
+        </div>
+    </div>
+    <div class="rowSec paddingBotton-none">
+        <apex:outputPanel >
+            <div class="leftSecShiftTeam">
+                <apex:outputlabel value="Available Shift"  />
+            </div>  
+            <div class="rightSecShiftTeam paddingBotton10">
+              <div class="rightSecInnerDiv">
+              <apex:selectList value="{!CurrentShifts}" size="1" id="team" >
+                <apex:selectoptions value="{!Shifts}" />
+                <apex:actionSupport event="onchange" action="{!getallContacts}" reRender="chooseTeamsToAssignment2,chooseAssignment2,selectTeam,shiftAdminid,showMemberAssignmentDetails" />
+              </apex:selectList>
+              </div>
+            </div>
+        </apex:outputPanel>
+    </div>
+
+    <div class="rowSec">
+        <div class="leftSec">
+            <apex:outputlabel value="Shift Administrator"/>
+        </div>
+        <div class="rightSec">
+            <div class="rightSecInnerDiv">
+            <apex:outputPanel id="shiftAdminid">
+                <apex:outputPanel > 
+                <apex:selectList value="{!shiftAdministrator}" size="1" id="elementshift" >
+                  <apex:selectoptions value="{!allShiftAdministrators}" />
+                  <apex:actionSupport event="onchange" action="{!ShowPanel}" reRender="chooseTeamsToAssignment2,chooseAssignment2,shiftTeamId,shiftAdminid" /> 
+                </apex:selectList>          
+                </apex:outputPanel>
+            </apex:outputPanel>
+            </div>
+        </div>
+    </div>
+    
+        <apex:outputPanel id="showMemberAssignmentDetails">
+                 
+                  
+                     <apex:outputPanel rendered="{!(selectvalue !=NULL &&  CurrentShifts != NULL && MemberNotInTeamHaveAssignments.size > 0 )}" >
+                     <table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="pbTitle">&nbsp;<h3>Member Assigned for the Shift ( {!selectShiftNameForDisplay} ) only</h3></td></tr></tbody></table>                         
+                     <div class="tablescroll"> 
+                        <div class="common_grid">
+                            <div class="container">
+                           
+                                 <table class="fixedtbl">
+                                    <thead>
+                                         <tr class="header ">
+                                            <th>Member Name<div class="headcls"> Member Name</div></th>
+                                            <th>Employee ID <div class="headcls">Employee ID</div></th>
+                                            <th>Designation<div class="headcls">Designation</div></th>
+                                            <th>User  <div class="headcls">User</div>  </th>
+                                         </tr>
+                                    </thead>
+                                    <tbody>
+                                        <apex:repeat value="{!MemberNotInTeamHaveAssignments}" var="member" >
+                                            <tr class=" dataRow even first">
+                                                <td>{!member.Name}</td>
+                                                <td>{!member.Emp_ID__c}</td>
+                                                <td>{!member.Designation__c}</td>
+                                                <td>{!member.User_Id__r.Name}</td>
+                                            </tr>    
+                                        </apex:repeat>
+                                    </tbody>
+                                 </table>
+
+                             </div>
+                        </div>
+                    </div>   
+
+            </apex:outputPanel>                
+        </apex:outputPanel>
+    <!--</div> -->
+    
+    <div class="listViewer" id="clearOptionValues">
+        <apex:outputPanel id="chooseAssignment2">
+            <apex:selectList value="{!assignType}" size="1" id="type2">
+              <apex:selectoptions value="{!AssignmentType}" />
+              <apex:actionSupport event="onchange" action="{!getallContacts}" reRender="chooseTeamsToAssignment2"/>
+            </apex:selectList>
+        </apex:outputPanel> 
+     
+        <apex:outputPanel id="chooseTeamsToAssignment2">   
+            <c:MultiselectPicklist id="multipicklistValues" leftLabel="Available Teams" 
+                    leftOption="{!allContacts}"  
+                    rightLabel="Selected Team"
+                    rightOption="{!selectedContacts}"
+                    size="14"
+                    width="100%">
+            </c:MultiselectPicklist>    
+        </apex:outputPanel> 
+    </div>
+
+</div>     
+
+</apex:pageblock>
+</apex:form>
+</body>
+</html>
+
+</apex:page>

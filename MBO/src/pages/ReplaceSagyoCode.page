@@ -1,0 +1,29 @@
+<apex:page controller="ReplaceSagyoCodeController" action="{!init}" tabStyle="Sagyo__c" >
+    <!-- 共通スクリプト -->
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>
+    
+    <script type="text/javascript">
+        function replaceConfirm(){
+            if(confirm('作業コードの置換を行います。よろしいですか？')){
+                 return true;
+            }
+            return false;
+        }
+    </script>
+    
+    <apex:sectionHeader title="作業コードの置換" />
+        <apex:form id="form">
+            <apex:pageMessages id="messageArea" showDetail="false" />
+            <apex:pageBlock title="作業コードの置換">
+            <div>
+                作業コード（FROM）<apex:inputText value="{!sagyoCodeFrom}" styleClass="textbox4" style="width:75px;"/>
+                <span style="font-size: 14px;">～</span>
+                作業コード（TO）<apex:inputText value="{!sagyoCodeTo}" styleClass="textbox4" style="width:75px;"/><br/>※作業コードを1件ずつ置換したい場合、作業コード（FROM）と（TO）に同じ値を入力してください。<br/><br/>
+                
+                ターゲット作業コード<apex:inputText value="{!sagyoCodetarget}" styleClass="textbox4" style="width:75px;"/><br/><br/>
+                
+                <apex:commandButton styleClass="button2" value="置換" action="{!replaceSagyoCode}" onclick="return replaceConfirm();"/>
+            </div>
+            </apex:pageBlock>
+        </apex:form>
+</apex:page>

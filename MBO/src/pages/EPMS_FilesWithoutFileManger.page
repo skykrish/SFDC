@@ -1,0 +1,92 @@
+<apex:page controller="EPMS_FilesWithoutFileManger" sidebar="false" showHeader="false">
+<apex:includeScript value="{!URLFOR($Resource.attendance,'jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.attendance,'jquery-ui.min.js')}"/>
+<style>
+#table-wrapper {
+  position:relative;
+overflow-x: scroll;
+}
+#table-scroll {
+  height:520px;
+  overflow:auto;  
+  margin-top:20px;
+}
+#table-wrapper table {
+  width:100%;
+
+}
+
+}
+#table-wrapper table thead th .text {
+  position:absolute;   
+  top:-20px;
+  z-index:2;
+  height:20px;
+  width:35%;
+  border:1px solid red;
+}
+#table1
+{
+width:520px;
+min-height:210px;
+padding:10px;
+}
+.OrderListEdit
+{
+border-bottom:1px solid #efefef;
+    height: auto;
+    overflow: hidden;
+    padding: 5px;
+}
+.ordercontorl
+{
+width:100%;
+clear: both;
+    height: auto;
+    padding: 5px;
+}
+.ordercontorl label
+{
+display:block;
+padding:3px 0px;
+width:47%;
+float:left;
+border-right: 3px solid #fff;
+}
+.ordercontorl label.manit
+{
+border-right: 3px solid #CC0000;
+}
+
+.ordercontorl input, .ordercontorl textarea
+{
+width:48%;
+float:left;
+}
+</style>
+
+<apex:form id="formids" >
+<body style="zoom: 1;width: 624px;height: 267px;" >
+<div >
+
+
+
+<apex:pagemessages />
+<div></div>
+<div></div>
+<div></div>
+<div>
+<table><tr><td><b>Please Upload a CSV File And Click on Import Files To Downlaod Production Order</b></td></tr> </table>
+</div>
+<div>
+ <apex:pageBlock >
+            <apex:pageBlockSection columns="4"> 
+                  <apex:inputFile value="{!csvFileBody}"  filename="{!csvAsString}"/>
+                  <apex:commandButton value="Import Files" action="{!importCSVFile}"/>
+            </apex:pageBlockSection>
+  </apex:pageBlock> 
+</div>
+</div>
+</body>
+  </apex:form>
+</apex:page>

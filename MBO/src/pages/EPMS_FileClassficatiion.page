@@ -1,0 +1,20 @@
+<apex:Page tabStyle="File_Classification__c" >
+<script src="/soap/ajax/35.0/connection.js"></script>
+<script type="text/javascript" />
+<script>
+     window.onload = function() {
+
+     sforce.connection.sessionId = '{!$Api.Session_ID}';
+
+     var describeSObjectResult = sforce.connection.describeSObject("File_Classification__c");
+     var prefix = describeSObjectResult.keyPrefix;
+
+     // Determine the View
+     var cView='00Bp0000000LSWh';
+     
+
+     // Change the whole window to point to this location
+     parent.document.location.href = "/" + prefix + "?fcf=" + cView ;
+}
+</script>
+</apex:page>

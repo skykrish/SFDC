@@ -1,0 +1,164 @@
+<apex:page Controller="EPMS_AssignJobTitle" sidebar="false" showHeader="false" standardStylesheets="true">
+    <apex:stylesheet value="{!URLFOR($Resource.View_Directory,'css/jquery.treeview.css')}" />
+    
+    <apex:stylesheet value="{!URLFOR($Resource.View_Directory,'css/custom.css')}" />
+    
+    <apex:includeScript value="{!URLFOR($Resource.View_Directory,'js/jquery.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.View_Directory,'js/jquery.treeview.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.View_Directory,'js/jquery-checktree.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.View_Directory,'js/custom.js')}" />
+    
+    <apex:includeScript value="{!URLFOR($Resource.csspopup,'add-style.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.csspopup,'css-pop.js')}" />
+    
+    <apex:includeScript value="{!URLFOR($Resource.attendance,'jquery-ui.min.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.attendance,'gridviewScroll.js')}" />
+    
+    <apex:stylesheet value="{!URLFOR($Resource.Classification,'css/defaultTheme.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.Classification,'css/myTheme.css')}" />
+    
+    <apex:includescript value="{!URLFOR($Resource.Classification,'js/jquery.fixedheadertable.js')}" />
+    <apex:includescript value="{!URLFOR($Resource.Classification,'js/custom-table.js')}" />
+    
+    
+    <style>
+        p {
+        font-weight: bold;
+        text-align: center;
+        }
+        
+        .bPageBlock {
+        border-top: 0px;
+        }
+        
+        select option:hover, select option:focus, select option:active, select option:checked
+        {
+        background: linear-gradient(#FFC894, #FFC894);
+        background-color: #FFC894 !important; /* for IE */
+        }
+        
+        .jobtitle {
+        background: #f8f8f8 none repeat scroll 0 0;
+       
+        display:inline-block;   
+        marign:10px auto 0 !important;            
+        /* border: 1px solid #ccc; min-height: 510px;  left: 50%; margin-left: -250px;margin-top: -265px;*/
+        /*padding: 10px;  top: 0; position: fixed;*/
+        padding: 0px;
+      width: 100%;
+        z-index: 999;
+        border-radius: 3px;
+        box-shadow: 0 0 5px 1px #ccc;
+        -webkit-border-radius: 3px;
+        -webkit-box-shadow: 0 0 5px 1px #ccc;
+        -moz-border-radius: 3px;
+        -moz-box-shadow: 0 0 5px 1px #ccc;
+        }
+        td.pbTitle, td.pbTitle h2{ width:100% !important; display:inline-block; }
+        .pbBottomButtons td{ display:inline-block; width:96% !important; text-align:center; }
+        .pbBottomButtons td.pbTitle{ display:none;}
+        .jobtitle label {
+        font-weight: bold;
+        color: #000;
+        font-size: 13px;
+        }
+        
+        .pbSubheader img {
+        display: none;
+        }
+        
+        .pbSubheader h3 {
+        font-weight: bold;
+        color: #000;
+        font-size: 13px;
+        }
+        
+        .pbBottomButtons {
+        margin-top: 0px !important;
+        }
+      
+        .bPageBlock {  margin: 10px auto 0 !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        }
+        
+        td.data2Col {
+        padding-left: 0 !important;
+        background: #f8f8f8 !important;
+        }
+        
+        td.data2Col thead {
+        display: none;
+        }
+        
+        body .bRelatedList .pbBody table.list, body .apexp .pbBody table.list {
+        border: 0;
+        }
+        
+        .bPageBlock .detailList tr td, .bPageBlock .detailList tr th,
+        .hoverDetail .bPageBlock .detailList tr td, .hoverDetail .bPageBlock .detailList tr th
+        {
+        border-bottom: 0 !important;
+        background: #f8f8f8 !important;
+        }
+    </style>
+    
+    <script src="/soap/ajax/35.0/connection.js"></script>
+    <script>
+        function refreshParent(){
+        window.opener.location.reload();
+    }
+    function ClosePopup(){
+        
+        sforce.connection.sessionId = '{!$Api.Session_ID}';
+        var describeSObjectResult = sforce.connection.describeSObject("Production_Order__c");
+        var prefix = describeSObjectResult.keyPrefix; 
+        
+        var url = location.href;
+        var basepath = '{!basepath}';
+        var filerec = '{!fileRecord}';
+        
+        var baseURL = url.substring(0, url.indexOf('/', 14));      
+        var pareurl = baseURL+"/"+filerec;
+        
+        if(basepath == 'detailpage'){
+            if(pareurl)
+            {
+                // window.opener.location.href=baseURL+"/"+filerec;
+            }
+        }
+        if(baseURL)
+        {
+            window.top.close();     
+        }
+        
+        
+    }
+    
+    </script>
+    <apex:form >
+     <apex:pageMessages />
+        <apex:pageBlock mode="maindetail">          
+            <apex:pageMessages id="errorMessages" />
+            <apex:outputPanel id="jobPopup" styleClass="jobtitle">
+                <apex:pageBlock title="Assign Job Title">
+                <apex:pagemessages id="errorId"> </apex:pagemessages>
+                    <apex:pageBlockSection title="Job Title" columns="1">
+                        <apex:pageBlockTable value="{!jobTitleListWrapper}" var="po">
+                            <apex:column >
+                                <apex:inputCheckbox value="{!po.isSelected}" />
+                            </apex:column>
+                            <apex:column value="{!po.jobTitle}" />
+                        </apex:pageBlockTable>
+                    </apex:pageBlockSection>
+                    <apex:pageBlockButtons location="bottom">
+                        <apex:outputPanel rendered="{!ErrorflagstatusCheck == false}" id="commandButton">
+                            <apex:commandButton value="Save" action="{!saveObject}" styleClass="closeButton" rerender="errorId" onclick="" oncomplete="ClosePopup();refreshParent();" />
+                        </apex:outputPanel>
+                        <apex:commandButton value="Close" onclick="ClosePopup();" />
+                    </apex:pageBlockButtons>
+                </apex:pageBlock>
+            </apex:outputPanel>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

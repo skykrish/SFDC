@@ -1,0 +1,90 @@
+<apex:page title="納品処理アサイン" Controller="NohinshoriAsainController" tabStyle="Anken__c" action="{!init}">
+
+    <style>
+        span.paging {
+           padding-left: 5px;
+           padding-right: 5px;
+        }
+    </style>
+    
+    <!-- 共通スクリプト -->
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>
+    
+    <script type="text/javascript">
+    </script>
+    
+    <apex:sectionHeader title="納品処理アサイン" />
+    <apex:pageMessages id="messageArea" showDetail="false" />
+    
+    <apex:form >
+        <apex:pageBlock >
+             <!-- ボタンエリア -->
+            <apex:pageBlockButtons location="both">
+                <!-- 初期表示チェックOK時 -->
+                <apex:commandButton value="OK" action="{!updateAnken}" rendered="{!!ankenCheckFlg}"/>
+                <apex:commandButton value="戻る" action="{!closeCompiled}"/>
+            </apex:pageBlockButtons>
+            <!-- 納品処理 -->
+            <table width="100%">
+                <tr>
+                    <td>
+                        <apex:outputLabel for="criteria_seikyusaki" value="納品処理担当者"/>&nbsp;&nbsp;
+                        <apex:inputField id="criteria_seikyusaki" value="{!ankenAsain.InvoicePersonnelAsain__c}"/>
+                    </td>
+                </tr>
+            </table>
+            <apex:outputPanel id="resultArea">
+                <apex:pageBlockTable var="item" value="{!ankenList}">
+                    <!-- 伝票番号 -->
+                    <apex:column style="width:110px;">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.Anken__c.fields.Name.label}"/>
+                        </apex:facet>
+                        <apex:outputField style="width:100px" value="{!item.Name}"/>
+                    </apex:column>
+                    <!-- ステータス -->
+                    <apex:column style="width:110px;">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.Anken__c.fields.Status__c.label}"/>
+                        </apex:facet>
+                        <apex:outputField style="width:100px" value="{!item.Status__c}"/>
+                    </apex:column>
+                    <!-- 納期 -->
+                    <apex:column style="width:110px;">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.Anken__c.fields.Nouki__c.label}"/>
+                        </apex:facet>
+                        <apex:outputField style="width:100px" value="{!item.Nouki__c}"/>
+                    </apex:column>
+                    <!-- 点数 -->
+                    <apex:column style="width:110px;">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.Anken__c.fields.ItemCnt__c.label}"/>
+                        </apex:facet>
+                        <apex:outputField style="width:100px" value="{!item.ItemCnt__c}"/>
+                    </apex:column>
+                    <!-- 顧客名 -->
+                    <apex:column style="width:110px;">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.Anken__c.fields.KokyakuName__c.label}"/>
+                        </apex:facet>
+                        <apex:outputField style="width:100px" value="{!item.KokyakuName__c}"/>
+                    </apex:column>
+                    <!-- 発注先 -->
+                    <apex:column style="width:110px;">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.Anken__c.fields.HachusakiText__c.label}"/>
+                        </apex:facet>
+                        <apex:outputField style="width:100px" value="{!item.HachusakiText__c}"/>
+                    </apex:column>
+                </apex:pageBlockTable>
+            </apex:outputPanel>
+        </apex:pageBlock>
+        <!-- 請求書作成用ボタン（画面上は非表示） -->
+        <div style="display: none;">
+            <apex:commandButton id="btnUpdateAnken" value="納品処理" action="{!updateAnken}"/>
+        </div>
+        
+    </apex:form>
+    
+</apex:page>

@@ -1,0 +1,130 @@
+<apex:page title="Input Classification" controller="AnkenMeisaiRegisterController" action="{!init}" label="Input Classification" tabstyle="Anken__c" cache="false">
+
+    <!-- 共通スクリプト -->
+    <apex:includeScript value="{!$Resource.JQuery}"/>
+
+    <!-- スタイルシート -->
+    <style>
+        div.pbHeader td.pbTitle{
+            width: 75%;
+        }
+        input.ime-disabled {
+            ime-mode: disabled;
+        }
+    </style>
+    
+
+    <!-- スクリプト -->
+    <script type="text/javascript">
+        
+        // 画面ロード時に実行
+        $(document).ready(function(){
+
+            var index = 1;
+
+            // 登録チェックボックスのtabIndexを無効化
+            $('input[id$="updateChecked"]').each(function(i) {
+                $(this).attr('tabindex', -1);
+            });
+
+            // 作業コードのtabIndexを無効化
+            $('span[id$="sagyoCode"]').each(function(i) {
+                $(this).children('a').attr('tabindex', -1);
+            });
+
+            // 作業名のtabIndexを無効化
+            $('input[id$="sagyoName"]').each(function(i) {
+                $(this).attr('tabindex', -1);
+            });
+
+            // 数量にtabIndexを設定
+            $('input[id$="suryo"]').each(function(i) {
+                $(this).attr('tabindex', index ++);
+            });
+            
+            // 見積フラグのtabIndexを無効化
+            $('input[id$="mitsumoriFlg"]').each(function(i) {
+                $(this).attr('tabindex', -1);
+            });
+            
+            // 登録ボタンにtabIndexを設定
+            $('input[id$="btnSave"]').attr('tabindex', index ++);
+
+            // キャンセルボタンにtabIndexを設定
+            $('input[id$="btnCancel"]').attr('tabindex', index ++);
+        });
+
+        /**
+         * 変更レコードにチェック
+         * 変更箇所の背景色変更
+         */
+        function autocheck(id, element) {
+            document.getElementById(id).checked = true;
+            element.style.background = 'yellow';
+        }
+
+    </script> 
+    
+
+    <apex:sectionHeader title="Input Classification" />
+    <apex:pageMessages id="messagearea" showDetail="false" />
+
+    <apex:form >
+
+        <apex:pageBlock id="editArea" title="{!anken.KokyakuName__r.Name} - {!anken.AnkenName__c}　（{!anken.Name}）">
+            <!-- ボタンエリア -->
+            <apex:pageBlockButtons location="bottom">
+                <!-- 登録ボタン -->
+                <apex:commandButton id="btnSave" value="Register" action="{!save}" onclick="if(confirm('Are you sure?')){return true;};return false;" />
+                <!-- キャンセルボタン -->
+                <apex:commandButton id="btnCancel" value="Cancel" action="{!cancel}" immediate="true" />
+            </apex:pageBlockButtons>
+            
+            <!-- 明細エリア -->
+            <apex:pageblockTable value="{!ankenMeisaiList}" var="item">
+
+                <!-- 登録チェックボックス -->
+                <apex:column style="width:60px">
+                    <apex:facet name="header"><apex:outputText value="Register" /></apex:facet>
+                  　<apex:inputcheckbox id="updateChecked" value="{!item.checked}" style="width:60px;text-align: center;" />
+                </apex:column>
+    
+                <!-- 作業コード -->
+                <apex:column style="width:260px">
+                    <apex:facet name="header">
+                        <apex:outputText value="Work code"/>
+                    </apex:facet>
+                    <apex:outputfield id="sagyoCode" style="width:260px" value="{!item.ankenMeisai.SagyoCd__c}"/> 
+                </apex:column>
+
+                <!-- 作業名 -->
+                <apex:column >
+                    <apex:facet name="header">
+                        <apex:outputText value="Work name"/>
+                    </apex:facet>
+                    <apex:inputfield id="sagyoName" style="width:550px" value="{!item.ankenMeisai.SagyoName_English__c}" onfocus="this.select();" onchange="javascript:autocheck('{!$Component.updateChecked}', this)" /> 
+                </apex:column>
+
+                <!-- 数量 -->
+                <apex:column style="width:100px">
+                    <apex:facet name="header">
+                        <apex:outputText value="Quantity"/>
+                    </apex:facet>
+                    <apex:inputfield id="suryo" styleClass="ime-disabled" style="width:100px" value="{!item.ankenMeisai.Suryo__c}" onfocus="this.select();" onchange="javascript:autocheck('{!$Component.updateChecked}', this)"/> 
+                </apex:column>
+
+                <!-- 見積フラグ -->
+                <apex:column style="width:150px">
+                    <apex:facet name="header">
+                        <apex:outputText value="Included in estimate"/>
+                    </apex:facet>
+                    <apex:inputfield id="mitsumoriFlg" style="width:150px" value="{!item.ankenMeisai.MitsumoriFlg__c}" onchange="javascript:autocheck('{!$Component.updateChecked}', this)"/> 
+                </apex:column>
+    
+            </apex:pageblockTable>
+
+        </apex:pageBlock>
+        
+    </apex:form>
+
+</apex:page>

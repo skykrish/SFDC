@@ -1,0 +1,1666 @@
+<apex:page controller="EPMS_MyDirectoryQCcheckSearch_IT" id="viewPo" tabstyle="Production_Order__c" showHeader="false" sidebar="false">
+    <apex:stylesheet value="{!URLFOR($Resource.View_Directory,'css/jquery.treeview.css')}" /> 
+    <apex:stylesheet value="{!URLFOR($Resource.View_Directory,'css/custom.css')}" /> 
+    
+    <apex:includeScript value="{!URLFOR($Resource.View_Directory,'js/jquery.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.View_Directory,'js/jquery.treeview.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.View_Directory,'js/jquery-checktree.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.View_Directory,'js/custom.js')}" />
+    
+    <apex:includeScript value="{!URLFOR($Resource.ConfirmPopJs)}" />    
+    
+    <apex:includeScript value="{!URLFOR($Resource.csspopup,'add-style.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.csspopup,'css-pop.js')}" />
+    
+    <apex:includeScript value="{!URLFOR($Resource.attendance,'jquery-ui.min.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.attendance,'gridviewScroll.js')}"/>
+    
+    <apex:stylesheet value="{!URLFOR($Resource.Classification,'css/defaultTheme.css')}" /> 
+    <apex:stylesheet value="{!URLFOR($Resource.Classification,'css/myTheme.css')}" />
+    
+    <!-- <apex:includescript value="{!URLFOR($Resource.Classification,'js/jquery.min.js')}" /> -->
+    <apex:includescript value="{!URLFOR($Resource.Classification,'js/jquery.fixedheadertable.js')}" />
+    
+    
+    
+    <script type="text/javascript">
+    var __sfdcSessionId = '{!GETSESSIONID()}';
+    </script>
+    <script src="/soap/ajax/31.0/connection.js" type="text/javascript"></script>
+    
+    <style type="text/css">
+        body .bRelatedList .pbBody table.list, body .apexp .pbBody table.list {border:0;}
+    body .pbBody table.list tr th, body .pbBody table.list tr td 
+    {   
+        border-width:0 1px 0 0;
+        border-color:#ECECEC;
+        border-style:solid;
+    }
+    
+    #GridView1Wrapper table td .GridCellDiv, #GridView1PanelItem table tr td, #GridView1PanelItem table tr td .GridCellDiv {word-break: break-all;}        
+    table.list
+    {
+        background-color: #fff;
+        border-top: 0px solid #e0e3e5;
+    }
+    .list td, .list th, body.oldForecast .list .last td, body.oldForecast .list .last th {
+        /*padding: 10px 2px 0px 5px;*/
+        color: #000;
+        padding:2px 2px;
+        vertical-align:middle;
+    }
+    .GridviewScrollHeader
+    {
+        background: #f2f3f3;
+        border-width: 0 0 1px 1px;
+        border-color: #e0e3e5;
+        color: #000;
+        font-size: .9em;
+        font-weight: bold;
+        padding: 4px 2px 4px 5px;
+    }
+    .pbBody, .pbBody a, .pbBody td, .lbBody a, .lbBodyDescription, .list .headerRow .noRowsHeader {
+        color: #000;
+    }
+    .pbBody table.list tr.dataRow td:first-child {
+        border-left-width: 0;
+    }
+    table.list tr.dataRow td {
+        border-width: 0 0 1px 0;
+        vertical-align: middle;
+        text-align:left;
+        padding:5px 10px;
+    }
+    .GridviewScrollHeader td {
+        border-right:0px solid #ededed;
+        white-space:nowrap;
+        text-align:center;
+        padding:5px 10px;
+    }
+    /*.contentWrap{word-break: break-all; !important; float:left}
+.contentWrap .GridCellDiv{word-break: break-all;  !important; float:left}*/
+    .list-custom {
+        margin: 0px;
+        float: left;
+        border: 0px solid #ededed;
+    } 
+    
+    .apexp .bPageBlock.apexDefaultPageBlock.pbBody {width:100%; margin:0px 0; float:left;}
+    
+    .jobtitle {
+        display:none; 
+        background: #fff none repeat scroll 0 0;
+        border: 1px solid #ccc;
+        min-height: 510px;
+        left: 25%;
+        margin-left: -250px;
+        /*margin-top: -265px;*/
+        padding: 10px;
+        position: absolute;
+        top:0%;
+        width: 500px;
+        z-index: 999;
+        border-radius: 3px;
+        box-shadow: 0 0 5px 1px #ccc;
+        -webkit-border-radius: 3px;
+        -webkit-box-shadow: 0 0 5px 1px #ccc;
+        -moz-border-radius: 3px;
+        -moz-box-shadow: 0 0 5px 1px #ccc;
+    }
+     .bPageBlock .dataCol{ padding-left:0 !important;}
+    .jobtitlegraybox
+    {
+        position:fixed;
+        left:0;
+        top:0;
+        right:0;
+        bottom:0;
+    }
+    .closejobtitle
+    {
+        background: #605F61 none repeat scroll 0 0;
+        border-radius: 40px;
+        color: #fff !important;
+        display: block;
+        float: right;
+        font-weight: bold;
+        padding: 3px;
+        position: absolute;
+        right: -10px;
+        text-align: center;
+        top: -10px;
+        width: 15px;
+        text-decoration:none;
+    }
+    .jobtitleHd
+    {
+        font-weight:bold;
+    }
+    
+    .filetree li span {color:#000 !important;}
+    .text-left
+    {
+        text-align:left !important;
+    }
+                       body .pbBody table.list tr.dataRow th, body .pbBody table.list tr.dataRow td
+                       {
+                           border-left:1px solid #ECECEC;
+                       }
+                       
+                       .filetree span.folder:hover {cursor:pointer;}
+                       
+                       #blanket {position:fixed;}
+                       .popUpDiv {position:fixed;}
+                       
+                       .ontop {
+                           z-index: 999;
+                           width: 100%;
+                           height: 100%;
+                           top: 0;
+                           left: 0;        
+                           position: fixed;                
+                           background-color: #000;
+                           color: #000;
+                           opacity: .8;
+                           filter: alpha(opacity = 50);
+                       }
+                       
+                       #popupStatus {
+                       width: 385px;
+                       /*height: 200px;*/
+                       position: fixed;
+                       z-index: 999;
+                       color: #000000;
+                       /*background-color: #ffffff;*/
+                       top: 50%; /* To align popup window at the center of screen*/
+                       left: 50%;
+                       margin-top: -100px;
+                       margin-left: -192px;
+                      }
+    
+    #popupStatus .pbTitle
+    {
+        width:100%;
+    }
+    .ontop .btn {color:#000;}
+    
+    .changeExtBtnStatusSec {width:32%; margin:0 auto; overflow:hidden;}
+                 .changeExtBtnStatusSec input {float:left; margin-right:10px;}
+                 
+                 .convertInstruction{
+                     display:none;
+                 }
+                 .blanket-div {
+                     width: 100%;
+                     background: #000;
+                     height: 100%;
+                     position: fixed;
+                     top: 0;
+                     left: 0;
+                     z-index: 99;
+                     opacity: 0.5;
+                 }
+                 
+                 .lefttblPart {
+                     width: 280px; 
+                 }
+                 
+                 .changeInstPopup,.changeExtPopup,.penaltyPopup,.changeCategoryDiv,.assignPenalityDiv,.changeStatusDiv,.showQCPopupCheck,.showQCPopupRedo,.showQCPopupApprove{
+                     display:none;
+                 }   
+                 ul.leftmenu li {
+                     display: block;
+                     padding: 0px !important; 
+                     margin-bottom: 0px !important;
+                     margin-left: 5px;
+                 }
+                 
+                 
+                 #popup {
+                 width: 300px;
+                 /*height: 200px;*/
+                 position: fixed;
+                 z-index: 999;
+                 color: #000000;
+                 /*background-color: #ffffff;*/
+                 top: 25%; /* To align popup window at the center of screen*/
+                 left: 50%;
+                 margin-top: -100px;
+                 margin-left: -150px;
+                }
+    
+    #popupStatus {
+    width: 385px;
+    /*height: 200px;*/
+    position: fixed;
+    z-index: 999;
+    color: #000000;
+    /*background-color: #ffffff;*/
+    top: 50%; /* To align popup window at the center of screen*/
+    left: 50%;
+    margin-top: -100px;
+    margin-left: -172px;
+    }
+    
+    #popupStatus .pbTitle
+    {
+        width:100%;
+    }
+    #popup .pbTitle
+    {
+        width:100%;
+    }
+    
+    #popupPenality {
+    width: 545px;
+    /*height: 200px;*/
+    position: fixed;
+    z-index: 999;
+    color: #000000;
+    /*background-color: #ffffff;*/
+    top: 50%; /* To align popup window at the center of screen*/
+    left: 50%;
+    margin-top: -100px;
+    margin-left: -272px;
+    }
+    
+    #popupPenality.pbTitle
+    {
+        width:100%;
+    }
+    #popupPenality.pbTitle
+    {
+        width:100%;
+    }
+    
+    
+    
+    .ontop .btn {color:#000;}
+    
+    .changeExtSec {float:left; padding-bottom:10px;}    
+                 .changeExtSec .changeExtLabel {width:50%; float:left; padding:2px 0;}
+                 .changeExtSec .changeExtTextBox {width:50%; float:left;}
+                 .changeExtSec .changeExtTextBox input {width:100%;}
+                 .changeExtSec .changeExtTextBox select {width:100%;}
+                 .changeExtSec .changeExtTextBox textarea {resize:none;}
+                 
+                 .changeExtBtnSec {width:42%; margin:0 auto; overflow:hidden;}
+                 .changeExtBtnSec input {float:left; margin-right:10px;}
+                 
+                 
+                 .changeExtStatusSec {width:100%; float:left; padding-bottom:10px;}
+                 .changeExtStatusSec .changeExtLabel {width:45%; float:left; padding:2px 0; margin-left:2%}
+                 .changeExtStatusSec .changeExtTextBox {width:50%; float:left;}
+                                                      .changeExtStatusSec .changeExtTextBox input {width:100%; float:left;}
+                                                      .changeExtStatusSec .changeExtTextBox input[type="checkBox"] {float:left; width: 15px}
+                                                      .changeExtStatusSec .changeExtTextBox select {width:100%; float:left;}
+                                                      .changeExtStatusSec .changeExtTextBox textarea {resize:none; float:left; width:98%; }
+                                                      
+                                                      .changeExtBtnStatusSec {width:32%; margin:0 auto; overflow:hidden;}
+                                                      .changeExtBtnStatusSec input {float:left; margin-right:10px;}
+                                                      
+                                                      .filetree span.folder, .filetree span.file
+                                                      {
+                                                          display:inline-block;
+                                                      }
+                                                      .changeInstPopup,.changeExtPopup,.penaltyPopup,.changeCategoryDiv,.changeStatusDiv{
+                                                          display:none;
+                                                      }
+                                                      ul.leftmenuCustom   
+                                                      {
+                                                          width: 280px !important;
+                                                      }
+                                                      ul.leftmenuCustom li
+                                                      {
+                                                          padding: 8px !important;
+                                                      }
+                                                      ul.leftmenuCustom li.active
+                                                      {
+                                                          background:#ccc;
+                                                          
+                                                      }
+                                                      ul.leftmenuCustom li.active a{
+                                                          font-weight:bold;
+                                                      }
+                                                      #sel1{
+                                                      cursor:pointer;
+                                                      background-color:rgb(120, 202, 228);
+                                                      padding:10PX 0px;
+                                                      width:49%;
+                                                      text-align:center;
+                                                      DISPLAY: inline-block;
+                                                      color:#000;
+                                                      font-weight:bold;
+                                                      
+                                                     }
+                 #sel2{
+                 cursor:pointer;
+                 background-color:rgb(207, 238, 248);
+                 padding:10PX 0px;
+                 width:49%;
+                 text-align:center;
+                 DISPLAY: inline-block;
+                 color:#000;
+                 font-weight:bold;
+                }
+    #resultsel1{
+    display:block;
+    position:relative;
+    bottom:1px;
+    width:99%;
+    height: auto;
+    background-color: rgb(255, 255, 255);
+    OVERFLOW: HIDDEN;
+    border: 1px solid #78CAE4;
+    }
+    #resultsel2{
+    display:none;
+    position:relative;
+    bottom:1px;
+    width:99%;
+    height: auto;
+    background-color: rgb(255, 255, 255);
+    OVERFLOW: HIDDEN;
+    border: 1px solid #78CAE4;
+    }
+    .bPageBlock{
+        padding:0 !important;
+    }
+    .viewdirectoryNewClass{display:none;}
+    .tblCustom td
+    {
+        vertical-align:top;
+    }
+    .tblCustom{ min-height:200px;}
+    
+    
+    .legend-content {
+        float: right;
+        width: auto;
+    }
+    .legend-content ul {
+        float: right;
+        list-style: outside none none;
+        margin: 0 0 5px;
+        padding: 0;
+    }
+    .legend-content ul li {
+        color: #808080;
+        float: left;
+        font-size: 12px;
+        /*margin: 0 15px 0 0;*/
+    }
+    .legend-content ul li em {
+        float: left;
+        height: 8px;
+        margin: 2px 5px 0 0;
+        width: 8px;
+    }
+    .splitedColor em {
+        background: #BAFFC0 repeat scroll 0 0;
+        /*background: #FFF2FC repeat scroll 0 0;
+    border: 1px solid #F919C7;*/
+     border: 1px solid #5DB964;
+     
+}
+    .copyColor em {
+        background: #FFD6D6 none repeat scroll 0 0;
+        border: 1px solid #9C0606;
+    }
+    .parentColor em{
+        background: #ECEEF9 none repeat scroll 0 0;
+        border: 1px solid #1B2EC3;
+    }
+    
+    .fancyTable tbody tr td {
+        text-align:left;
+        font-family: 'Arial','Helvetica',sans-serif;
+        font-size: 100%;
+        line-height: normal;
+    }
+    
+    .NOFPage input
+    {
+        width:20px;
+    }
+    
+    .paginator {
+        background-color: #ffe324;
+        width:60px;
+    }
+    
+    .count{
+        background-color: yellow;
+    }
+
+    .divider {margin-top:20px;}
+    .buttonSplitSec {float:left; margin-bottom:10px;}
+    .searchSec {text-align:right; margin:0 0 10px 0;}
+     .jobtitle {text-align:left; margin:0 0 10px 0;}
+    
+    .changeCategorySec {width:100%; float:left; padding-bottom:10px;}
+    
+    </style>
+    
+    <script>
+        function isNumberKey(evt)
+    {
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode != 46 && charCode > 31 
+            && (charCode < 48 || charCode > 57))
+            return false;
+        
+        return true;
+    }
+    
+    
+    
+    
+    
+    </script>
+    
+    
+    
+    
+    <script type="text/javascript">
+    var __sfdcSessionId = '{!GETSESSIONID()}';
+    </script>
+    <script src="/soap/ajax/31.0/connection.js" type="text/javascript"></script>
+    
+    <script>          
+        function Reloadpage(Sucessmessage){
+        var currentID='{!$CurrentPage.Parameters.Id}';
+        popup('popUpalert','alert','',Sucessmessage); 
+         window.location.assign('/apex/EPMS_MyDirectoryQCcheckSearch_IT_EV?id='+currentID);
+    }       
+    
+    function showpopup3(jobdiv){
+        document.getElementById(jobdiv).style.display='block';
+        
+    }        
+    
+    function showpopup4(jobdiv){
+        document.getElementById(jobdiv).style.display='block';
+        
+    }
+    function showpopup1(jobdiv){
+        //  $(".blanket-div").show();            
+        //document.getElementById(jobdiv).style.display='block';
+    }  
+    
+    
+    function showpopup5(jobdiv){
+        document.getElementById(jobdiv).style.display='block';
+    }
+    
+    
+    function showpopup6(jobdiv){
+        document.getElementById(jobdiv).style.display='block';
+    }
+    
+    $(document).ready(function () {
+        
+        $("#browser").treeview({
+            toggle: function() {
+                console.log("%s was toggled.", $(this).find(">span").text());
+            }   
+        });
+    });
+    
+    $(document).ready(function () {
+        var winwidth = document.body.clientWidth-60;
+        var winheight = window.innerHeight - 100;
+        gridviewScroll(winwidth, winheight);
+        gridviewScrollauto();
+    });
+    
+    $(window).resize(function () {
+        var winwidth = document.body.clientWidth-60;
+        var winheight = window.innerHeight - 100;
+        gridviewScroll(winwidth, winheight);
+        gridviewScrollauto();
+    });
+    function gridviewScrollauto() {
+        var winwidth = document.body.clientWidth-60;
+        //var winheight = screen.height- 300;
+        var winheight = window.innerHeight - 100;
+        setTimeout(function () {
+            gridviewScroll(winwidth, winheight);
+        }, 2000);
+    }
+    function gridviewScroll(winwidth, winheight) {
+        gridView1 = $('#GridView1').gridviewScroll({
+            width: winwidth,
+            height: winheight,
+            railcolor: "#F0F0F0",
+            barcolor: "#CDCDCD",
+            barhovercolor: "#606060",
+            bgcolor: "#F0F0F0",
+            arrowsize: 30,
+            scrollAssociate: { mode: "both", target: "body" },
+            varrowtopimg: "{!URLFOR($Resource.attendance,'Images/arrowvt.png')}",
+            varrowbottomimg: "{!URLFOR($Resource.attendance,'Images/arrowvb.png')}",
+            harrowleftimg: "{!URLFOR($Resource.attendance,'Images/arrowhl.png')}",
+            harrowrightimg: "{!URLFOR($Resource.attendance,'Images/arrowhr.png')}",
+            headerrowcount: 1,
+            railsize: 16,
+            barsize: 8,
+        });
+        $('#browser').checktree();
+    }
+    
+    function SuccessFully(Msg) {
+        $('.convertInstruction').hide();
+        popup('popUpalert','alert','',Msg); 
+    }
+    function SuccessFullyDelete(Msg) {
+        popup('popUpalert','alert','',Msg);
+        //window.parent.close();
+        //window.opener.location.reload();
+        location.reload();        
+    }
+    
+    function cancelchangeStatus()
+    {
+        $('.changeStatusDiv').hide();
+        $(".showQCPopupRedo").hide();   
+        $(".showQCPopupCheck").hide(); 
+        $(".showQCPopupApprove").hide(); 
+        $(".assignPenalityDiv").hide();   
+        $(".changeCategoryDiv").hide();
+        // document.getElementById('changeStatusDiv').style.display = 'none';
+    } 
+    
+    
+    
+    function showQCcheckPopup(statusVal)
+    {
+        $(".showQCPopupRedo").hide();   
+        $(".showQCPopupCheck").hide();  
+        $(".showQCPopupApprove").hide(); 
+        $(".assignPenalityDiv").hide();
+        
+        checkedValues=$("input[type='checkbox']:checked").map(function() {
+            return this.value;
+        }).get();
+        if(checkedValues=="")
+        {
+            popup('popUpalert','alert','','Please Select Atleast one File to proceed'); 
+            return false;
+        }else{
+            var checkSeleted=$("input[type='checkbox']:checked").map(function() { return this.className; }).get();  
+            console.log('Selected Ins' + checkSeleted); 
+            console.log('Selected Ins' +this.Id);
+            /* if(checkSeleted!=""){
+                         for (var i = 0, len = checkSeleted.length; i<len; i++){
+                            console.log('File Type ='+checkSeleted[i]);
+                            if(checkSeleted[i] =='child file'){
+                                popup('popUpalert','alert','','Please select image record to proceed'); 
+                                return false;
+                            }
+                         }
+                    }*/
+                var output="";
+                var outputStatus=[];           
+                for (var i = 0, len = checkedValues.length; i<len; i++){
+                    if(checkedValues[i]!='on')
+                    {
+                        // output += checkedValues[i]+',';
+                        output += checkedValues[i].substr(0,18)+',';
+                        outputStatus.push(checkedValues[i].substring(19));
+                    }
+                }
+                
+                var error = false; 
+                console.log('Before for loop error='+error);    
+                for(var j=0;j<outputStatus.length;j++){
+                    if(outputStatus[j] != 'On-Hold'){
+                        if(outputStatus[j] != 'Completed')
+                        {                                   
+                            error = true;
+                            console.log('inside if conditon error='+error);                             
+                            break; 
+                        }
+                    }
+                }
+                
+                if(error){
+                    popup('popUpalert','alert','','Please select files\'s have status Completed or On-Hold'); 
+                }
+                else{
+                    if(statusVal=='approve')
+                    {
+                        $(".showQCPopupRedo").hide();   
+                        $(".showQCPopupCheck").hide();
+                        $(".assignPenalityDiv").hide(); 
+                        $(".showQCPopupApprove").show();                        
+                        //changeQCcheckPopupApprove(output);                    
+                    }else if(statusVal=='redo')
+                    {
+                        $(".showQCPopupApprove").hide(); 
+                        $(".showQCPopupCheck").hide(); 
+                        $(".assignPenalityDiv").hide();  
+                        $(".showQCPopupRedo").show();   
+                        
+                        //changeQCcheckPopupRedo(output);                   
+                    }else if(statusVal=='category')
+                    {
+                        $(".showQCPopupApprove").hide(); 
+                        $(".showQCPopupCheck").hide();  
+                        $(".showQCPopupRedo").hide();  
+                        $(".changeCategoryDiv").show(); 
+                        
+                        changeCategory(output);
+                        
+                        
+                        
+                        //changeQCcheckPopupRedo(output);                   
+                    }else if(statusVal=='status')
+                    {
+                        $(".showQCPopupApprove").hide(); 
+                        $(".showQCPopupCheck").hide();  
+                        $(".showQCPopupRedo").hide(); 
+                        $(".assignPenalityDiv").hide(); 
+                        $(".changeStatusDiv").show();                           
+                        changeStatus(output);
+                        //changeQCcheckPopupRedo(output);                   
+                    }else if(statusVal=='penality')
+                    {
+                        $(".showQCPopupApprove").hide(); 
+                        $(".showQCPopupCheck").hide();  
+                        $(".showQCPopupRedo").hide(); 
+                        $(".assignPenalityDiv").show();                           
+                        changeStatus(output);
+                        //changeQCcheckPopupRedo(output);                   
+                    }else
+                    {
+                        $(".showQCPopupRedo").hide();   
+                        $(".showQCPopupApprove").hide(); 
+                        $(".showQCPopupCheck").show();  
+                        $(".assignPenalityDiv").hide(); 
+                        
+                        //changeQCcheckPopupCheck(output);
+                    }
+                } 
+                //document.getElementById('showQCPopup').style.display = 'block';
+            }   
+    }
+    
+    
+    
+    function showQCPopupCheck()
+    {
+        $(".showQCPopupRedo").hide();   
+        $(".showQCPopupApprove").hide();  
+        $(".showQCPopupCheck").show();   
+    }
+    
+    function showQCPopupRedo()
+    {
+        $(".showQCPopupApprove").hide(); 
+        $(".showQCPopupCheck").hide();             
+        $(".showQCPopupRedo").show(); 
+    }
+    
+    function showQCPopupApprove()
+    {    
+        $(".showQCPopupRedo").hide();   
+        $(".showQCPopupCheck").hide(); 
+        $(".showQCPopupApprove").show(); 
+    }
+    
+    function changeStatusValid() 
+    {
+        checkedValues=$("input[type='checkbox']:checked").map(function() {
+            return this.value;
+        }).get();
+        
+        if(checkedValues=="")
+        {
+            popup('popUpalert','alert','','Please Select Atleast one File to proceed'); 
+            return false;
+        }else{
+            var checkSeleted=$("input[type='checkbox']:checked").map(function() { return this.className; }).get();  
+            console.log('Selected Ins' + checkSeleted); 
+            if(checkSeleted!=""){
+                for (var i = 0, len = checkSeleted.length; i<len; i++){
+                    console.log('File Type ='+checkSeleted[i]);
+                    if(checkSeleted[i] =='child file'){
+                        popup('popUpalert','alert','','Please select image record to proceed'); 
+                        return false;
+                    }
+                }
+            }
+            var output="";
+            for (var i = 0, len = checkedValues.length; i<len; i++){
+                if(checkedValues[i]!='on')
+                {
+                    // output += checkedValues[i]+',';
+                    output += checkedValues[i].substr(0,18)+',';
+                }
+            }
+            changeStatus(output);
+            //document.getElementById('changeStatusDiv').style.display = 'block';
+        }        
+    }
+    
+    function changeCategoryValid()
+    {    
+        checkedValues=$("input[type='checkbox']:checked").map(function() {
+            return this.value;
+        }).get();
+        
+        if(checkedValues=="")
+        {
+            popup('popUpalert','alert','','Please Select Atleast one File to proceed'); 
+            return false;
+        }else{
+            var checkSeleted=$("input[type='checkbox']:checked").map(function() { return this.className; }).get();  
+            console.log('Selected Ins' + checkSeleted); 
+            if(checkSeleted!=""){
+                for (var i = 0, len = checkSeleted.length; i<len; i++){
+                    console.log('File Type ='+checkSeleted[i]);
+                    if(checkSeleted[i] =='child file'){
+                        popup('popUpalert','alert','','Please select image record to proceed'); 
+                        return false;
+                    }
+                }
+            }
+            var  output="";
+            for (var i = 0, len = checkedValues.length; i<len; i++){
+                if(checkedValues[i]!='on')
+                {
+                    //output += checkedValues[i]+',';
+                    output += checkedValues[i].substr(0,18)+',';
+                    console.log('OutputID='+output);
+                }
+            }
+            //alert(output+'-----' + checkedValues.length);
+            //console.log('**** '+output+'-----' + checkedValues.length);
+            changeCategory(output);
+            //document.getElementById('changeCategoryDiv').style.display = 'block';
+        }        
+    }
+    
+    function showChangeCategory()
+    {
+        $('.changeCategoryDiv').show();
+        // document.getElementById('changeCategoryDiv').style.display = 'none';
+    }
+    
+    function cancelchangeCategory()
+    {
+        $('.changeCategoryDiv').hide();
+        // document.getElementById('changeCategoryDiv').style.display = 'none';
+    }
+    
+    
+    function assignPenaltyJS()
+    {
+        
+        var outputStatus=[];
+        var checkedValues = $('.folder:checked').map(function() {
+            return this.value;
+        }).get();
+        if(checkedValues!=""){
+            popup('popUpalert','alert','','Please Select Only Files');
+        }else{
+            var checkSeleted=$("input[type='checkbox']:checked").map(function() { return this.className; }).get();  
+            console.log('Selected Ins ' + checkSeleted); 
+            if(checkSeleted!=""){
+                for (var i = 0, len = checkSeleted.length; i<len; i++){
+                    console.log('File Type ='+checkSeleted[i]);
+                    if(checkSeleted[i] =='child file'){
+                        popup('popUpalert','alert','','Please select image record to proceed'); 
+                        return false;
+                    }
+                }
+            }
+            checkedValues=$("input[type='checkbox']:checked").map(function() { return this.value; }).get();
+            if(checkedValues==""){
+                popup('popUpalert','alert','','Please Select Atleast one record to proceed'); 
+                return false;
+            }else{
+                var  output="";
+                for (var i = 0, len = checkedValues.length; i<len; i++){
+                    // output += checkedValues[i]+',';
+                    if(checkedValues[i]!='on'){
+                        output += checkedValues[i].substr(0,18)+',';
+                        console.log('OutputID='+output);
+                        
+                        outputStatus.push(checkedValues[i].substring(19));
+                        console.log('outputStatus='+outputStatus);
+                    }   
+                }
+                console.log('OutputID='+output);
+                console.log('outputStatus='+outputStatus);
+                
+                if(output!=""){
+                    
+                    var error = false; 
+                    console.log('Before for loop error='+error);    
+                    for(var j=0;j<outputStatus.length;j++){
+                        if(outputStatus[j] != 'QC'){
+                            if(outputStatus[j] != 'QCIP'){
+                                if(outputStatus[j] != 'Redo')
+                                    if(outputStatus[j] != 'Completed'){
+                                        {                                   
+                                            error = true;
+                                            console.log('inside if conditon error='+error);                             
+                                            break; 
+                                        }}}} 
+                    }
+                    console.log('outside if conditon error='+error);
+                    if(error){ 
+                        popup('popUpalert','alert','','Please select files\'s have status QC or QCIP or Redo'); 
+                    }else{
+                        var url2 = '/apex/AssignPenality?ids=' +output;   
+                        //var paramsW  = screen.width;
+                        //var paramsH = screen.height;
+                        var params  = 'width='+window.width -100;
+                        params += ', height='+window.height-100;
+                        params += ', top=100, left=100'
+                        params += ', fullscreen=yes';
+                        
+                        window.open(url2, "EPMS Order Assignment : Anken", "scrollbars=0, params, resizable=0,titlebar=0,toolbar=0,status=0"); 
+                        //convertToInstrFile(output);
+                    }                               
+                    
+                }
+                
+            }
+            
+        }
+        
+    }   
+    
+    
+    
+    
+    var selected="sel1";
+    var disp="resultsel1";
+    function show(a,b)
+    {
+        document.getElementById(selected).style.backgroundColor = "rgb(207, 238, 248)";
+        document.getElementById(disp).style.display = "none";
+        
+        document.getElementById(a).style.backgroundColor = "rgb(120, 202, 228)";      
+        
+        document.getElementById(b).style.display = "block";
+        selected=a;
+        disp=b;
+    }
+    
+    
+    function hideviewdirectoryNew()
+    {
+        $(".viewdirectoryNewClass").hide();
+        $(".orderFiles").hide();
+        $(".viewdirectoryClass").show();
+        
+    }
+    function hideviewdirectory()
+    {
+        $(".viewdirectoryClass").hide();
+        $(".orderFiles").hide();
+        $(".viewdirectoryNewClass").show();
+    }
+    
+    function refreshParent(){ 
+        location.reload();             
+        //  window.parent.close();
+        //  window.opener.location.reload();
+    }     
+    
+    function ClosePopup(){
+       window.opener.location.reload();
+       close();
+    }
+    function setWinSize(){
+        var winwidth = document.body.clientWidth-40;
+        //var winheight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+        var winheight = window.innerHeight-250;
+        
+        $(".freezeTableAutoWidth").css('width', winwidth+"px");     
+        
+        $(".buttonSplitSec").css('width', winwidth+"px");     
+        $(".searchSec").css('width', winwidth+"px");    
+        
+        //$('.headerFreezeTable').fixedHeaderTable({ altClass: 'odd', height:winheight+"px"});      
+        
+        
+        $('.headerFreezeTable').fixedHeaderTable({ altClass: 'odd', height:winheight+"px"});                    
+        $('.headerFreezeTable th.last').css('padding-right', '10px');
+        
+        
+        //$(".freezeTableAutoWidth").css('height', b);  
+    }    
+    
+    
+    
+    $(document).ready(function() {  
+        setWinSize();
+    });
+    
+    
+    $(window).load(function(){
+        var array = new Array();
+        $('.thumbImageBody').each(function() {
+            var a = $(this).width();
+            //alert($(this).width());
+            array.push(a);
+        });
+        var maxWidth = Math.max.apply(Math, array);
+        //alert (maxWidth); 
+        $('#thumbImageHeader .fht-cell').css('width',(maxWidth+1) + "px");
+        //alert($('#thumbImageHeader').width());
+    });
+    
+    
+    
+    function showViewClassificationJS(){
+        
+        var ankenId ='{!ankenId}';
+         var PONumber='{!OrderId}';
+        var url2 = '/apex/EPMS_AnkenClassifications?ids='+ankenId; 
+        window.open(url2, "", "scrollbars=1,width=800, height=500,resizable=0,titlebar=0,toolbar=0,status=0");
+        
+    }
+    function closeBg()
+    {
+        $(".blanket-div").hide();
+        location.reload();
+    }
+    
+    </script>  
+    
+    <script type="text/javascript">
+    var rootflog = false;
+    var count;
+    function selectAll(){
+        if(rootflog == false)
+        {
+            $('.fancyTable tbody tr').find('.childs').prop('checked', 'checked');
+            rootflog=true;
+            count = $(".childs:checked").length;    
+            jQuery('[id$=myPlaceholder]').text(count);
+            if(count>0)
+                jQuery('[id$=count]').css('background','ffe324');
+            else
+                jQuery('[id$=count]').css('background','#FFF');
+            
+        }
+        else{
+            $('.fancyTable tbody tr').find('.childs').removeProp('checked', 'checked');
+            rootflog=false;
+            count = $(".childs:checked").length;    
+            jQuery('[id$=myPlaceholder]').text(count);
+            if(count>0)
+                jQuery('[id$=count]').css('background','#ffe324');
+            else
+                jQuery('[id$=count]').css('background','#FFF');
+            
+        }
+        
+    }
+    
+    $(document).ready(function() {
+        $(document).on("click", "#checkall", function(){
+            $('.fancyTable tbody tr').find('.childs').prop('checked', this.checked);
+            count = $(".childs:checked").length;    
+            jQuery('[id$=myPlaceholder]').text(count);
+            if(count>0)
+                jQuery('[id$=count]').css('background','#ffe324');
+            else
+                jQuery('[id$=count]').css('background','#FFF');
+        });
+        
+        
+        $(".childs").on('change',function(){
+            var counts = $('.childs:checked').length;
+            var all_count=$('.fancyTable tbody tr').find(":checkbox").length;
+            
+            if(counts < all_count){
+                $('#checkall').prop('checked',false);
+            }
+            else{
+                $('#checkall').prop('checked',true);
+                
+            }
+            
+            count = $(".childs:checked").length;    
+            jQuery('[id$=myPlaceholder]').text(count);
+            if(count>0)
+                jQuery('[id$=count]').css('background','#ffe324');
+            else
+                jQuery('[id$=count]').css('background','#FFF');
+            
+        });
+        
+        
+        
+    });
+
+    </script>
+
+    <apex:form >  
+        <html> 
+            <body>    
+                <table border="1" width="100%" class="tblCustom">
+                    <tr>                  
+                        
+                        <td>
+                            <div class="blanket-div" style="display:none;"></div>
+                            <span class="orderFiles">
+                                <apex:pageBlock rendered="{!orderFiles}">
+                                    <apex:outputPanel id="outputPanelId1"  rendered="{!(wrapperList.size==0 && displayErrorMes ==false)}">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0" >
+                                            <tr style="height:65px;">
+                                                <td > No Records Found</td>
+                                            </tr>
+                                        </table>
+                                    </apex:outputPanel>
+                                    
+                                    <apex:outputPanel rendered="{!IF(wrapperList.size >= 0,true,false) }" >
+                                        <div><apex:pageMessages id="errorMessages" /></div> 
+                                        <div class="buttonSplitSec">
+                                            <div style="float:left; width:73%;">
+                                                <apex:commandButton value="Approve" onclick="showQCcheckPopup('approve'); return false;" rerender="errorMessages" rendered="{!IF(wrapperList.size > 0,true,false) }"/>
+                                                <apex:commandButton value="Redo" onclick="showQCcheckPopup('redo'); return false;" rerender="errorMessages" rendered="{!IF(wrapperList.size > 0,true,false) }"/>
+                                                <apex:commandButton value="On-Hold" onclick="showQCcheckPopup('On-Hold'); return false;" rerender="errorMessages" rendered="{!IF(wrapperList.size > 0,true,false) }"/>
+                                                <!-- <apex:commandButton value="Change Category" onclick="showQCcheckPopup('category'); return false;" rerender="errorMessages" rendered="{!IF(wrapperList.size > 0,true,false) }"/>-->
+                                                <apex:commandButton value="Change Category" oncomplete="if('{!multiSelectError}' == 'false') {showQCcheckPopup('category');};" rerender="errorMessages" rendered="{!IF(wrapperList.size > 0,true,false) }" action="{!UpdateCategory}" />
+                                                <apex:commandButton value="View Classification"  onclick="showViewClassificationJS();" rerender="errorMessages" />
+                                                <!-- onclick="TLFilesJS('{!$Component.openFiles}'); return false;"  oncomplete="showpopup5('{!$Component.changeTLPopup}');" -->
+                                                <!-- onComplete="showQCcheckPopup('category');"  -->
+                                                
+                                                <apex:commandButton value="Change Status" onclick="showQCcheckPopup('status'); return false;" rerender="errorMessages" rendered="{!IF(wrapperList.size > 0,true,false) }"/>
+                                                <apex:commandButton value="Assign Penalty"  onclick="showQCcheckPopup('penality'); return false;"  rerender="errorMessages"  rendered="{!IF(wrapperList.size > 0,true,false) }"/>                 
+                                                <apex:commandButton value="Merge Files" action="{!test_Merge_Files_Copy_and_Split}" rerender="errorMessages" rendered="{!IF(wrapperList.size > 0,true,false) }" onComplete="refreshParent()"/>
+                                                <apex:commandButton value="Select Merge Files" action="{!test_Merge_Files_Copy_and_Split_sel}" rerender="errorMessages" rendered="{!IF(wrapperList.size > 0,true,false) }" onComplete="refreshParent()"/>
+                                                <apex:commandButton value="Close" onclick="ClosePopup();return false;" immediate="true"/>
+                                                <apex:inputCheckbox value="{!OnHoldCheck}" label="Include On-Hold Files" onchange="showOnhold();"> Exclude On-Hold Files
+                                                    <apex:actionSupport event="onselect" rerender="viewPo" />
+                                                    <apex:actionFunction name="showOnhold" action="{!getdisplayQCCheckFiles2}" /> <!-- action="{!getOnHoldCheckFiles}" -->
+                                                    <!-- <apex:actionFunction name="getNewUpdateCategory" action="{!getCategoryForInputTime}" /> -->
+                                                </apex:inputCheckbox>
+                                                <div style="width:100%; display:block; float:left;">
+                                                    <apex:commandButton value="Change Job Title"   action="{!showJobTitlePopUp}" rerender="jobPopup,callJS,errorMessages" rendered="{!IF(wrapperList.size > 0,true,false) }" oncomplete="showpopup1('{!$Component.jobPopup}');"/>
+                                                </div>
+                                            </div>
+                                            <div style="float:right; padding-top:5px;">
+                                                <apex:outputPanel id="displayLegendColor" rendered="{!IF(wrapperList.size > 0,true,false) }">
+                                                    <div class="legend-content">
+                                                        <ul>
+                                                            <li class="parentColor"><em></em>Splitted Parent Files</li>
+                                                            <li class="splitedColor"><em></em>Splitted Files</li>
+                                                            <li class="copyColor"><em></em>Copy Files</li>  
+                                                            
+                                                        </ul>
+                                                    </div>
+                                                </apex:outputPanel> 
+                                                
+                                                
+                                            </div>
+                                            
+                                        </div>
+                                        
+                                        <div class="searchSec">
+                                            
+                                            
+                                            <apex:outputPanel id="displaySearchWindow" rendered="{!displaySearchWindow}">
+                                                
+                                                <apex:actionFunction name="show3" action="{!runSearch}" /> 
+                                                <apex:actionFunction name="showSort" action="{!refresh}" />
+                                                <apex:inputText value="{!searchValue}" html-placeholder="File Name Search...." title="Enter File Name to Search" onkeydown="if(event.keyCode==13){this.blur();show3();gridviewScrollauto();}"/>
+                                                <apex:commandButton value="Search" action="{!runSearch}" />
+                                                Sort&nbsp; by &nbsp;<apex:selectList value="{!sortingChoice}" id="sortPicklist"  multiselect="false" size="1" onchange="showSort()">
+                                                <apex:selectOptions value="{!sortingoptions}"/>
+                                                </apex:selectList>&nbsp; 
+                                                <apex:selectList styleClass="sortListAsc" value="{!sortType}"  multiselect="false" size="1"  onchange="showSort()" >
+                                                    <apex:selectOptions value="{!sortingTypeoptions}"/>
+                                                </apex:selectList>&nbsp;
+                                            </apex:outputPanel>
+                                            
+                                        </div>
+                                        
+                                        
+                                        <apex:actionFunction name="changeQCcheckPopupApprove" action="{!updateQCFileStatusCheck}" onComplete="showQCPopupApprove();" immediate="true" >
+                                            <apex:param id="filesId" name="filesId" value=""/>
+                                        </apex:actionFunction>
+                                        
+                                        <apex:actionFunction name="changeQCcheckPopupRedo" action="{!updateQCFileStatusCheck}" onComplete="showQCPopupRedo();" immediate="true">
+                                            <apex:param id="filesId1" name="filesId1" value=""/>
+                                        </apex:actionFunction>
+                                        
+                                        <apex:actionFunction name="changeQCcheckPopupCheck" action="{!updateQCFileStatusCheck}" onComplete="showQCPopupCheck();" immediate="true">
+                                            <apex:param id="filesId2" name="filesId2" value=""/>
+                                        </apex:actionFunction>
+                                        
+                                        <apex:actionFunction name="callUpdateCategory" action="{!UpdateCategory}"/> 
+                                        
+                                        <apex:actionFunction name="changeCategory" action="{!changeCategory}" onComplete="showChangeCategory() ;" immediate="true" rerender="changeCategoryId" >
+                                            <apex:param id="fileCategoryId" name="fileCategoryId" value=""/>
+                                        </apex:actionFunction>
+                                        
+                                        <apex:actionFunction name="changeStatus" action="{!changeStatus}" onComplete="showChangeStatus() ;" immediate="true" rerender="changeStatusId" >
+                                            <apex:param id="fileStatusId" name="fileStatusId" value=""/>
+                                        </apex:actionFunction>
+                                        
+                                        
+                                        
+                                        <apex:actionStatus id="myDisplayStatus"  startText="Processing..."  stopText=""/>
+                                        
+                                        
+                                        
+                                        <apex:outputPanel id="outputPanelId4"  rendered="{!(wrapperList.size==0 && displayErrorMes ==true)}">
+                                            <table width="100%" cellpadding="0" cellspacing="0" border="0" >
+                                                <tr style="height:65px;">
+                                                    <td > No Records Found</td>
+                                                </tr>
+                                            </table>
+                                        </apex:outputPanel>     
+                                           
+                                        <apex:outputPanel id="callJS">    
+                                            <script type="text/javascript">
+                                            var Jobdetails='{!displayJobPopUp}';
+                                            var FileInstruction = '{!displayPopup}';
+                                            if('{!displayJobPopUp}'=='true'){
+                                                if(document.getElementById('{!$Component.jobPopup}')){
+                                                    $(".blanket-div").show();   
+                                                    document.getElementById('{!$Component.jobPopup}').style.display='block';
+                                                }
+                                            }else{
+                                                if(document.getElementById('{!$Component.jobPopup}')){
+                                                    document.getElementById('{!$Component.jobPopup}').style.display='none';
+                                                }
+                                            }    
+                                            if('{!displayPopup}'=='true'){
+                                                if(document.getElementById('{!$Component.popup}')){
+                                                    $(".blanket-div").show();   
+                                                    document.getElementById('{!$Component.popup}').style.display='block';
+                                                }
+                                            }else{
+                                                if(document.getElementById('{!$Component.popup}')){
+                                                    document.getElementById('{!$Component.popup}').style.display='none';
+                                                }
+                                            }    
+                                            </script>
+                                        </apex:outputPanel>
+                                                                                
+                                                                                
+                                        <apex:outputPanel id="jobPopup" style="display:none;" styleClass="jobtitle" >    
+                                            <apex:outputPanel id="jobPopInnerOutputPnl"  styleClass="customPopup" layout="block" rendered="{!displayJobPopUp}">
+                                                <apex:pageBlock > 
+                                                    <apex:pageblockSection >  
+                                                        <apex:outputLabel styleClass="jobtitleHd" value="Change Job Titles"></apex:outputLabel>
+                                                        <UL>   
+                                                            <apex:outputLabel value="Job Titles"></apex:outputLabel>                           
+                                                            
+                                                            <apex:selectcheckboxes layout="pageDirection" value="{!EPMSJobList}">                   
+                                                                <apex:selectoptions value="{!JobList}" />          
+                                                            </apex:selectcheckboxes> 
+                                                        </UL>     
+                                                    </apex:pageblockSection>            
+                                                    <apex:commandButton value="Submit" action="{!updateObject}" styleClass="closeButton" rerender="jobPopup" oncomplete="Reloadpage('SuccessFully Created Jobs');"/>
+                                                    <apex:commandButton value="Cancel"  styleClass="closeButton" action="{!closeJobTitlePopup}" rerender="jobPopup" oncomplete="closeBg();"/>   
+                                                </apex:pageBlock>  
+                                            </apex:outputPanel>                        
+                                        </apex:outputPanel>                   
+                                        
+                                        <div class="container_12 divider freezeTableAutoWidth">
+                                            <div class="grid_6">
+                                                <table class="fancyTable headerFreezeTable" cellpadding="0" cellspacing="0">
+                                                    <thead>
+                                                        <tr>
+                                                            <apex:outputPanel rendered="{!IF(wrapperList.size > 0,true,false) }">
+                                                                <!-- <th><input type="checkbox" id = "selectall"  onclick="return checkCheckboxes();" /></th> -->
+                                                                <th><input type="checkbox" id="checkall" /></th>
+                                                                <th>Production Order Name</th>
+                                                                <th style="min-width:80px;">Status</th>
+                                                                <th>File Name</th>
+                                                                <!-- <th style="min-width:180px;">Thumb Nail</th> -->
+                                                                <th id="thumbImageHeader">Thumb Nail</th>
+                                                                <th>Category</th>
+                                                                <th>Extension</th>
+                                                                <th>Actual Time (HH:MM:SS)</th>
+                                                                <th style="min-width:220px;">Job Name</th>
+                                                                <th style="min-width:450px;">QC Comments</th>
+                                                                <th>Operator Incharge</th>
+                                                                <th>Quality Incharge</th>
+                                                                <th style="min-width:220px;">Order Instruction</th>
+                                                                <th class="last" style="min-width:220px;">File  Instruction</th>
+                                                            </apex:outputPanel>
+                                                        </tr>
+                                                    </thead>    
+                                                    <apex:variable var="inc" value="{!0}"/>
+                                                    
+                                                    <apex:repeat value="{!wrapperList}" var="fileObj">
+                                                        <apex:variable var="inc" value="{!inc+1}"/>
+                                                        <tbody class="allRow"> 
+                                                            <apex:outputPanel rendered="{!(fileObj.fileWrap.IsSplitedFile__c =false && fileObj.fileWrap.Splitted_Parent_id__c =NULL && fileObj.isCopyFile = false)}">
+                                                                
+                                                                <tr>
+                                                                    <!--                             <td><apex:inputCheckbox id="checkBox" styleClass="case" value="{!fileObj.isSelected}" /></td> -->
+                                                                    <td><apex:inputCheckbox styleClass="childs" value="{!fileObj.isSelected}" /></td>
+                                                                    
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Production_Order_Name__c}</apex:outputText> </td>
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Status__c}</apex:outputText> </td>
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Name}</apex:outputText> </td>  
+                                                                    <td class="thumbImageBody"><apex:outputText value="{!fileObj.fileWrap.Thumbnail_Display__c }" escape="false"/></td>
+                                                                    <td><apex:outputText >{!fileObj.catWrap.Name}</apex:outputText> </td>
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Current_Extension__c}</apex:outputText> </td>                          
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Actual_Time_HH_MM_SS__c}</apex:outputText> </td>
+                                                                    <td>
+                                                                        <div id="jobID{!inc}">
+                                                                        </div>
+                                                                        <script type="text/javascript">
+                                                                        var jobtitles='{!fileObj.fileWrap.Job_List__c}';
+                                                                        var jobsplioted='';
+                                                                        jobtitles=jobtitles.split(',');
+                                                                        
+                                                                        for(var incr=0;incr < jobtitles.length;incr++){
+                                                                            jobsplioted+=jobtitles[incr]+'<br/>';
+                                                                        }
+                                                                        $('#jobID{!inc}').html(jobsplioted);
+                                                                        </script>
+                                                                    </td>
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.QC_Comments__c}</apex:outputText> </td>  <!-- {!fileObj.fileWrap.QC_Comments__c} -->
+                                                                    <td><apex:outputText >{!fileObj.memWrap.Name}</apex:outputText></td>
+                                                                    <td><apex:outputText >{!fileObj.memQCWrap.Name}</apex:outputText></td>
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Instruction__c}</apex:outputText></td> 
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Order_Instructions__c}</apex:outputText> </td> 
+                                                                    
+                                                                </tr>
+                                                            </apex:outputPanel>
+                                                            <!-- NORMAL CHILD (OF PARENT) RECORD TO BE DISPLAY -->
+                                                            <apex:outputPanel rendered="{!fileObj.fileWrap.IsSplitedFile__c =false && fileObj.fileWrap.Parent_Id__c !=NULL && fileObj.isCopyFile = true }">
+                                                                
+                                                                <!--  -->
+                                                                <tr bgcolor="#FFD6D6">
+                                                                    <!-- <td><apex:inputCheckbox id="checkBox1" styleClass="case" value="{!fileObj.isSelected}" /></td> -->
+                                                                    <td><apex:inputCheckbox id="checkBox1" styleClass="childs" value="{!fileObj.isSelected}" /></td>
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Production_Order_Name__c}</apex:outputText> </td>
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Status__c}</apex:outputText> </td>
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Name}</apex:outputText> </td>  
+                                                                    <td class="thumbImageBody"><apex:outputText value="{!fileObj.fileWrap.Thumbnail_Display__c }" escape="false"/>
+                                                                    </td>
+                                                                    <td><apex:outputText >{!fileObj.catWrap.Name}</apex:outputText> </td>   
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Current_Extension__c}</apex:outputText> </td>                          
+                                                                    
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Actual_Time_HH_MM_SS__c}</apex:outputText> </td>
+                                                                    <td>
+                                                                        <div id="jobID{!inc}">
+                                                                        </div>
+                                                                        <script type="text/javascript">
+                                                                        var jobtitles='{!fileObj.fileWrap.Job_List__c}';
+                                                                        var jobsplioted='';
+                                                                        jobtitles=jobtitles.split(',');
+                                                                        
+                                                                        for(var incr=0;incr < jobtitles.length;incr++){
+                                                                            
+                                                                            jobsplioted+=jobtitles[incr]+'<br/>';
+                                                                            
+                                                                            
+                                                                        }
+                                                                        $('#jobID{!inc}').html(jobsplioted);
+                                                                        
+                                                                        </script>
+                                                                    </td>
+                                                                    
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.QC_Comments__c}</apex:outputText> </td>    <!-- {!fileObj.fileWrap.QC_Comments__c} -->
+                                                                    <td ><apex:outputText >{!fileObj.memWrap.Name}</apex:outputText> </td>
+                                                                    <td><apex:outputText >{!fileObj.memQCWrap.Name}</apex:outputText></td>
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Instruction__c}</apex:outputText> </td> 
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Order_Instructions__c}</apex:outputText> </td> 
+                                                                    
+                                                                    
+                                                                    
+                                                                </tr>
+                                                            </apex:outputPanel>
+                                                            <!-- SPLITTED CHILD (OF PARENT) RECORD TO BE DISPLAY -->
+                                                            <apex:outputPanel rendered="{!fileObj.fileWrap.Splitted_Parent_id__c !=NULL && fileObj.fileWrap.IsSplitedFile__c =false}"> <!-- fileObj.fileWrap.IsSplitedFile__c = false && -->
+                                                                <tr bgcolor="#BAFFC0"> <!-- ffebfb -->
+                                                                    <!-- <td><apex:inputCheckbox id="checkBox2" styleClass="case" value="{!fileObj.isSelected}" /></td> -->
+                                                                    <td><apex:inputCheckbox id="checkBox2" styleClass="childs" value="{!fileObj.isSelected}" /></td>
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Production_Order_Name__c}</apex:outputText> </td>
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Status__c}</apex:outputText> </td>
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Name}</apex:outputText> </td>  
+                                                                    <td class="thumbImageBody">
+                                                                        <apex:outputText value="{!fileObj.fileWrap.Thumbnail_Display__c }" escape="false"/>
+                                                                    </td>
+                                                                    <td><apex:outputText >{!fileObj.catWrap.Name}</apex:outputText> </td>     
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Current_Extension__c}</apex:outputText> </td>                          
+                                                                    
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Actual_Time_HH_MM_SS__c}</apex:outputText> </td>                 
+                                                                    
+                                                                    <td>
+                                                                        <div id="jobID{!inc}">
+                                                                        </div>
+                                                                        <script type="text/javascript">
+                                                                        var jobtitles='{!fileObj.fileWrap.Job_List__c}';
+                                                                        var jobsplioted='';
+                                                                        jobtitles=jobtitles.split(',');
+                                                                        
+                                                                        for(var incr=0;incr < jobtitles.length;incr++){
+                                                                            
+                                                                            jobsplioted+=jobtitles[incr]+'<br/>';
+                                                                            
+                                                                            
+                                                                        }
+                                                                        $('#jobID{!inc}').html(jobsplioted);
+                                                                        
+                                                                        </script>
+                                                                    </td>
+                                                                    
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.QC_Comments__c}</apex:outputText> </td>  
+                                                                    <td ><apex:outputText >{!fileObj.memWrap.Name}</apex:outputText> </td>
+                                                                    <td><apex:outputText >{!fileObj.memQCWrap.Name}</apex:outputText></td>
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Instruction__c}</apex:outputText> </td> 
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Order_Instructions__c}</apex:outputText> </td> 
+                                                                    
+                                                                    
+                                                                    
+                                                                </tr>
+                                                            </apex:outputPanel>
+                                                            <!-- SPLITTED PARENT RECORD TO BE DISPLAY -->
+                                                            <apex:outputPanel rendered="{!fileObj.fileWrap.IsSplitedFile__c =true}"> <!-- && fileObj.fileWrap.Parent_Id__c =NULL -->
+                                                                <tr bgcolor="#e2e5fe" >
+                                                                    <!-- <td><apex:inputCheckbox id="checkBox3" styleClass="case" value="{!fileObj.isSelected}" /></td> -->
+                                                                    <td><apex:inputCheckbox id="checkBox3" styleClass="childs" value="{!fileObj.isSelected}" /></td>
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Production_Order_Name__c}</apex:outputText> </td>
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Status__c}</apex:outputText> </td>
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Name}</apex:outputText> </td>  
+                                                                    <td class="thumbImageBody">
+                                                                        <apex:outputText value="{!fileObj.fileWrap.Thumbnail_Display__c }" escape="false"/>
+                                                                    </td>
+                                                                    <td><apex:outputText >{!fileObj.catWrap.Name}</apex:outputText> </td>     
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Current_Extension__c}</apex:outputText> </td>                  
+                                                                    
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Actual_Time_HH_MM_SS__c}</apex:outputText> </td>
+                                                                    <td>
+                                                                        <div id="jobID{!inc}">
+                                                                        </div>
+                                                                        <script type="text/javascript">
+                                                                        var jobtitles='{!fileObj.fileWrap.Job_List__c}';
+                                                                        var jobsplioted='';
+                                                                        jobtitles=jobtitles.split(',');
+                                                                        
+                                                                        for(var incr=0;incr < jobtitles.length;incr++){                                            
+                                                                            jobsplioted+=jobtitles[incr]+'<br/>';
+                                                                            
+                                                                            
+                                                                        }
+                                                                        $('#jobID{!inc}').html(jobsplioted);
+                                                                        
+                                                                        </script>
+                                                                    </td>
+                                                                    
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.QC_Comments__c}</apex:outputText> </td>  
+                                                                    <td ><apex:outputText >{!fileObj.memWrap.Name}</apex:outputText> </td>
+                                                                    <td><apex:outputText >{!fileObj.memQCWrap.Name}</apex:outputText></td>
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Instruction__c}</apex:outputText> </td> 
+                                                                    <td><apex:outputText >{!fileObj.fileWrap.Order_Instructions__c}</apex:outputText> </td> 
+                                                                    
+                                                                </tr>
+                                                            </apex:outputPanel>
+                                                            
+                                                        </tbody>    
+                                                    </apex:repeat>
+                                                    <apex:outputPanel rendered="{!IF(wrapperList.size > 0,true,false) }">
+                                                        <div class="paginationNav">
+                                                            <table class="pagefooter" width="100%" border="0" cellpadding="0" cellspacing="0" >
+                                                                
+                                                                <tr>
+                                                                    <apex:actionFunction name="show" action="{!refresh}" />
+                                                                    <td width="20%" align="left" class="lefttd">Display&nbsp;<apex:selectList value="{!setUserChoice}"  multiselect="false" size="1" onchange="show(); setWinSize(); ">
+                                                                        <apex:selectOptions value="{!items}"/>
+                                                                        </apex:selectList>&nbsp; Records Per Page &nbsp;&nbsp;&nbsp;
+                                                                        <td width="13%" id="count" >  <apex:outputText id="myPlaceholder" value="0"/>&nbsp;&nbsp; Records Selected </td>
+                                                                    
+                                                                </td>
+                                                            
+                                                            <td width="34%"><apex:commandButton value="Previous" action="{!Previous}"  status="status" disabled="{!DisablePrevious}" />
+                                                                <apex:commandButton value="Next" action="{!Next}" status="status" disabled="{!DisableNext}" /></td>
+                                                            
+                                                            <apex:actionStatus id="status1" startText="Please Wait..."/>
+                                                            <apex:actionFunction name="show2" action="{!refreshPageRecords}" /> <!--  -->
+                                                            <!-- <td width="33%" align="right" class="NOFPage"> Page &nbsp; <input name="" type="text" value="{!currentPage}"/> &nbsp;  Of &nbsp;  <apex:outputText label="Total" value="{!noOfPages}" escape="false"/></td> -->
+                                                            <td width="33%" align="right" class="NOFPage"> Page &nbsp; <apex:inputText value="{!newFileForPageCount}" id="pageCount" onchange="show2(); setWinSize(); " onkeydown="if(event.keyCode==13){this.blur();show2();gridviewScrollauto();}"/> &nbsp;  Of &nbsp;  <apex:outputText label="Total" value="{!noOfPages}" escape="false"/></td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </apex:outputPanel>    
+                                        </table>
+                                    </div>
+                                    <div class="clear"></div>
+                                </div>    
+                                
+                                
+                                
+                                
+                                
+                            </apex:outputPanel>
+                        </apex:pageBlock>
+                </span>
+                
+                <div class="showQCPopupApprove">
+                    <div id="popDiv" class="ontop"></div>
+                    <div id="popupStatus">
+                        <apex:outputPanel id="changeStatusId1">                    
+                            <apex:pageblock title="Do you want to approve">                        
+                                <apex:pageMessages />                     
+                                
+                                <div class="changeExtStatusSec">      
+                                    <div class="changeExtLabel" style="width: 45%;float: left;">QC Comments:</div>
+                                    <div class="changeExtTextBox" style="width: 200px;">
+                                        <apex:inputTextArea style="width: 200px;"  id="qc_comments" value="{!qcCommentsForFilesForApprove}" html-maxlength="200"/>
+                                    </div> 
+                                    
+                                    
+                                </div>    
+                                <div class="changeExtStatusSec" style="margin-left:120px;">
+                                    <apex:inputCheckbox value="{!isImmediateUpload}"/> Approve Immediately
+                                </div>
+                                <div class="changeExtBtnStatusSec" style="width: 37%;">      
+                                    <apex:commandButton value="Submit" styleClass="closeButton" action="{!updateQCFileStatusCheck}" rerender="changeStatusId1" />                   
+                                    <!-- oncomplete="SuccessFullyDelete('SuccessFully Comments updated') ;" -->
+                                    <apex:commandButton value="Cancel" styleClass="closeButton" onclick="cancelchangeStatus()" OnComplete="refreshParent()"/>
+                                </div>
+                            </apex:pageblock>                    
+                        </apex:outputPanel>                
+                    </div>
+                </div>                   
+                
+                <div class="showQCPopupRedo">
+                    <div id="popDiv" class="ontop"></div>
+                    <div id="popupStatus">
+                        <apex:outputPanel id="changeStatusId2">                    
+                            <apex:pageblock title="Do you want to change File status as Redo">                        
+                                <apex:pageMessages />                     
+                                
+                                <div class="changeExtStatusSec">      
+                                    <div class="changeExtLabe2" style="width: 45%;float: left;">QC Comments:</div>
+                                    <div class="changeExtTextBox" >
+                                        <apex:inputTextArea style="width: 200px;" id="qc_comments" value="{!qcCommentsForFilesRedo}" html-maxlength="200"/>
+                                    </div>                       
+                                </div>    
+                                
+                                <div class="changeExtBtnStatusSec" style="width: 37%;">      
+                                    <apex:commandButton value="Submit" style="float:left;" action="{!updateQCFileStatusToRedo}" styleClass="closeButton" rerender="changeStatusId2" oncomplete="if('{!errorFlag}' == 'false') {SuccessFullyDelete('SuccessFully Comments updated') ;};" />                   
+                                    <apex:commandButton value="Cancel" onclick="cancelchangeStatus()" styleClass="closeButton" OnComplete="refreshParent()"/>
+                                </div>
+                            </apex:pageblock>                    
+                        </apex:outputPanel>                
+                    </div>
+                </div>          
+                
+                <div class="showQCPopupCheck">
+                    <div id="popDiv" class="ontop"></div>
+                    <div id="popupStatus">
+                        <apex:outputPanel id="changeStatusId3">                    
+                            <apex:pageblock title="Do you want to change File status as On-Hold">                        
+                                <apex:pageMessages />                     
+                                
+                                <div class="changeExtStatusSec">      
+                                    <div class="changeExtLabe2" style="width: 35%;float: left;">QC Comments:</div>
+                                    <div class="changeExtTextBox" style="width: 200px;">
+                                        <apex:inputTextArea style="width: 400px;" id="qc_comments" value="{!qcCommentsForFiles}" html-maxlength="200"/>
+                                    </div>                       
+                                </div>    
+                                
+                                <div class="changeExtBtnStatusSec" style="width: 37%;">      
+                                    <apex:commandButton value="Submit" style="float:left;" action="{!updateQCFileStatusToChecked}" styleClass="closeButton" rerender="changeStatusId3" oncomplete="if('{!errorFlag}' == 'false') {SuccessFullyDelete('SuccessFully Comments updated') ;};"/>                   
+                                    <apex:commandButton value="Cancel" onclick="cancelchangeStatus()" styleClass="closeButton" OnComplete="refreshParent()"/>
+                                </div>
+                            </apex:pageblock>                    
+                        </apex:outputPanel>                
+                    </div>
+                </div> 
+                
+                <div class="changeCategoryDiv">
+                    <div id="popDiv" class="ontop"></div>
+                    <div id="popupStatus">
+                        <apex:outputPanel id="changeCategoryId">                    
+                            <apex:pageblock title="Change Category">                       
+                                <apex:pageMessages />                     
+                                
+                                <div class="changeExtStatusSec"> 
+                                    <!--
+<div class="changeCategorySec">
+<div class="changeExtLabel">Current Category Code</div>
+<div class="changeExtLabel">
+<apex:outputLabel value="{!newcatcode}" /> 
+</div>
+</div>
+<div class="changeCategorySec">
+<div class="changeExtLabel">Current Working Time (secs)</div>
+<div class="changeExtLabel">
+<apex:outputLabel value="{!totalworktimeOld}" />
+</div>
+</div>
+-->
+                                    
+                                    <!-- onchange="callUpdateCategory();" onkeypress="return isNumberKey(event)"-->
+                                    <!-- <apex:actionSupport event="onchange" action="{!getCategoryForInputTime}" rerender="elementStatus" /> -->
+                                    <!--
+<div class="changeCategorySec"> 
+<div class="changeExtLabel">New Working Time  (secs)</div>
+<div class="changeExtTextBox">
+<apex:inputtext value="{!totalworktime}" id="worktime" onchange="getNewUpdateCategory();">
+
+<apex:actionFunction name="getNewUpdateCategory" action="{!getCategoryForInputTime}" rerender="changeCategoryId"/>
+</apex:inputText>
+</div> 
+</div>
+-->
+                                    
+                                    <div class="changeCategorySec">
+                                        <div class="changeExtLabel">Select Category  </div>
+                                        <div class="changeExtTextBox">
+                                            <apex:outputPanel id="SelectCateg">
+                                                <apex:selectList value="{!selectvalueCategory}" size="1" id="elementStatus">
+                                                    <apex:selectoptions value="{!AllFileCategory}" />
+                                                </apex:selectList>
+                                            </apex:outputPanel>    
+                                        </div>
+                                    </div>
+                                </div>    
+                                
+                                <div class="changeExtBtnStatusSec" style="width:35%;">      
+                                    <apex:commandButton value="Submit" action="{!saveChangeCategory}" rerender="changeCategoryId" rendered="{!submitButtonCat}"/>
+                                    <apex:commandButton value="Cancel" onclick="cancelchangeCategory()" OnComplete="refreshParent()" rerender="changeCategoryId" rendered="{!submitButtonCat}"/>
+                                    <apex:commandButton value="Close" onclick="cancelchangeStatus()" OnComplete="refreshParent()"    rendered="{!submitButtonCat==false}" />
+                                </div>
+                            </apex:pageblock>    
+                            
+                            
+                            
+                            
+                        </apex:outputPanel>                
+                    </div>
+                </div> 
+                
+                <div class="changeStatusDiv">
+                    <div id="popDiv" class="ontop"></div>
+                    <div id="popupStatus">
+                        <apex:outputPanel id="changeStatusId">                    
+                            <apex:pageblock title="Change File Status">                        
+                                <apex:pageMessages />                     
+                                
+                                <div class="changeExtStatusSec">      
+                                    <div class="changeExtLabel">File Status :</div>
+                                    <div class="changeExtTextBox">
+                                        <apex:selectList value="{!selectvalue}" size="1" id="StatusC" disabled="{!statusC}">
+                                            <apex:selectoptions value="{!AllFileStatus}"/>
+                                        </apex:selectList></div>
+                                </div>    
+                                
+                                <div class="changeExtBtnStatusSec">      
+                                    <apex:commandButton value="Submit" action="{!saveChangeStatus}"    rerender="changeStatusId"  rendered="{!submitButton}"/>
+                                    <apex:commandButton value="cancel" onclick="cancelchangeStatus()" OnComplete="refreshParent()"    rerender="changeStatusId" rendered="{!submitButton}"/>
+                                    <apex:commandButton value="Close" onclick="cancelchangeStatus()" OnComplete="refreshParent()"    rendered="{!submitButton==false}" />
+                                </div>
+                            </apex:pageblock>                    
+                        </apex:outputPanel>                
+                    </div>
+                </div> 
+                
+                <div class="assignPenalityDiv">
+                    <div id="popDiv" class="ontop"></div>
+                    <div id="popupPenality">
+                        <apex:outputPanel id="assignPenalityId">                    
+                            <apex:pageblock title="Assign/Skip Penalty">                        
+                                <apex:pageMessages />                     
+                                
+                                <div class="changeExtStatusSec">      
+                                    <div class="changeExtLabel">Mistake Category :</div>
+                                    <div class="changeExtTextBox">
+                                        <apex:selectList value="{!selectMistakeCategory}" size="1" id="StatusC" disabled="{!statusC}">
+                                            <apex:selectoptions value="{!AllMistakeCategory}"/>
+                                            <apex:actionSupport event="onchange" rerender="StatusD"/>
+                                        </apex:selectList></div>
+                                </div>    
+                                
+                                <div class="changeExtStatusSec">      
+                                    <div class="changeExtLabel">Mistake :</div>
+                                    <div class="changeExtTextBox">
+                                        <apex:selectList value="{!selectMistake}" size="1" id="StatusD" disabled="{!statusD}">
+                                            <apex:selectoptions value="{!AllMistake}"/>
+                                        </apex:selectList></div>
+                                </div>   
+                                <div class="changeExtStatusSec">      
+                                    <div class="changeExtLabel">Do you want to skip the penalty ? </div>
+                                    <div class="changeExtTextBox">
+                                        <apex:inputCheckbox value="{!isSkipPenalty}" label=""/>
+                                    </div>
+                                </div>     
+                                <div class="changeExtStatusSec">      
+                                    <div class="changeExtLabel">QC Comments</div>
+                                    <div class="changeExtTextBox">
+                                        <apex:inputtextarea style="width: 250px; height:250px;"  id="qc_penality_comments" value="{!penaltycomments}" html-maxlength="200" />
+                                    </div>
+                                </div>
+                                
+                                <div class="changeExtBtnStatusSec">      
+                                    <apex:commandButton value="Submit" action="{!save}"    rerender="assignPenalityId"  rendered="{!submitButton}"/>
+                                    <apex:commandButton value="cancel" onclick="cancelchangeStatus()" OnComplete="refreshParent()"    rerender="assignPenalityId" rendered="{!submitButton}"/>
+                                    <apex:commandButton value="Close" onclick="cancelchangeStatus()" OnComplete="refreshParent()"    rendered="{!submitButton==false}" />
+                                </div>
+                            </apex:pageblock>                    
+                        </apex:outputPanel>                
+                    </div>
+                </div> 
+                
+            </td>  
+            
+        </tr>
+    </table>
+    
+</body>
+
+</html>
+
+</apex:form>
+
+</apex:page>

@@ -1,0 +1,5 @@
+<apex:page title="貸し倒れ" standardController="SeikyuHeader__c" extensions="TokusokuController" recordSetVar="records" action="{!NyukinStatusUpdate}">
+
+    <h1>入金ステータス更新中...</h1>
+
+</apex:page>

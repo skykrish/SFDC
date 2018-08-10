@@ -1,0 +1,108 @@
+<apex:page standardController="Production_Order__c" extensions="EPMS_ChangeTLController" showHeader="false" sidebar="false">
+    
+    
+    <style>
+    .bPageBlock {
+         background-color: white;
+     }
+    .bPageTitle h3 {
+            font-family: arial,"Times New Roman", Georgia, Serif;
+            font-size: 90% !important; 
+            // you can write this way also font-size: 40px !important;
+        }
+      
+        .bPageTitle h1{
+            font-style: Arial;
+            font-weight: bold;
+            font-size: 150% !important;
+            text-align:center;
+         }  
+         
+         .statusStyle {
+        background:url(/img/loading.gif) no-repeat 0 0; 
+        padding-left:20px; 
+        margin-left:10px; 
+        padding-bottom:5px; 
+         color: blue;
+        }   
+     
+     </style>
+    <style>
+.tbldates table
+{
+width:100%;
+}
+.tbldates table th
+{
+width:50% !important;
+text-align:left !important;
+}
+.tbldates table select
+{
+width:94% !important;
+}
+</style>
+<script src="/soap/ajax/35.0/connection.js"></script>
+<script>   
+       function ClosePopup(){
+       sforce.connection.sessionId = '{!$Api.Session_ID}';
+       var describeSObjectResult = sforce.connection.describeSObject("Production_Order__c");
+       var prefix = describeSObjectResult.keyPrefix;       
+        var url = location.href;
+        var baseURL = url.substring(0, url.indexOf('/', 14));         
+        window.opener.location.href="/" + prefix;
+        window.top.close();
+      }
+      
+</script>   
+       <apex:form >
+          <apex:sectionHeader title="Change TL for Production Order" />
+          <apex:pagemessages id="errorId"> </apex:pagemessages>
+          <center>
+            <apex:pageblock mode="maindetail">
+             <apex:pageblockButtons location="bottom">
+                 <apex:outputPanel id="hideButton">
+                    <apex:commandbutton action="{!saveChanges}" value="Submit" rerender="pgBlckId,errorId,status,hideButton" status="actStatusId" rendered="{!isSubmitted}" onclick="this.disabled = true;">                    
+                    </apex:commandbutton>
+                    <apex:commandbutton value="Cancel" onclick="ClosePopup();return false;"/>                 
+                    </apex:outputPanel>
+                </apex:pageblockButtons>
+                
+
+                <div class="tbldates"> 
+                    <apex:actionStatus id="actStatusId" startText="Updating Team leads..."  stopText="" startStyleClass="statusStyle" >
+                    </apex:actionStatus>
+                   <apex:pageBlockSection columns="1" id="pgBlckId">
+                    <apex:pageblocksectionItem >
+                       <apex:outputText value="Available Shifts" style="font-size: 105%;margin-left:30px;" />
+                            <apex:selectList value="{!selShift}" size="1" multiselect="false">
+                            <apex:actionSupport event="onchange" action="{!changeShift}"  />
+                                <apex:selectOptions value="{!shiftNames}" />
+                            </apex:selectList>
+                                             
+                            </apex:pageblocksectionItem> 
+                        <apex:pageblocksectionItem >
+                        <apex:outputText value="Available Teams" style="font-size: 105%;margin-left:30px;" />
+                            <apex:selectList value="{!selTeam}" size="1" multiselect="false">
+                            <apex:actionSupport event="onchange" action="{!changeTeam}"  />
+                                <apex:selectOptions value="{!teamNames}" />
+                            </apex:selectList>
+                        </apex:pageblocksectionItem>
+                        <apex:pageblocksectionItem >
+                        <apex:outputText value="Select TL Name" style="font-size: 105%;margin-left:30px;" />
+                            <apex:selectList value="{!selTL}" size="1" multiselect="false">
+                                <apex:selectOptions value="{!TLNames}" />
+                            </apex:selectList>
+                        </apex:pageblocksectionItem>
+                        <apex:outputPanel rendered="{!isBulkUpdate}">
+                            <apex:outputLabel style="font-weight:bold;margin-left:20px;">Order Files - Change TL Updation is :</apex:outputLabel>
+                            <apex:outputText style="font-weight:bold;color:blue;margin-left:20px;" value="{!batchStatus}" id="status" rendered="{!isBulkUpdate}"/>
+                            <apex:actionPoller action="{!checkJobStatus}" rerender="status,errorId" interval="10"/>
+                        </apex:outputPanel>
+                </apex:pageBlockSection>
+                </div>
+           </apex:pageblock>
+           </center>
+           
+    </apex:form>
+</apex:page>

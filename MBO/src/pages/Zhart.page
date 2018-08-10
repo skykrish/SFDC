@@ -1,0 +1,985 @@
+<apex:page controller="Zhart" readonly="true">
+ <!--  <apex:includeScript value="{!URLFOR($Resource.d3js,'d3.min.js')}"/> -->
+ <apex:form >
+ 
+  
+  <apex:selectList value="{!SelectedOrder}" size="1" multiselect="false">
+                                                    <apex:actionSupport event="onchange" action="{!reports}"/>
+                                                    <apex:selectOptions value="{!memberoptions}" />
+                                                </apex:selectList>
+ 
+ 
+<apex:outputPanel id="RefreshPage">
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  
+  
+ 
+  
+  
+ 
+  <style>
+  .switch {
+    left:85vw;
+    position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 30px;
+}
+
+.switch input {display:none;}
+
+#slider {
+padding:0;
+  position: absolute;
+  cursor: pointer;
+  border-radius: 10px;
+  top: 0;
+  left: 0px;
+font-size:20px;
+  right: 0;
+  bottom: 0;
+  background:black;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+#slider:before {
+
+  position: absolute;
+  content: attr(title);
+  font-family: monospace;
+  font-weight: bold;
+  height: 30px;
+  text-align:center;
+  
+  border-radius: 30px;
+  line-height:30px;
+ 
+  width: 30px;
+  left: 4px;
+  bottom: 0px;
+  background:lightskyblue;
+    /* text-shadow:inset 2px 2px 1px rgba(255, 255, 255, 0.5); */
+  /* -webkit-background-clip: text;
+     -moz-background-clip: text;
+          background-clip: text; */
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + #slider {
+  background-color:brown;
+}
+
+input:focus + #slider {
+  box-shadow: 0 0 1px gray;
+}
+
+input:checked + #slider:before {
+  -webkit-transform: translateX(15px);
+  -ms-transform: translateX(15px);
+  transform: translateX(15px);
+}
+
+
+
+
+#custTble {
+    border-collapse: collapse;
+    margin:0 auto;
+    margin-top:1rem;
+    -webkit-animation: fadeEffect 1s;
+    animation: fadeEffect 1s;
+}
+
+#custTble th, #custTble td {
+   border: 1px solid gray;
+}
+#custTble th,#custTble td{
+min-width:calc(100vw/88);
+text-align:center; 
+vertical-align:middle;
+}
+#sidebarCell{
+display:none;
+}
+
+#custTble tr:nth-child(odd){
+background-color:#ccc;
+}
+
+.d3-tip {
+  position:absolute;
+    line-height: 1;
+    font-weight: bold;
+    padding: 12px;
+    background: rgba(0, 255, 0, 0.8);
+    color:#1b1b1b;
+    border-radius: 2px;
+  }
+
+
+#tabTable{
+  display:flex;
+ align-content: space-between;
+}
+#tabTable  button{
+  width:100%;
+background: linear-gradient(#1797C0, #1797C0 70%, cyan);
+color:white;
+padding: 10px;
+font-size:18px;
+    box-shadow: 0px 1px 5px rgba(0,0,0,0.7);
+font-family:serif;
+    border: none;
+    cursor: pointer;
+}
+#tabTable  button.active{
+  background: linear-gradient(#998100,  #998100 70%,  #f6d365);
+}
+button:focus {outline:0;}
+#tabTable div{
+  margin:1px;
+  width:50%;
+}
+
+#chart{
+  margin:0 auto;
+  display: none;
+   -webkit-animation: fadeEffect 1s;
+    animation: fadeEffect 1s;
+  
+}
+
+
+/* Fade in tabs */
+@-webkit-keyframes fadeEffect {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+@keyframes fadeEffect {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+</style>
+
+  <script>
+    function callChart(e){
+    console.log(e.className);
+      e.className += ' active';
+      var tabbut = document.getElementsByClassName('tabbutton');
+      for(let item of tabbut){
+       item.className = item.className.replace('active','');
+    }
+      document.getElementById("chart").style.display ="block";
+      document.getElementById("custTble").style.display ="none";
+     return false;
+    }
+
+
+    function callTable(e){
+  console.log(e);
+   e.className += ' active';
+
+   var chtbut = document.getElementsByClassName('chrtbutton');
+    for(let item of chtbut){
+       item.className = item.className.replace('active','');
+    }
+      document.getElementById("custTble").style.display ="table";
+      document.getElementById("chart").style.display ="none";
+       
+     return false;
+    }
+
+    var regMap = new Map();
+
+
+  </script>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div id="tabTable">
+   
+      <div><button class="tabbutton" type="button" onclick="callTable(this);">Table</button></div><div><button class="chrtbutton" type="button" onclick="callChart(this);">Chart</button></div>
+  
+    </div>
+  <apex:repeat value="{!MapCaregoryr}" var="cat">
+
+  <script>
+
+
+     var catVals ={'A':[0,0],'B':[0,0],'C':[0,0],'D':[0,0],'E':[0,0],'F':[0,0],'G':[0,0],'H':[0,0],'I':[0,0],'J':[0,0],'K':[0,0],'L':[0,0],'M':[0,0],'N':[0,0],'O':[0,0],'P':[0,0],'Q':[0,0],'R':[0,0],'S':[0,0],'T':[0,0],'U':[0,0],'V':[0,0],'W':[0,0],'X':[0,0],'Y':[0,0],'Z':[0,0]};
+  </script>
+    <apex:repeat value="{!MapCaregoryr[cat]}" var="cats">
+                  
+            <script>
+             
+            catVals["{!cats['nme']}"][0] = {!cats['cnt']};
+            regMap.set('{!cats['mname']}',catVals);
+            </script>
+    
+
+    </apex:repeat>
+  </apex:repeat>
+
+  <apex:repeat value="{!MapCaregoryo}" var="cato">
+   <script>
+     var catVals ={'A':[0,0],'B':[0,0],'C':[0,0],'D':[0,0],'E':[0,0],'F':[0,0],'G':[0,0],'H':[0,0],'I':[0,0],'J':[0,0],'K':[0,0],'L':[0,0],'M':[0,0],'N':[0,0],'O':[0,0],'P':[0,0],'Q':[0,0],'R':[0,0],'S':[0,0],'T':[0,0],'U':[0,0],'V':[0,0],'W':[0,0],'X':[0,0],'Y':[0,0],'Z':[0,0]};
+  </script>
+
+    <apex:repeat value="{!MapCaregoryo[cato]}" var="cat1">
+                  
+            <script>
+            if(regMap.get('{!cat1['mname']}')){
+            var oVals = regMap.get('{!cat1['mname']}');
+                
+            oVals["{!cat1['nme']}"][1] = {!cat1['cnt']};
+        
+            }else{
+
+             catVals["{!cat1['nme']}"][1] = {!cat1['cnt']};
+            regMap.set('{!cat1['mname']}',catVals);
+            }
+     
+            </script>
+    
+
+    </apex:repeat>
+  </apex:repeat>
+  
+  
+<table id="custTble">
+    <thead>
+    <tr>
+    <th rowspan="2" style="line-height:30px; width:110px;  vertical-align:middle;">Member Name</th>
+     <th colspan="2">A</th>
+     <th colspan="2">B</th>
+     <th colspan="2">C</th>
+     <th colspan="2">D</th>
+     <th colspan="2">E</th>
+     <th colspan="2">F</th>
+     <th colspan="2">G</th>
+     <th colspan="2">H</th>
+     <th colspan="2">I</th>
+     <th colspan="2">J</th>
+     <th colspan="2">K</th>
+     <th colspan="2">L</th>
+     <th colspan="2">M</th>
+     <th colspan="2">N</th>
+     <th colspan="2">O</th>
+     <th colspan="2">P</th>
+     <th colspan="2">Q</th>
+     <th colspan="2">R</th>
+     <th colspan="2">S</th>
+     <th colspan="2">T</th>
+     <th colspan="2">U</th>
+     <th colspan="2">V</th>
+     <th colspan="2">W</th>
+     <th colspan="2">X</th>
+     <th colspan="2">Y</th>
+     <th colspan="2">Z</th>
+     <th colspan="2">Total</th>
+     </tr>
+       <tr>
+   <th>R</th>
+   <th>O</th>
+   <th>R</th>
+   <th>O</th>
+   <th>R</th>
+   <th>O</th>
+   <th>R</th>
+   <th>O</th>
+   <th>R</th>
+   <th>O</th>
+   <th>R</th>
+   <th>O</th>
+   <th>R</th>
+   <th>O</th>
+   <th>R</th>
+   <th>O</th>
+   <th>R</th>
+   <th>O</th>
+   <th>R</th>
+   <th>O</th>
+   <th>R</th>
+   <th>O</th>
+   <th>R</th>
+   <th>O</th>
+   <th>R</th>
+   <th>O</th>
+   <th>R</th>
+   <th>O</th>
+   <th>R</th>
+   <th>O</th>
+   <th>R</th>
+   <th>O</th>
+   <th>R</th>
+   <th>O</th>
+   <th>R</th>
+   <th>O</th>
+   <th>R</th>
+   <th>O</th>
+   <th>R</th>
+   <th>O</th>
+   <th>R</th>
+   <th>O</th>
+   <th>R</th>
+   <th>O</th>
+   <th>R</th>
+   <th>O</th>
+   <th>R</th>
+   <th>O</th>
+   <th>R</th>
+   <th>O</th>
+   <th>R</th>
+   <th>O</th>
+   <th>R</th>
+   <th>O</th>
+   </tr>
+    </thead>
+    <tbody id="tablebody">
+
+    </tbody>
+</table>
+<div id="chart">
+
+<label class="switch">
+  <input onclick="checkboxfunc();"   id="slidercheck" type="checkbox"/>
+  <span title='S'  id="slider"></span>
+</label>
+
+  <svg id = "svg1" width="1000" height="600"></svg>
+ 
+</div>
+
+
+
+
+
+
+
+<script>
+
+
+function checkboxfunc(){
+
+if(document.getElementById("slidercheck").checked){
+    document.getElementById("slider").setAttribute('title','G');
+  transitionGrouped();
+}else{
+  document.getElementById("slider").setAttribute('title','S');
+  transitionStacked();
+}
+}
+
+
+var tbody = document.getElementById("tablebody");
+var data = [];
+regMap.forEach((value,key,mapObj) => {
+  var tr = document.createElement("tr");
+  var td = document.createElement("td");
+  var memId = document.createTextNode(key);
+  var regTotaltd = document.createElement("td");
+  var optTotaltd = document.createElement("td");
+  var regTotal = 0;
+  var optTotal = 0;
+  var d3obj ={};
+
+  d3obj["Name"] = key; 
+  
+
+  td.appendChild(memId);
+  tr.appendChild(td);
+  tbody.appendChild(tr);
+
+  for(var i in value){
+    if(value.hasOwnProperty(i)){
+      var regjobtd = document.createElement("td");
+      var optJobtd = document.createElement("td");
+
+      regTotal += value[i][0];
+      optTotal += value[i][1];
+      
+      var regJob = document.createTextNode(value[i][0]);
+      var optJob = document.createTextNode(value[i][1]);
+
+      optJobtd.appendChild(optJob);
+      regjobtd.appendChild(regJob);
+      tr.appendChild(regjobtd);
+      tr.appendChild(optJobtd);
+
+    }
+
+  }
+  regTotaltd.appendChild(document.createTextNode(regTotal));
+  optTotaltd.appendChild(document.createTextNode(optTotal));
+  tr.appendChild(regTotaltd);
+  tr.appendChild(optTotaltd);
+  d3obj["Total Regular Files"] = regTotal;
+  d3obj["Total Optional Files"] = optTotal;
+  data.push(d3obj);
+
+  
+});
+
+/* var data1 = data.splice(0,70);
+var data2 = data.splice(0,25); */
+
+
+
+
+
+let callBars = (catData) =>{
+
+ document.getElementById("slidercheck").checked = false;
+if(parent === false){
+  
+  zoom.transform(g, d3.zoomIdentity);
+       var keys = [];
+      for (var key in catData[0]){
+       if (key != "Name")
+      keys.push(key);
+      }
+    
+    catData.forEach(function(d){
+
+      d.total = 0;
+     keys.forEach(function(k){
+      d.total += d[k];
+       });
+     });
+
+    let childvals = [];
+
+    catData.forEach(function(d){
+
+    keys.forEach(function(k){
+      childvals.push(d[k]);
+      });
+     });
+     
+    y1Max = d3.max(childvals); 
+    x.domain(catData.map(function(d) {
+            return d.Name;
+       }));
+  
+     
+    y.domain([0, d3.max(catData, function(d) {
+           return d.total;
+      })]).nice();
+
+  svg1.select(".axis")
+      .transition()
+      .duration(500)
+      .call(d3.axisBottom(x));
+
+      svg1.select(".yaxis")
+      .transition()
+      .duration(500)
+      .call(d3.axisLeft(y)); 
+      
+      var innerstacked = d3.stack().keys(keys)(catData);
+      console.log(innerstacked);
+     
+      var innerdata = g.selectAll(".gclass").data(innerstacked);
+      var bars = innerdata.selectAll(".bar").data(function(d){
+        return d;
+      });
+   
+    bars.exit().transition()
+        .duration(500)
+        .attr("y",y(0))
+        .attr("height",height-y(0))
+        .remove();
+   
+
+    bars
+    .enter().append("rect")
+    .attr("class","bar")
+    .attr("y",y(0))
+    .attr("height",height-y(0));
+    
+   
+   
+    bars.transition().duration(500)
+    .attr("x", function(d) {
+        return x(d.data.Name);
+        })
+        .attr("y", function(d) {
+        return y(d[1]);
+       })
+        .attr("height", function(d) {
+       return y(d[0]) - y(d[1]);
+       })
+       .attr("width", x.bandwidth());
+       
+       
+   
+    d3.selectAll("rect").on("click",callParent);
+
+      svg1.select(".axis")
+      .transition()
+      .duration(500)
+      .call(d3.axisBottom(x));
+
+      svg1.select(".yaxis")
+      .transition()
+      .duration(500)
+      .call(d3.axisLeft(y)); 
+
+}else{
+  zoom.transform(g, d3.zoomIdentity);
+  console.log("entered parent block");
+ console.log(catData);
+  x.domain(catData.map(function(d) {
+    return d.Name;
+  }));
+
+     
+     y1Max = y2Max;
+
+
+
+   y.domain([0, d3.max(catData, function(d) {
+           return d.total;
+      })]).nice();
+
+  svg1.select(".axis")
+      .transition()
+      .duration(500)
+      .call(d3.axisBottom(x))
+      .selectAll("text")
+    .attr("y", 0)
+    .attr("x", 9)
+    .attr("dy", ".35em")
+    .attr("transform", "rotate(65)")
+    .style("text-anchor", "start");
+
+
+var yAxis = d3.axisLeft(y)
+    .ticks(10);
+    /*.tickSize(width)
+    .tickPadding(8 - width); */
+
+  svg1.select(".yaxis")
+      .transition()
+      .duration(500)
+      .call(yAxis); 
+
+
+     console.dir(stackedData);
+        var outerData = g.selectAll(".gclass").data(stackedData);
+      var rect = outerData.selectAll(".bar").data(function(d){
+        return d;
+      });
+
+      var oldrect = rect
+    .enter().append("rect")
+     .attr("class","bar")
+     .attr("x", function(d) {
+        return x(d.data.Name);
+        })
+      .merge(rect)
+    .attr("y",y(0))
+    .attr("height",height-y(0))
+    .attr("x", function(d) {
+        return x(d.data.Name);
+        })
+   
+    .on("click",function(d,i){
+      callChild(d,i);
+    });
+
+    var newBarTrans = 
+    oldrect.transition().duration(1000)
+    .attr("y",function(d) {
+        return y(d[1]);
+       })
+    .attr("height",function(d) {
+       return y(d[0]) - y(d[1]);
+       })
+    .attr("width", x.bandwidth())
+    .attr("x", function(d) {
+        return x(d.data.Name);
+        });
+
+   
+    
+   rect.exit()
+   
+      .transition()
+        .duration(1000)
+      
+        .remove();
+  
+   zoom = d3.zoom()
+    .scaleExtent([1, 200])
+    .translateExtent([[0, 0], [width, height]])
+    .extent([[0, 0], [width, height]])
+    .on("zoom", zoomedInside);
+
+     g.call(zoom);
+
+
+
+function zoomedInside(){
+ 
+  gY.transition().duration(50).call(yAxis.scale(d3.event.transform.rescaleY(y)));
+ var new_yScale = d3.event.transform.rescaleY(y);
+  oldrect.attr("height", function(d) {
+      return new_yScale(d[0]) - new_yScale(d[1]);
+    })
+    .attr("y", function(d) {
+      return new_yScale(d[1]);
+    });
+     
+}
+
+
+
+
+
+    /*outerBars.transition().duration(500)
+    .attr("x", function(d) {
+        return x(d.data.Name);
+        })
+        .attr("y", function(d) {
+        return y(d[1]);
+       })
+        .attr("height", function(d) {
+       return y(d[0]) - y(d[1]);
+       })
+       .attr("width", x.bandwidth());*/
+  
+
+      
+  }
+
+};
+
+
+let parent = true;
+
+let callParent = ()=>{
+   d3.select(".nametext").remove();
+  d3.selectAll("rect").on("click",null);
+      console.log("called from child");
+          parent = true;
+          callBars(data);
+  }
+  let callChild =(d,i)=>{
+    var catList =  regMap.get(d.data.Name);
+      d3.selectAll("rect").on("click",null);
+     var catData = [];
+
+      d3.select(".legend").append("g").attr("height", 19)
+      .attr("transform", "translate(0,60)").attr("class","nametext").append("text")
+      .attr("font-size", 14)
+      .attr("font-family", "cursive")
+      .attr("x", width - 24)
+      .text("Name: "+d.data.Name);
+
+     for(var key in catList){
+
+       if(catList.hasOwnProperty(key)){
+        var valobj = {};
+        valobj["Name"] = key;
+        valobj["regularJob"] = catList[key][0];
+        valobj["optionalJob"] = catList[key][1];
+        catData.push(valobj);
+       }
+     }
+    parent = false;
+    callBars(catData);
+  }
+
+var svg1 = d3.select("#svg1"),
+    margin = {
+      top: 20,
+      right: 20,
+      bottom: 100,
+      left: 40
+    },
+    width = +svg1.attr("width") - margin.left - margin.right,
+    height = +svg1.attr("height") - margin.top - margin.bottom,
+    g = svg1.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  var x = d3.scaleBand()
+    .rangeRound([0, width])
+    .paddingInner(0.05)
+    .align(0.1);
+
+
+  var y = d3.scaleLinear()
+    .rangeRound([height, 0]);
+
+
+  var z = d3.scaleOrdinal()
+    .range(['#1b1b1b','#DE1B1B']);
+
+var tip = d3.select("body").append("div").attr("class","d3-tip").style("opacity",1).style("display","none");
+    
+ var keys = [];
+ var baseKeys = [];
+  for (key in data[0]){
+    if (key != "Name")
+      keys.push(key);
+      baseKeys.push(key);
+  }
+
+  data.forEach(function(d){
+
+    d.total = 0;
+    keys.forEach(function(k){
+      d.total += d[k];
+    })
+  });
+
+let values = [];
+  data.forEach(function(d){
+
+    keys.forEach(function(k){
+  values.push(d[k]);
+})
+});
+let y1Max = d3.max(values); 
+let y2Max = y1Max;
+
+data.sort(function(a, b) {
+    return b.total - a.total;
+  });
+  x.domain(data.map(function(d) {
+    return d.Name;
+  }));
+
+let ymax = d3.max(data,function(d){
+return d.total;
+});
+  y.domain([0, d3.max(data, function(d) {
+    return d.total;
+  })]).nice();
+
+
+  z.domain(keys);
+
+
+  let stackedData = d3.stack().keys(keys)(data);
+  console.log(stackedData);
+
+   var series = g.append("g")
+    .selectAll("g")
+    .data(d3.stack().keys(keys)(data))
+    .enter().append("g")
+    .attr("class","gclass")
+    .attr("fill", function(d) {
+      return z(d.key);
+    });
+    var rect = series.selectAll("rect")
+    .data(function(d) {
+      return d;
+    })
+    .enter().append("rect")
+    .attr("class","bar")
+    .attr("x", function(d) {
+      return x(d.data.Name);
+    })
+    .attr("y", function(d) {
+      return y(d[1]);
+    })
+    .attr("height", function(d) {
+      return y(d[0]) - y(d[1]);
+    })
+    .attr("width", x.bandwidth())
+    .on("mouseover", function(d){
+     tip.style('display','block');
+         
+            tip.html(this.parentNode.__data__.key+': '+(d[1]-d[0])).style('left',((d3.event.pageX)+'px'))
+                            .style('top',((d3.event.pageY-70)+'px'));
+            d3.select(this).style('opacity',0.8);
+    })
+    .on("mouseout",function(d){
+/*        tip.transition().style('opacity',0) */
+      tip.style('display','none');
+        d3.select(this).style('opacity',1);
+    })
+    
+  
+    .on("click",function(d,i){
+    
+      d3.select(".legend").append("g").attr("height", 19)
+      .attr("transform", "translate(0,60)").attr("class","nametext").append("text")
+      .attr("font-size", 14)
+      .attr("font-family", "cursive")
+      .attr("x", width - 24)
+      .text("Name: "+d.data.Name);
+      
+  
+      var catList =  regMap.get(d.data.Name);
+      d3.selectAll("rect").on("click",null);
+
+     var catData = [];
+  
+     for(var key in catList){
+
+       if(catList.hasOwnProperty(key)){
+        var valobj = {};
+        valobj["Name"] = key;
+        valobj["regularJob"] = catList[key][0];
+        valobj["optionalJob"] = catList[key][1];
+        catData.push(valobj);
+       }
+     }
+    parent = false;
+    callBars(catData);
+      
+      });
+
+    zoom = d3.zoom()
+    .scaleExtent([1, 200])
+    .translateExtent([[0, 0], [width, height]])
+    .extent([[0, 0], [width, height]])
+    .on("zoom", zoomed);
+
+     g.call(zoom);
+
+
+
+    
+
+
+ var gX = g.append("g")
+    .attr("class", "axis")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x))
+    .selectAll("text")
+    .attr("y", 0)
+    .attr("x", 9)
+    .attr("dy", ".35em")
+    .attr("transform", "rotate(65)")
+    .style("text-anchor", "start");
+
+var yAxis = d3.axisLeft(y)
+          .ticks(10);
+         /*.tickSize(width)
+          .tickPadding(8 - width); */
+           
+  var gY = g.append("g")
+    .attr("class", "yaxis")
+    .call(yAxis);
+   /*  .attr("y", y(y.ticks().pop()) + 0.5) */
+    /* .append("text")
+    .attr("x", 2)
+    .attr("dy", "0.32em")
+    .attr("fill", "#000")
+    .attr("font-weight", "bold")
+    .attr("text-anchor", "start")
+    .text("Total Files"); */
+
+
+
+function zoomed(){
+ console.log('main zoom called');
+  gY.transition().duration(50).call(yAxis.scale(d3.event.transform.rescaleY(y)));
+ var new_yScale = d3.event.transform.rescaleY(y);
+  rect.attr("height", function(d) {
+      return new_yScale(d[0]) - new_yScale(d[1]);
+    })
+    .attr("y", function(d) {
+      return new_yScale(d[1]);
+    });
+     
+}
+
+
+
+
+
+ 
+ 
+
+
+  var legend = g.append("g")
+    .attr("class","legend")
+    .attr("font-size", 10)
+    .attr("font-family", "sans-serif")
+    .attr("text-anchor", "end")
+    .selectAll("g")
+    .data(keys.slice().reverse())
+    .enter().append("g")
+    .attr("transform", function(d, i) {
+      return "translate(0," + i *20 + ")";
+    });
+
+  legend.append("rect")
+    .attr("x", width - 19)
+    .attr("width", 19)
+    .attr("height", 19)
+    .attr("fill", z);
+
+  legend.append("text")
+    .attr("x", width - 24)
+    .attr("y", 9.5)
+    .attr("dy", "0.32em")
+    .text(function(d) {
+      return d;
+    });
+
+
+var groupSpacing = 1;
+function transitionGrouped() {
+  zoom.on('zoom', null);
+  console.log('y1max'+y1Max);
+  y.domain([0, y1Max]).nice();
+  svg1.select(".yaxis")
+ .transition().duration(500)
+ .call(d3.axisLeft(y));
+
+  d3.selectAll("rect.bar").transition()
+      .duration(500)
+      .delay(function(d, i) { return i * 10; })
+      .attr("x", function(d, i) { return x(d.data.Name) + x.bandwidth() / 2 *this.parentNode.__data__.index; })
+      .attr("width", x.bandwidth() / 2 - groupSpacing)
+    .transition()
+      .attr("y", function(d) { return y(d[1] - d[0]); })
+      .attr("height", function(d) { return y(0) - y(d[1] - d[0]); });
+ 
+}
+
+function transitionStacked() {
+  zoom.on('zoom', zoomed);
+y.domain([0, d3.max(data, function(d) {
+  return d.total;
+})]).nice();
+
+svg1.select(".yaxis")
+.transition().duration(500)
+.call(d3.axisLeft(y));
+
+
+d3.selectAll("rect.bar").transition()
+    .duration(500)
+    .delay(function(d, i) { return i * 10; })
+    .attr("y", function(d) { return y(d[1]); })
+    .attr("height", function(d) { return y(d[0]) - y(d[1]); })
+  .transition()
+    .attr("x", function(d, i) { return x(d.data.Name); })
+    .attr("width", x.bandwidth());
+}
+
+
+
+</script>
+</apex:outputPanel>
+
+  </apex:form>
+
+    </apex:page>

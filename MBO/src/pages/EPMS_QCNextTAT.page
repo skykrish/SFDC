@@ -1,0 +1,123 @@
+<apex:page controller="EPMS_QCNextTAT" sidebar="false" showHeader="false"  standardStylesheets="false">
+    <apex:stylesheet value="{!URLFOR($Resource.bootstrap, 'bootstrap/css/bootstrap.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.bootstrap, 'bootstrap/css/jquery.mCustomScrollbar.css')}" />
+    <apex:includeScript value="{!URLFOR($Resource.bootstrap,'bootstrap/js/jquery.min.js')}"/> 
+        <apex:includeScript value="{!URLFOR($Resource.bootstrap,'bootstrap/js/jquery.mCustomScrollbar.js')}"/> 
+      
+
+    
+   
+  <style>
+      
+      
+      
+      
+    body{
+   padding-top:0px;
+   margin-top: 0px;
+   background:#cfeef8 ;
+       font-size: 12px;
+       color:#716E6E;
+    } 
+      .panel-group{
+      margin:0;
+      padding:0;
+      }
+     
+     
+   .panel {
+  margin-bottom: 4px;
+  margin-top: 0px;
+
+}
+.panel:nth-child(even)
+{
+background:#F7F7F7;
+}
+.panel-body {
+  padding-bottom:0;
+  padding-top:0;
+   background:url({!URLFOR($Resource.bootstrap, 'bootstrap/css/order.png')}) no-repeat 4px center;
+}
+      .panel-heading{
+      width:100%;
+     padding:5px 15px;
+     background:url({!URLFOR($Resource.bootstrap, 'bootstrap/css/tat.png')}) no-repeat 4px center;
+         background-color: #58B7D6 !important;
+    color: #DFF4FB !important;
+      
+     padding-bottom:0;
+      }
+      .margin-top-20
+      {
+      margin-top:-20px;
+      }
+   .panel-body a
+   {
+   padding:7px;
+   display:block;
+   border-left: 1px solid #E4D9D9;
+    margin-bottom: 0;
+   }
+   
+    
+ </style>
+    <script>
+    $(document).ready(function(){
+    $(".tblcls").mCustomScrollbar({
+                    setHeight:200,
+                    theme:"minimal-dark"
+                });
+                
+               
+    });
+    
+    function getCurrentOrder(){
+         $(".tblcls").mCustomScrollbar({
+                    setHeight:200,
+                    theme:"minimal-dark"
+                });
+                console.log('called');
+    }
+    
+     //window.setTimeout(getCurrentOrder,10000);
+    
+    </script>
+     <apex:form >
+    <apex:pageBlock id="block1">
+        
+       <apex:actionPoller action="{!getCurrentOrder}" reRender="counter" interval="15" oncomplete="getCurrentOrder();"/>
+
+        <apex:outputPanel id="counter">
+        
+        <apex:outputPanel rendered="{!donotDisplay == false}" >
+        <div class="tblcls">
+             <div class="panel" style="height: auto;">
+      <apex:repeat value="{!mapTimewiseOrders}" var="k"> 
+         
+            <div class="panel panel-default" >
+                <div class="panel-heading">
+                
+                    <apex:outputLabel value="{!k}"></apex:outputLabel>
+                    
+                </div>
+                <div class="panel-body">            
+                 <apex:repeat value="{!mapTimewiseOrders[k]}" var="v">
+                  <apex:outputLink value="/{!v.id}"  target="_top">{!v.name} ({!v.Production_Order_Status__c})</apex:outputLink>
+                </apex:repeat> 
+                </div>  
+            </div>
+               
+            </apex:repeat>
+      </div>
+      </div>
+       </apex:outputPanel>
+       <apex:outputPanel rendered="{!donotDisplay == true}">
+      <!--- <apex:pageblockSection >--->
+       No Records to display
+       <!--- </apex:pageblockSection>--->
+       </apex:outputPanel>
+        </apex:outputPanel> 
+    </apex:pageBlock>
+    </apex:form>
+</apex:page>
