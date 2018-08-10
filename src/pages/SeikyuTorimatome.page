@@ -1,0 +1,221 @@
+<apex:page title="請求取り纏め" controller="SeikyuTorimatomeController" tabStyle="SeikyuIchiranTab__tab">
+
+    <style>
+        span.paging {
+           padding-left: 5px;
+           padding-right: 5px;
+        }
+    </style>
+    
+    <!-- 共通スクリプト -->
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>
+    
+    <script type="text/javascript">
+    
+        // 画面ロード時の処理
+        $(document).ready(function(){
+            // 請求書作成
+            var isCreatePdf = {!isCreatePdf};
+            if (isCreatePdf) {
+                // 請求書作成処理を起動
+                $('input[id$="btnCreatePdf"]').click();
+            } else {
+                // 請求書作成処理を起動しない場合は画面表示
+                $("body").css("display", "block");
+            }
+        });
+        
+        function closeCompiled(){
+            postRequest("{!searchCondition}", "_self", "/apex/SeikyuIchiran");
+            $('input[id$="ichiran"]').attr('value', false);
+        }
+        
+        //POSTリクエスト処理
+        function postRequest(sh, target, nextUrl) {
+            // パラメータ設定
+            $('#shcon').val(sh);
+            // POSTリクエスト
+            $('#formPostRequest').attr("target", target);
+            $('#formPostRequest').attr("action", nextUrl);
+            $('#formPostRequest').submit();
+        }
+        
+        /**
+         * 処理対象のデータにチェック
+         * 合計印刷ページを更新
+         */
+        function paging(dispPage, pageNo) {
+            document.getElementById(dispPage).value = parseInt(pageNo);
+        }
+    </script>
+    
+    <apex:sectionHeader title="請求書取り纏め" />
+    <apex:pageMessages id="messageArea" showDetail="false" />
+    
+    <apex:form >
+    <apex:actionFunction name="sayHello" action="{!compiledSeikyu}" rerender="out" status="myStatus"/>
+        <apex:pageBlock >
+            <table width="100%">
+                <tr>
+                    <td>
+                        <apex:outputLabel for="criteria_seikyusaki" value="取り纏め先顧客"/>&nbsp;&nbsp;
+                        <apex:inputField id="criteria_seikyusaki" value="{!criteria.Seikyusaki__c}"/>
+                    </td>
+                </tr>
+            </table>
+            <!-- 取り纏め対象請求一覧 -->
+            <apex:outputPanel id="resultArea">
+                <apex:pageBlockSection id="comSec" title="取り纏め対象請求一覧" columns="1">
+                    <apex:pageBlockTable var="item" value="{!seikyuHeaderList}">
+                        <!-- 請求書番号 -->
+                        <apex:column style="width:110px;">
+                            <apex:facet name="header">
+                                <apex:outputText value="{!$ObjectType.SeikyuHeader__c.fields.Name.label}"/>
+                            </apex:facet>
+                            <apex:outputField style="width:100px" value="{!item.seikyuHeader.Name}"/>
+                        </apex:column>
+                        <!-- 請求先 -->
+                        <apex:column style="width:110px;">
+                            <apex:facet name="header">
+                                <apex:outputText value="{!$ObjectType.SeikyuHeader__c.fields.Seikyusaki__c.label}"/>
+                            </apex:facet>
+                            <apex:outputField style="width:100px" value="{!item.seikyuHeader.Seikyusaki__r.Name}"/>
+                        </apex:column>
+                        <!-- 締めグループ -->
+                        <apex:column style="width:110px;">
+                            <apex:facet name="header">
+                                <apex:outputText value="{!$ObjectType.SeikyuHeader__c.fields.ShimeGroup__c.label}"/>
+                            </apex:facet>
+                            <apex:outputField style="width:100px" value="{!item.seikyuHeader.ShimeGroup__c}"/>
+                        </apex:column>
+                        <!-- 締日 -->
+                        <apex:column style="width:110px;">
+                            <apex:facet name="header">
+                                <apex:outputText value="{!$ObjectType.SeikyuHeader__c.fields.Shimebi__c.label}"/>
+                            </apex:facet>
+                            <apex:outputField style="width:100px" value="{!item.seikyuHeader.Shimebi__c}"/>
+                        </apex:column>
+                        <!-- 請求先取引区分 -->
+                        <apex:column style="width:110px;">
+                            <apex:facet name="header">
+                                <apex:outputText value="{!$ObjectType.SeikyuHeader__c.fields.SeikyusakiTorihikiKbn__c.label}"/>
+                            </apex:facet>
+                            <apex:outputField style="width:100px" value="{!item.seikyuHeader.SeikyusakiTorihikiKbn__c}"/>
+                        </apex:column>
+                        <!-- 回収予定日 -->
+                        <apex:column style="width:110px;">
+                            <apex:facet name="header">
+                                <apex:outputText value="{!$ObjectType.SeikyuHeader__c.fields.KaisyuScheduledDate__c.label}"/>
+                            </apex:facet>
+                            <apex:outputField style="width:100px" value="{!item.seikyuHeader.KaisyuScheduledDate__c}"/>
+                        </apex:column>
+                        <!-- 請求額（税込み） -->
+                        <apex:column style="width:110px;">
+                            <apex:facet name="header">
+                                <apex:outputText value="{!$ObjectType.SeikyuHeader__c.fields.Seikyugaku_Tax__c.label}"/>
+                            </apex:facet>
+                            <apex:outputField style="width:100px" value="{!item.seikyuHeader.Seikyugaku_Tax__c}"/>
+                        </apex:column>
+                        <!-- 請求ステータス -->
+                        <apex:column style="width:110px;">
+                            <apex:facet name="header">
+                                <apex:outputText value="{!$ObjectType.SeikyuHeader__c.fields.SeikyuStatus__c.label}"/>
+                            </apex:facet>
+                            <apex:outputField style="width:100px" value="{!item.seikyuHeader.SeikyuStatus__c}"/>
+                        </apex:column>
+                        <!-- 入金ステータス -->
+                        <apex:column style="width:110px;">
+                            <apex:facet name="header">
+                                <apex:outputText value="{!$ObjectType.SeikyuHeader__c.fields.NyukinStatus__c.label}"/>
+                            </apex:facet>
+                            <apex:outputField style="width:100px" value="{!item.seikyuHeader.NyukinStatus__c}"/>
+                        </apex:column>
+                    </apex:pageBlockTable>
+                </apex:pageBlockSection>
+                <apex:outputPanel rendered="{!lastPage != null && seikyuHeaderList.size != 0}">
+                <table width="100%">
+                    <tr>
+                        <!-- ページング -->
+                        <td width="60%" align="left">
+                            <span class="paging">
+                                <apex:commandLink value="前へ" action="{!paging}" rendered="{!(dispPage != 1)}" onclick="javascript:paging('{!$Component.dispPage}', {!(dispPage - 1)})" reRender="resultArea, messageArea"/>
+                                <apex:outputText value="前へ" rendered="{!(dispPage == 1)}"/>
+                            </span>
+                            <span class="paging">
+                                <apex:commandLink value="1" action="{!paging}" rendered="{!(dispPage != 1)}" onclick="javascript:paging('{!$Component.dispPage}', 1)" reRender="resultArea, messageArea"/>
+                                <apex:outputText value="1" rendered="{!(dispPage == 1)}"/>
+                            </span>
+                            <span class="paging" style="display : {!IF(lastPage >= 2, 'inline', 'none')}">
+                                <apex:commandLink value="2" action="{!paging}" rendered="{!(dispPage != 2)}" onclick="javascript:paging('{!$Component.dispPage}', 2)" reRender="resultArea, messageArea"/>
+                                <apex:outputText value="2" rendered="{!(dispPage == 2)}"/>
+                            </span>
+                            <span class="paging" style="display : {!IF(lastPage >= 3, 'inline', 'none')}">
+                                <apex:commandLink value="3" action="{!paging}" rendered="{!(dispPage != 3)}" onclick="javascript:paging('{!$Component.dispPage}', 3)" reRender="resultArea, messageArea"/>
+                                <apex:outputText value="3" rendered="{!(dispPage == 3)}"/>
+                            </span>
+                            <span class="paging" style="display : {!IF(lastPage >= 4, 'inline', 'none')}">
+                                <apex:commandLink value="4" action="{!paging}" rendered="{!(dispPage != 4)}" onclick="javascript:paging('{!$Component.dispPage}', 4)" reRender="resultArea, messageArea"/>
+                                <apex:outputText value="4" rendered="{!(dispPage == 4)}"/>
+                            </span>
+                            <span class="paging" style="display : {!IF(lastPage >= 5, 'inline', 'none')}">
+                                <apex:commandLink value="5" action="{!paging}" rendered="{!(dispPage != 5)}" onclick="javascript:paging('{!$Component.dispPage}', 5)" reRender="resultArea, messageArea"/>
+                                <apex:outputText value="5" rendered="{!(dispPage == 5)}"/>
+                            </span>
+                            <span class="paging" style="display : {!IF(lastPage >= 6, 'inline', 'none')}">
+                                <apex:commandLink value="6" action="{!paging}" rendered="{!(dispPage != 6)}" onclick="javascript:paging('{!$Component.dispPage}', 6)" reRender="resultArea, messageArea"/>
+                                <apex:outputText value="6" rendered="{!(dispPage == 6)}"/>
+                            </span>
+                            <span class="paging" style="display : {!IF(lastPage >= 7, 'inline', 'none')}">
+                                <apex:commandLink value="7" action="{!paging}" rendered="{!(dispPage != 7)}" onclick="javascript:paging('{!$Component.dispPage}', 7)" reRender="resultArea, messageArea"/>
+                                <apex:outputText value="7" rendered="{!(dispPage == 7)}"/>
+                            </span>
+                            <span class="paging" style="display : {!IF(lastPage >= 8, 'inline', 'none')}">
+                                <apex:commandLink value="8" action="{!paging}" rendered="{!(dispPage != 8)}" onclick="javascript:paging('{!$Component.dispPage}', 8)" reRender="resultArea, messageArea"/>
+                                <apex:outputText value="8" rendered="{!(dispPage == 8)}"/>
+                            </span>
+                            <span class="paging" style="display : {!IF(lastPage >= 9, 'inline', 'none')}">
+                                <apex:commandLink value="9" action="{!paging}" rendered="{!(dispPage != 9)}" onclick="javascript:paging('{!$Component.dispPage}', 9)" reRender="resultArea, messageArea"/>
+                                <apex:outputText value="9" rendered="{!(dispPage == 9)}"/>
+                            </span>
+                            <span class="paging" style="display : {!IF(lastPage >= 10, 'inline', 'none')}">
+                                <apex:commandLink value="10" action="{!paging}" rendered="{!(dispPage != 10)}" onclick="javascript:paging('{!$Component.dispPage}', 10)" reRender="resultArea, messageArea"/>
+                                <apex:outputText value="10" rendered="{!(dispPage == 10)}"/>
+                            </span>
+                            <span class="paging">
+                                <apex:commandLink value="次へ" action="{!paging}" rendered="{!(dispPage != lastPage)}" onclick="javascript:paging('{!$Component.dispPage}', {!(dispPage + 1)})" reRender="resultArea, messageArea"/>
+                                <apex:outputText value="次へ" rendered="{!(dispPage == lastPage)}"/>
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+                </apex:outputPanel>
+                <table width="100%">
+                    <tr>
+                        <td align="right">
+                            <apex:commandButton value="取り纏め" disabled="{!isCreatePdf}" action="{!compiledSeikyu}" onclick="if(confirm('請求書取り纏めを行います。よろしいですか？')){return true;};return false;"/>
+                            <apex:commandButton value="戻る" disabled="{!isCreatePdf}" onclick="closeCompiled()" reRender="messageArea"/>
+                        </td>
+                    </tr>
+                </table>
+            
+                <!-- 隠しパラメータ -->
+                <apex:inputHidden id="dispPage" value="{!dispPage}"/>
+                <apex:inputHidden id="ichiran" value="{!ichiran}"/>
+            </apex:outputPanel>
+        </apex:pageBlock>
+        
+        <!-- 請求書作成用ボタン（画面上は非表示） -->
+        <div style="display: none;">
+            <apex:commandButton id="btnCreatePdf" value="請求書作成" action="{!createPdf}"/>
+        </div>
+        
+    </apex:form>
+    
+    <!-- POSTデータ -->
+    <div style="display:none">
+        <form id="formPostRequest" method="POST">
+            <input name="shcon" id="shcon" type="hidden" value=""/>
+        </form>
+    </div>
+    
+</apex:page>

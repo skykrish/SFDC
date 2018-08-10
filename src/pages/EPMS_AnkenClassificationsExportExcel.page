@@ -1,0 +1,141 @@
+<apex:page controller="EPMS_AnkenClassificationsExportExcel"  readonly="true" contentType="application/vnd.ms-excel#{!POquery.Name}.xls" cache="true" showHeader="false">
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+
+<style>
+body {font:12px Arial, Helvetica, sans-serif; color:#000; margin:0; padding:0;}
+.TableSec {padding:15px;}
+.TableSec table {font-size:12px; margin-bottom:20px;}
+.titleName h4 {font-size:16px; color:#000; margin:0; padding:10px 0; text-align:center;}
+.TableSec th {height:22px; padding:5px 8px; text-align:center; font-size:13px; background:#f1f1f1; border:1px solid #CCC; text-align:center;}
+.TableSec td {height:22px; padding:5px 8px; text-align:center; border-left:1px solid #CCC; border-bottom:1px solid #CCC; border-right:1px solid #CCC;}
+.TableSec tr:nth-child(odd) {background:#fafafa;}
+.TableSec tr:nth-child(even) {background:#ffffff;}
+.textCenter {text-align:center;}
+
+</style>
+
+</head>
+
+
+
+<apex:outputPanel >
+ <div class="grid_8 height304">
+            <table class="fancyTable" id="myTable02" cellpadding="0" cellspacing="0" width="100%" align="center">
+               
+               <tr>
+                   <td width="3%" style="border:0; background:#fff;"></td>
+                   <td colspan="2" style="border:0;"></td>
+               </tr>
+               <tr>
+                   <td width="3%" style="border:0; background:#fff;"></td>
+                   <td colspan="2" style="border:0;"><b>Production Order&nbsp;:&nbsp;{!POquery.Name}</b> </td>
+               </tr>
+               <tr>
+                   <td width="3%" style="border:0; background:#fff;"></td>
+                   <td colspan="2" style="border:0;"><b>Total file count(Anken)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;</b> {!POquery.Total_Anken_Count__c}</td>
+               </tr>
+               </table>
+               </div>
+               
+<apex:outputPanel rendered="{!catg}">
+
+<div>
+    <table width="100%" border="0" cellpadding="0" cellspacing="0" align="center">
+         <tr style="none" border="0" cellpadding="0" cellspacing="0">
+            <td colspan="4" style="none"></td>
+         </tr>
+         <tr style="none" border="0" cellpadding="0" cellspacing="0">
+            <td style="none"></td>
+            <td colspan="4" style="text-align:left;">
+                <h4>File Classification</h4>
+            </td>
+         </tr>
+         <tr style="none" border="0" cellpadding="0" cellspacing="0"><td colspan="4" style="none"></td></tr>
+    </table>
+</div>
+
+<div class="TableSec">
+    <table width="100%" border="0" cellpadding="0" cellspacing="0" align="center">
+        <tr>
+            <th width="10%" style="border-left:0; border-top:0; border-bottom:0; background:#fff;">&nbsp;</th>
+            <th width="6%">S.No</th>
+            <th width="38%">FileName</th>
+            <th width="38%">Directory Name</th>
+            <th width="38%">Category Name</th>
+        </tr>
+        <apex:variable var="inc" value="{!0}"/>
+        <apex:repeat value="{!FilesClassification}" var="obj">
+        <apex:variable var="inc" value="{!inc+1}"/>
+        <tr>
+            <td style="border-left:0; border-bottom:0;">&nbsp;</td>
+            <td><apex:outputText value="{!inc}" escape="false"/></td>
+            <td nowrap="true"><apex:outputText >{!obj.FileNames} </apex:outputText> </td>
+            <td nowrap="true"><apex:outputText >{!obj.DirectoryName}</apex:outputText> </td>
+            <td style="text-align:center;"><apex:outputText >{!obj.ClassificationName}</apex:outputText> </td>
+        </tr>
+        </apex:repeat> 
+        
+    </table>
+</div>
+</apex:outputPanel>
+</apex:outputPanel>
+    
+    
+    
+   
+   
+ 
+<apex:outputPanel rendered="{!OptionalFlag}">
+<div>
+    <table width="100%" border="0" cellpadding="0" cellspacing="0" align="center">
+         <tr style="none" border="0" cellpadding="0" cellspacing="0">
+            <td colspan="4" style="none"></td>
+         </tr>
+         <tr style="none" border="0" cellpadding="0" cellspacing="0">
+            <td style="none"></td>
+            <td colspan="4" style="text-align:left;">
+                <h4>Optional Job Details </h4>
+            </td>
+         </tr>
+         <tr style="none" border="0" cellpadding="0" cellspacing="0"><td colspan="4" style="none"></td></tr>
+    </table>
+</div>
+
+
+<div class="TableSec">
+    <table width="100%" border="0" cellpadding="0" cellspacing="0" align="center">
+        <tr>
+            <th width="10%" style="border-left:0; border-top:0; border-bottom:0; background:#fff;">&nbsp;</th>
+            
+            <th colspan="3" width="60%">Optional Job Name</th>
+            <th width="20%">Number of Files</th>
+            
+        </tr>
+        <apex:variable var="inc" value="{!0}"/>
+        <apex:repeat value="{!mapInteger}" var="mapKey">
+        
+        <tr>
+            <td style="border-left:0; border-bottom:0;">&nbsp;</td>
+            
+            <td colspan="3" nowrap="true" style="text-align:left;"><apex:outputText >{!mapKey} </apex:outputText> </td>
+            <td nowrap="true"><apex:outputText >{!mapInteger[mapKey]}</apex:outputText> </td>
+            
+        </tr>
+        </apex:repeat> 
+        
+    </table>
+</div>
+    
+    
+</apex:outputPanel>
+    
+    
+    
+    
+    
+
+
+</apex:page>

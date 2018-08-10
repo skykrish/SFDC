@@ -1,0 +1,89 @@
+<apex:page title="督促" standardController="SeikyuHeader__c" extensions="TokusokuController" recordSetVar="records" action="{!initCheck}">
+
+    <!-- 共通スクリプト -->
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>
+
+    <apex:sectionHeader title="督促" />
+    <apex:pageMessages id="messagearea" showDetail="false" />
+
+    <apex:form >
+        <apex:pageBlock title="対象請求書一覧" rendered="{!isInitCheck}">
+            <!-- ボタンエリア -->
+            <apex:pageBlockButtons location="Top">
+                <apex:commandButton value="督促状送付" action="{!sendPdf}" />
+                <apex:commandButton value="キャンセル" action="{!cancel}" immediate="true" />
+            </apex:pageBlockButtons>
+
+            <!-- 詳細エリア -->
+            <apex:pageBlockTable var="item" value="{!records}">
+
+                <!-- 請求書番号 -->
+                <apex:column style="width:110px">
+                    <apex:facet name="header">
+                        <apex:outputText value="{!$ObjectType.SeikyuHeader__c.fields.Name.label}"/>
+                    </apex:facet>
+                    <apex:outputfield style="width:200px" value="{!item.Name}"/> 
+               </apex:column>
+
+                <!-- 請求先 -->
+                <apex:column style="width:210px">
+                    <apex:facet name="header">
+                        <apex:outputText value="{!$ObjectType.SeikyuHeader__c.fields.Seikyusaki__c.label}"/>
+                    </apex:facet>
+                    <apex:outputfield style="width:200px" value="{!item.Seikyusaki__r.Name}"/> 
+                </apex:column>
+
+                <!-- 回収予定日 -->
+                <apex:column style="width:100px">
+                    <apex:facet name="header">
+                        <apex:outputText value="{!$ObjectType.SeikyuHeader__c.fields.KaisyuScheduledDate__c.label}"/>
+                    </apex:facet>
+                    <apex:outputfield style="width:100px" value="{!item.KaisyuScheduledDate__c}"/> 
+                </apex:column>
+
+                <!-- 請求額（税込み） -->
+                <apex:column style="width:100px">
+                    <apex:facet name="header">
+                        <apex:outputText value="{!$ObjectType.SeikyuHeader__c.fields.Seikyugaku_Tax__c.label}"/>
+                    </apex:facet>
+                    <apex:outputfield style="width:100px" value="{!item.Seikyugaku_Tax__c}"/> 
+                </apex:column>
+
+                <!-- 請求ステータス -->
+                <apex:column style="width:100px">
+                    <apex:facet name="header">
+                        <apex:outputText value="{!$ObjectType.SeikyuHeader__c.fields.SeikyuStatus__c.label}"/>
+                    </apex:facet>
+                    <apex:outputfield style="width:100px" value="{!item.SeikyuStatus__c}"/> 
+                </apex:column>
+
+                <!-- 入金ステータス -->
+                <apex:column style="width:100px">
+                    <apex:facet name="header">
+                        <apex:outputText value="{!$ObjectType.SeikyuHeader__c.fields.NyukinStatus__c.label}"/>
+                    </apex:facet>
+                    <apex:outputfield style="width:100px" value="{!item.NyukinStatus__c}"/> 
+                </apex:column>
+
+                <!-- 督促状送付日 -->
+                <apex:column style="width:100px">
+                    <apex:facet name="header">
+                        <apex:outputText value="{!$ObjectType.SeikyuHeader__c.fields.TokusokuDate__c.label}"/>
+                    </apex:facet>
+                    <apex:outputfield style="width:100px" value="{!item.TokusokuDate__c}"/> 
+                </apex:column>
+
+
+            </apex:pageBlockTable>
+        </apex:pageBlock>
+        
+        <apex:pageBlock title="対象請求書一覧" rendered="{!(!isInitCheck)}">
+            <!-- ボタンエリア -->
+            <apex:pageBlockButtons location="top">
+                <apex:commandButton value="戻る" action="{!cancel}" immediate="true" />
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+
+    </apex:form>
+    
+</apex:page>

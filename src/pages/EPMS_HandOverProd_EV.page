@@ -1,0 +1,56 @@
+<apex:page standardController="Production_Order__c" extensions="EPMS_HandoverProductionOrder"  sidebar="false" showHeader="false">
+    
+    <style>
+        p{
+        font-weight:bold;
+        margin-left:25px;
+        }
+        .bPageBlock {
+        border-top: 0px;
+        }
+        
+        
+    </style>
+    <script src="/soap/ajax/35.0/connection.js"></script>
+    <script>
+        function ClosePopup(){
+        window.opener.location.reload();
+        close();
+    }
+    </script>
+    <apex:form >
+        <apex:pageBlock mode="edit">
+            <apex:pageMessages />
+        </apex:pageBlock>
+        <apex:pageBlock id="teamBlock" >
+            <apex:pageBlockSection >
+                <apex:outputLabel value="Shift:" style="font-weight:bold;"></apex:outputLabel>
+                <apex:selectList value="{!selectedShiftId}" size="1" multiselect="false"  >
+                    <apex:selectOptions value="{!ListOfShifts}" />
+                    <apex:actionSupport event="onchange" reRender="teamBlock"/>    
+                </apex:selectList>
+                
+            </apex:pageBlockSection>
+            <apex:pageBlockSection >
+                <apex:outputLabel value="Team:" style="font-weight:bold;"> </apex:outputLabel>
+                <apex:selectList value="{!selectedTeamId}" size="1" multiselect="false" style="margin-right:100px;">
+                    <apex:selectOptions value="{!ListOfTeams}" />
+                </apex:selectList>
+                
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        <div>
+            <p><b>Selected Production Order's Information </b> </p>
+        </div>
+        <apex:pageBlock >
+            <apex:pageBlockTable value="{!productionOrders}" var="prod" width="200">
+                <apex:column value="{!prod.Name}"/>
+                <apex:column value="{!prod.Production_Order_Old_Status__c}"/>
+            </apex:pageBlockTable>
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="HandOver Production Orders" action="{!updateorder}" disabled="{!diableButton}"/>
+                <apex:commandbutton value="Close" onclick="javascript:ClosePopup();"/> 
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

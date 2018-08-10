@@ -1,0 +1,309 @@
+<apex:page title="請求確定" controller="SeikyuKakuteiController">
+
+    <!-- スタイルシート -->
+    <style type="text/css">
+        body {
+            display:none;
+        }
+    </style>
+
+    <!-- 共通スクリプト -->
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>
+
+    <!-- スクリプト処理 -->
+    <script type="text/javascript">
+
+        // 画面ロード時の処理
+        $(document).ready(function(){
+            // 請求書作成
+            var isCreatePdf = {!isCreatePdf};
+            if (isCreatePdf) {
+                // 請求書作成処理を起動
+                $('input[id$="btnCreatePdf"]').click();
+            } else {
+                // 請求書作成処理を起動しない場合は画面表示
+                $("body").css("display", "block");
+            }
+        });
+
+        // 全チェック
+        function checkAll() {
+            var checked = $('input[id$="selectCheckedAll"]').attr('checked');
+            if(checked){
+                $('input[id$="selectChecked"]').attr('checked', 'checked');
+            }else{
+                $('input[id$="selectChecked"]').removeAttr('checked');
+            }
+        }
+
+        // 請求年月（日）の表示、非表示
+        function dispSeikyuDay() {
+
+            // 締めグループが都度の場合に、請求年月（日）を表示
+            var seikyuDayField = $('td[id$="seikyuDayField"]');
+            var seikyuDayHeader = $('td[id$="seikyuDayHeader"]');
+
+            var shimeGroup = $('select[id$="criteria_shimeGroup"]').val();
+            if (shimeGroup == '都度' || shimeGroup == 'クレジットカード') {
+                // 表示
+                seikyuDayField.css("display", "");
+                seikyuDayHeader.css("display", "");
+
+            } else {
+                // 非表示
+                seikyuDayField.css("display", "none");
+                seikyuDayHeader.css("display", "none");
+                // 非表示時に必須チェックを回避するため、1 を自動設定する。
+                var inputObj = $('input[id$="criteria_seikyuDay"]');
+                if (inputObj.val() == '') {
+                    inputObj.val('1');
+                }
+            }
+        }
+        <!--201501 add start-->
+        // Enterボタン非活性
+        function stopRKey(evt) {
+            var evt = (evt) ? evt : ((event) ? event : null);
+            var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null);
+            if ((evt.keyCode == 13) && (node.type=="text")) {return false;}
+        }
+
+        document.onkeypress = stopRKey;
+        <!--201501 add end-->
+
+    </script>
+
+    <apex:sectionHeader title="請求確定" />
+    <apex:pageMessages id="messageArea" showDetail="false" />
+
+    <apex:form >
+
+        <!-- 初期表示チェックOK時 -->
+        <apex:pageBlock >
+
+            <!-- 検索条件 -->
+            <apex:pageBlockSection title="検索条件" collapsible="false" />
+            <apex:outputPanel id="conditionArea">
+                <table width="100%">
+                    <tr>
+                        <!-- 顧客 -->
+                        <td width="180px">
+                            <apex:outputLabel for="criteria_seikyusaki" value="{!$ObjectType.SeikyuCriteria__c.fields.Seikyusaki__c.label}"/>&nbsp;&nbsp;
+                            <apex:inputField id="criteria_seikyusaki" value="{!criteria.Seikyusaki__c}"/>
+                        </td>
+                        <!-- 取引区分 -->
+                        <td width="180px">
+                            <apex:outputLabel for="criteria_torihikiKbn" value="{!$ObjectType.SeikyuCriteria__c.fields.TorihikiKbn__c.label}"/>&nbsp;&nbsp;
+                            <apex:inputField id="criteria_torihikiKbn" value="{!criteria.TorihikiKbn__c}"/>
+                        </td>
+                        <!-- 締めグループ -->
+                        <td width="180px">
+                            <table cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td width="80px"><apex:outputLabel for="criteria_shimeGroup" value="{!$ObjectType.SeikyuCriteria__c.fields.ShimeGroup__c.label}"/></td>
+                                    <td width="100px"><apex:inputField id="criteria_shimeGroup" value="{!criteria.ShimeGroup__c}" onchange="javascript:dispSeikyuDay();" required="true"/></td>
+                                </tr>
+                            </table>
+                        </td>
+                        <!-- 請求年月 -->
+                        <td width="280px">
+                            <table cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <!-- 請求年月 -->
+                                    <td width="70px"><apex:outputText value="請求年月"/></td>
+                                    <!-- 年 -->
+                                    <td><apex:inputField id="criteria_seikyuYear" value="{!criteria.SeikyuYear__c}" required="true" style="width: 40px;" /></td>
+                                    <td width="25px"><apex:outputText value="年"/></td>
+                                    <!-- 月 -->
+                                    <td><apex:inputField id="criteria_seikyuMonth" value="{!criteria.SeikyuMonth__c}" required="true" style="width: 20px;" /></td>
+                                    <td width="25px"><apex:outputText value="月"/></td>
+                                    <!-- 日 -->
+                                    <td id="seikyuDayField"><apex:inputField id="criteria_seikyuDay" value="{!criteria.SeikyuDay__c}" required="true" style="width: 20px;" /></td>
+                                    <td  width="25px" id="seikyuDayHeader"><apex:outputText value="日"/></td>
+                                </tr>
+                            </table>
+
+                        </td>
+                        <!-- 検索ボタン -->
+                        <td>
+                            <apex:commandButton value="検索" action="{!ankenSearch}" reRender="resultArea, messageArea, conditionArea"/>
+                        </td>
+                    </tr>
+                </table>
+
+                <script type="text/javascript">
+                    dispSeikyuDay();
+                </script>
+
+            </apex:outputPanel>
+
+            <!-- 検索結果 -->
+            <apex:outputPanel id="resultArea">
+                <!-- 検索結果：レコードあり -->
+                <apex:pageBlockSection title="請求確定対象" columns="1" rendered="{!(NOT(ISNULL(ankenList))) && (ankenList.size != 0)}">
+                    <apex:pageBlockTable var="item" value="{!ankenList}">
+
+                        <!-- チェックボックス -->
+                        <apex:column style="width:30px">
+                            <apex:facet name="header">
+                                <apex:inputCheckbox id="selectCheckedAll" onclick="javascript:checkAll();"/>
+                            </apex:facet>
+                            <apex:inputcheckbox id="selectChecked" value="{!item.checked}" />
+                        </apex:column>
+
+                        <!-- 伝票番号 -->
+                        <apex:column style="width:70px">
+                            <apex:facet name="header">
+                                <apex:commandLink action="{!sortData}" value="{!$ObjectType.Anken__c.fields.Name.label} {!IF(sortExpression=='Name', IF(sortDirection=='ASC', '↑', '↓'), '')}" reRender="resultArea, messageArea">
+                                    <apex:param value="Name" assignTo="{!sortExpression}"/>
+                                </apex:commandLink>
+                            </apex:facet>
+                            <apex:outputLink value="/{!item.anken.Id}">{!item.anken.Name}</apex:outputLink>
+                        </apex:column>
+
+                        <!-- 案件名 -->
+                        <apex:column style="width:210px">
+                            <apex:facet name="header">
+                                <apex:commandLink action="{!sortData}" value="{!$ObjectType.Anken__c.fields.AnkenName__c.label} {!IF(sortExpression=='AnkenName__c', IF(sortDirection=='ASC', '↑', '↓'), '')}" reRender="resultArea, messageArea">
+                                    <apex:param value="AnkenName__c" assignTo="{!sortExpression}"/>
+                                </apex:commandLink>
+                            </apex:facet>
+                            <apex:outputField style="width:200px" value="{!item.anken.AnkenName__c}"/>
+                        </apex:column>
+
+                        <!-- 顧客名 -->
+                        <apex:column style="width:110px">
+                            <apex:facet name="header">
+                                <apex:commandLink action="{!sortData}" value="{!$ObjectType.Anken__c.fields.KokyakuName__c.label} {!IF(sortExpression=='KokyakuName__c', IF(sortDirection=='ASC', '↑', '↓'), '')}" reRender="resultArea, messageArea">
+                                    <apex:param value="KokyakuName__c" assignTo="{!sortExpression}"/>
+                                </apex:commandLink>
+                            </apex:facet>
+                            <apex:outputField style="width:100px" value="{!item.anken.KokyakuName__c}"/>
+                        </apex:column>
+
+                        <!-- 合計金額（税抜き） -->
+                        <apex:column style="width:110px">
+                            <apex:facet name="header">
+                                <apex:commandLink action="{!sortData}" value="{!$ObjectType.Anken__c.fields.JuchuTotalKingaku__c.label} {!IF(sortExpression=='JuchuTotalKingaku__c', IF(sortDirection=='ASC', '↑', '↓'), '')}" reRender="resultArea, messageArea">
+                                    <apex:param value="JuchuTotalKingaku__c" assignTo="{!sortExpression}"/>
+                                </apex:commandLink>
+                            </apex:facet>
+                            <apex:outputField style="width:100px" value="{!item.anken.JuchuTotalKingaku__c}"/>
+                        </apex:column>
+
+                        <!-- 合計消費税額 -->
+                        <apex:column style="width:110px">
+                            <apex:facet name="header">
+                                <apex:commandLink action="{!sortData}" value="{!$ObjectType.Anken__c.fields.JuchuTotalTax__c.label} {!IF(sortExpression=='JuchuTotalTax__c', IF(sortDirection=='ASC', '↑', '↓'), '')}" reRender="resultArea, messageArea">
+                                    <apex:param value="JuchuTotalTax__c" assignTo="{!sortExpression}"/>
+                                </apex:commandLink>
+                            </apex:facet>
+                            <apex:outputField style="width:100px" value="{!item.anken.JuchuTotalTax__c}"/>
+                        </apex:column>
+
+                        <!-- 合計金額（税込） -->
+                        <apex:column style="width:110px">
+                            <apex:facet name="header">
+                                <apex:commandLink action="{!sortData}" value="{!$ObjectType.Anken__c.fields.JuchuTotalKingaku_Tax__c.label} {!IF(sortExpression=='JuchuTotalKingaku_Tax__c', IF(sortDirection=='ASC', '↑', '↓'), '')}" reRender="resultArea, messageArea">
+                                    <apex:param value="JuchuTotalKingaku_Tax__c" assignTo="{!sortExpression}"/>
+                                </apex:commandLink>
+                            </apex:facet>
+                            <apex:outputField style="width:100px" value="{!item.anken.JuchuTotalKingaku_Tax__c}"/>
+                        </apex:column>
+
+                        <!-- 納品日時 -->
+                        <apex:column style="width:110px">
+                            <apex:facet name="header">
+                                <apex:commandLink action="{!sortData}" value="{!$ObjectType.Anken__c.fields.NohinDateTime__c.label} {!IF(sortExpression=='NohinDateTime__c', IF(sortDirection=='ASC', '↑', '↓'), '')}" reRender="resultArea, messageArea">
+                                    <apex:param value="NohinDateTime__c" assignTo="{!sortExpression}"/>
+                                </apex:commandLink>
+                            </apex:facet>
+                            <apex:outputField style="width:100px" value="{!item.anken.NohinDateTime__c}"/>
+                        </apex:column>
+
+                        <!-- 請求先送り日 -->
+                        <apex:column style="width:110px">
+                            <apex:facet name="header">
+                                <apex:commandLink action="{!sortData}" value="{!$ObjectType.Anken__c.fields.SeikyuSkipDate__c.label} {!IF(sortExpression=='SeikyuSkipDate__c', IF(sortDirection=='ASC', '↑', '↓'), '')}" reRender="resultArea, messageArea">
+                                    <apex:param value="SeikyuSkipDate__c" assignTo="{!sortExpression}"/>
+                                </apex:commandLink>
+                            </apex:facet>
+                            <apex:outputField style="width:100px" value="{!item.anken.SeikyuSkipDate__c}"/>
+                        </apex:column>
+
+                        <!-- 取引区分 -->
+                        <apex:column style="width:80px">
+                            <apex:facet name="header">
+                                <apex:commandLink action="{!sortData}" value="{!$ObjectType.Account.fields.TorihikiKbn__c.label} {!IF(sortExpression=='KokyakuName__r.TorihikiKbn__c', IF(sortDirection=='ASC', '↑', '↓'), '')}" reRender="resultArea, messageArea">
+                                    <apex:param value="KokyakuName__r.TorihikiKbn__c" assignTo="{!sortExpression}"/>
+                                </apex:commandLink>
+                            </apex:facet>
+                            <apex:outputField style="width:70px" value="{!item.anken.KokyakuName__r.TorihikiKbn__c}"/>
+                        </apex:column>
+
+                        <!-- 締めグループ -->
+                        <apex:column style="width:80px">
+                            <apex:facet name="header">
+                                <apex:commandLink action="{!sortData}" value="{!$ObjectType.Account.fields.ShimeGroup__c.label} {!IF(sortExpression=='KokyakuName__r.ShimeGroup__c', IF(sortDirection=='ASC', '↑', '↓'), '')}" reRender="resultArea, messageArea">
+                                    <apex:param value="KokyakuName__r.ShimeGroup__c" assignTo="{!sortExpression}"/>
+                                </apex:commandLink>
+                            </apex:facet>
+                            <apex:outputField style="width:70px" value="{!item.anken.KokyakuName__r.ShimeGroup__c}"/>
+                        </apex:column>
+
+                        <!-- 回収予定日 -->
+                        <apex:column style="width:80px">
+                            <apex:facet name="header">
+                                <apex:outputText value="回収予定日"/>
+                            </apex:facet>
+                            <apex:outputText value="{0, date, yyyy/MM/dd}">
+                                <apex:param value="{!item.kaisyuScheduledDate}"/>
+                            </apex:outputText>
+                        </apex:column>
+
+                        <!-- ステータス -->
+                        <apex:column style="width:110px">
+                            <apex:facet name="header">
+                                <apex:commandLink action="{!sortData}" value="{!$ObjectType.Anken__c.fields.Status__c.label} {!IF(sortExpression=='Status__c', IF(sortDirection=='ASC', '↑', '↓'), '')}" reRender="resultArea, messageArea">
+                                    <apex:param value="Status__c" assignTo="{!sortExpression}"/>
+                                </apex:commandLink>
+                            </apex:facet>
+                            <apex:outputField style="width:100px" value="{!item.anken.Status__c}"/>
+                        </apex:column>
+                    </apex:pageBlockTable>
+                </apex:pageBlockSection>
+
+                <!-- 請求確定処理 -->
+                <apex:outputPanel rendered="{!(NOT(ISNULL(ankenList))) && (ankenList.size != 0)}">
+                    <br/>
+                    <table width="100%" align="right">
+                        <tr>
+                            <!-- 左寄せのためのダミー列 -->
+                            <td></td>
+                            <!-- 請求書作成ボタン -->
+                            <td width="60px">
+                                <apex:commandButton value="請求確定" action="{!seikyuFix}"/>
+                            </td>
+                        </tr>
+                    </table>
+                    <br/>
+                    <br/>
+                </apex:outputPanel>
+
+                <!-- 検索結果：レコードなし-->
+                <apex:outputPanel rendered="{!(NOT(ISNULL(ankenList))) && (ankenList.size == 0)}">
+                    <apex:pageBlockSection title="請求確定対象" collapsible="false"/>
+                    <apex:outputText >該当する請求確定対象データはありません。</apex:outputText>
+                </apex:outputPanel>
+
+            </apex:outputPanel>
+        </apex:pageBlock>
+
+        <!-- 請求書作成用ボタン（画面上は非表示） -->
+        <div style="display: none;">
+            <apex:commandButton id="btnCreatePdf" value="請求書作成" action="{!createPdf}"/>
+        </div>
+
+    </apex:form>
+
+</apex:page>

@@ -1,0 +1,10 @@
+<apex:page controller="EPMS_PO_POPUP" sidebar="false" showHeader="false">
+ 
+  
+ <script type="text/javascript">
+window.onload = function() {
+   window.open('/apex/EPMS_PO_instructiondownlaod?id={!ids}&type=file','order instruction', 'width=800, height=600, resizable=no')
+window.close();
+}
+</script>
+</apex:page>

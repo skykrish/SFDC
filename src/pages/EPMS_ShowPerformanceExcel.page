@@ -1,0 +1,291 @@
+<apex:page controller="EPMS_ShowPerformance" contenttype="application/vnd.ms-excel">
+       
+     
+     <apex:includescript value="{!URLFOR($Resource.ShowPerf,'ShowPerf/js/jquery.min.js')}" />
+    <apex:includescript value="{!URLFOR($Resource.ShowPerf,'ShowPerf/js/jquery.fixedheadertable.js')}"/>
+    <apex:includescript value="{!URLFOR($Resource.ShowPerf,'ShowPerf/js/custom-bichartpage-table2.js')}"/>
+            
+    
+    <style>
+        .bichartPage .bPageBlock {overflow: hidden; padding-bottom:10px; margin-bottom:0;}
+        .bichartPage {width:100%; margin:0 auto; float:left; border:0px solid #ccc;}
+        .bichartLeft {width:49%; float:left; border:0px solid #ccc;}
+        .bichartRight {width:47%; float:right; border:0px solid #ccc;}
+        .bichartRight h2 {padding:5px 10px; display:block; background:#EFEFEF; border-bottom:1px solid #ccc;}
+        .shiftTeamSec {width:100%; float:left; margin-bottom:15px;}
+        .shiftSec {width:49%; float:left;}
+        .TeamSec {width:49%; float:right;}
+        .chartPart{width:49%; float:left; padding:4px;}
+        .memberTableSec {width:100%; border:0px solid #ccc;}
+        
+        .divider {margin-top:0px;}
+        .fancyTable tbody tr td {background:#fff; font-size:12px;} 
+    
+        
+        
+        .teamTableSec {font-size:12px; margin:0px auto; border-left:1px solid #e5e5e5; border-top:1px solid #e5e5e5;}
+        .teamTableSec th {padding:4px 4px; text-align:center; color:#000; background:#f3f3f3; border-bottom:1px solid #e5e5e5; border-right:1px solid #e5e5e5;}
+        .teamTableSec td {padding:5px 8px; text-align:center; background:#fff; cursor:pointer; border-bottom:1px solid #e5e5e5; border-right:1px solid #e5e5e5;}
+        .teamTableSec tr.grayBg {background:#f9fafa;}
+        .scroll-part-content {height:auto; overflow:auto; border:0px solid gray;}
+        
+        .teamTableSec span {display:block; cursor:pointer;}
+        .teamTableSec td:hover {background:#e3f3ff; color:#000;}
+        .active{background:#f00}
+        
+        .statusStyle {
+        background:url(/img/loading.gif) no-repeat 0 0; 
+        padding-left:20px; 
+        margin-left:10px; 
+        padding-bottom:5px; 
+        }
+        .grid_8
+        {
+        width:1055px;
+        }
+        .heighfooter
+        {
+        height:15px !important;
+        padding-right:0 !important;
+         padding-left:0 !important;
+        }
+        .fht-tfoot
+        {
+        
+        }
+        .fht-table-wrapper
+        {
+        border:0px solid #f00;
+        padding-bottom:1px;
+        }
+       .last
+        {
+        padding-right:5px !important; 
+        }
+        table.fht-table.fancyTable th {
+    min-width: 16px;
+}
+        .TimeSec{
+       display:inline;
+        margin-left: inherit;
+        }
+    </style>
+    
+
+   <script>
+   
+   
+   // Member Table
+    function headerFreeze(){
+        
+    
+    
+    
+   
+        $(".scroll-part-content").css("height","105px")
+       
+        $('#myTable02').fixedHeaderTable({ height: '510px', fixedColumns:0, fixedColumn:false, footer: true,
+ });
+        
+        if($('#myTable02').height()<="509"){
+          
+          $('.fht-tbody').css("height","auto");       
+          $('.fht-table').css("width","100%");     
+            //$('.fht-table').css("margin-top","0");  
+          $('.last').css('padding-right','0px');
+          $('.fht-tfoot').css('top','0px');
+            $('.fht-table-wrapper').css('padding-bottom','10px');
+            $('.fooertlast').css('padding-left','10px');
+        }
+    }
+    
+    
+    
+   
+   
+  function doubletbl()
+  {
+  //headerFreezeTeam();
+     setTimeout(function(){ 
+    
+     headerFreeze();
+  },1000);
+   }
+    
+   $('.list-span').click(function(){
+   alert("dddd")
+        var self = $(this);
+        self.siblings().removeClass('active');
+        self.toggleClass('active');
+    });
+
+
+
+ 
+    
+   </script>
+
+    
+
+
+    
+    
+    <apex:form id="form">
+      
+    
+        <apex:outputPanel id="shifts">
+
+            <div class="bichartPage">
+                           
+            <apex:pageBlock >
+            
+                <div class="">
+                                      
+                    <div class="memberTableSec">
+                    
+                    <apex:outputPanel id="mypaneltable">
+                        <apex:outputPanel rendered="{!selectedTeamName != NULL}">
+                            <apex:outputLabel value="Selected Team  " style="margin:20px;font-weight:bold;"></apex:outputLabel>
+                            <apex:outputText value="{!selectedTeamName}" style="margin:20px;font-weight:bold;color:red;"></apex:outputText>
+                        </apex:outputPanel>
+                        <div class="container_12 divider">
+                            <div class="grid_8">  
+                              
+                                <table class="fancyTable" id="myTable02" cellpadding="0" cellspacing="0" border="0">    
+                                    <thead>
+                                     <tr>
+                                            <th rowspan="2" style="vertical-align:middle;">Serial<br/>No</th>
+                                            <th rowspan="2" style="line-height:30px; vertical-align:middle;">Employee</th>
+                                            <th rowspan="2" style="line-height:30px; width:110px;  vertical-align:middle;">Member Name</th>
+                                             <th colspan="2">A</th>
+                                             <th colspan="2">B</th>
+                                             <th colspan="2">C</th>
+                                             <th colspan="2">D</th>
+                                             <th colspan="2">E</th>
+                                             <th colspan="2">F</th>
+                                             <th colspan="2">G</th>
+                                             <th colspan="2">H</th>
+                                             <th colspan="2">I</th>
+                                             <th colspan="2">J</th>
+                                             <th colspan="2">K</th>
+                                             <th colspan="2">L</th>
+                                             <th colspan="2">M</th>
+                                             <th colspan="2">N</th>
+                                             <th colspan="2">O</th>
+                                             <th colspan="2">P</th>
+                                             <th colspan="2">Q</th>
+                                             <th colspan="2">R</th>
+                                             <th colspan="2">S</th>
+                                             <th colspan="2">T</th>
+                                             <th colspan="2">U</th>
+                                             <th colspan="2">V</th>
+                                             <th colspan="2">W</th>
+                                             <th colspan="2">X</th>
+                                             <th colspan="2">Y</th>
+                                             <th rowspan="2" class="last" style="vertical-align:middle;">No of files <br/>Member has Worked</th>
+                                        </tr>
+                                        <tr>
+                                             <th>O</th>
+                                             <th>R</th>
+                                             <th>O</th>
+                                             <th>R</th>
+                                             <th>O</th>
+                                             <th>R</th>
+                                             <th>O</th>
+                                             <th>R</th>
+                                             <th>O</th>
+                                             <th>R</th>
+                                             <th>O</th>
+                                             <th>R</th>
+                                             <th>O</th>
+                                             <th>R</th>
+                                             <th>O</th>
+                                             <th>R</th>
+                                             <th>O</th>
+                                             <th>R</th>
+                                             <th>O</th>
+                                             <th>R</th>
+                                             <th>O</th>
+                                             <th>R</th>
+                                             <th>O</th>
+                                             <th>R</th>
+                                             <th>O</th>
+                                             <th>R</th>
+                                             <th>O</th>
+                                             <th>R</th>
+                                             <th>O</th>
+                                             <th>R</th>
+                                             <th>O</th>
+                                             <th>R</th>
+                                             <th>O</th>
+                                             <th>R</th>
+                                             <th>O</th>
+                                             <th>R</th>
+                                             <th>O</th>
+                                             <th>R</th>
+                                             <th>O</th>
+                                             <th>R</th>
+                                             <th>O</th>
+                                             <th>R</th>
+                                             <th>O</th>
+                                             <th>R</th>
+                                             <th>O</th>
+                                             <th>R</th>
+                                             <th>O</th>
+                                             <th>R</th>
+                                             <th>O</th>
+                                             <th>R</th>
+                                        </tr>
+                                    </thead>
+                                    <apex:variable value="{!1}" var="i"/>
+                                    <tbody>
+                                    <apex:repeat value="{!FileList2}" var="F" id="members">
+                                      <apex:repeat value="{!F.memberCatListMap}" var="k">    
+                                         
+                                                   
+                                        
+                                   <tr>
+                              
+                                        <td>{!i}</td>
+                                        <td>{!F.empId}</td>
+                                       
+                                        <td>{!LEFT(k,(FIND(':', k) - 1))}</td>
+                                       
+                                      <apex:repeat value="{!F.memberCatListMap[k]}" var="v">
+                                      <apex:repeat value="{!v}" var="key">
+                                         <apex:repeat value="{!v[Key]}" var="fc">
+                                        <td> {!fc}</td>
+                                        </apex:repeat>
+                                        </apex:repeat>
+                                        </apex:repeat>
+                                       <td class="last">{!F.NumberOfFiles}</td>
+                                    </tr>
+                                      
+                                    <apex:variable value="{!i+1}" var="i"/>
+                                        
+                                             </apex:repeat>
+                                        
+                                     </apex:repeat>
+                                                                            
+                                    </tbody> 
+                                    <tfoot>
+                                     <tr>
+                                            <td colspan="53" class="heighfooter">Total No of Files</td>
+                                            <td class="last fooertlast">{!totalShiftFileCount}</td>
+                                     </tr>     
+                                    </tfoot>
+                                </table>
+                              
+                            
+                            </div>
+                            <div class="clear"></div>
+                        </div>
+                        </apex:outputPanel>
+                    </div>
+                </div>
+                
+                </apex:pageBlock>
+            </div>            
+        </apex:outputPanel>
+    </apex:form>
+</apex:page>

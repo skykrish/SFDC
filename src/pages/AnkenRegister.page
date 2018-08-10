@@ -1,0 +1,133 @@
+<apex:page controller="AnkenRegisterController" action="{!init}" tabStyle="Anken__c">
+
+    <!-- 独自のスタイル -->
+    <style type="text/css">
+        input.ime-disabled {
+            ime-mode: disabled;
+        }
+    </style>
+
+    <!-- タイトル -->
+    <apex:sectionHeader title="案件の編集" subtitle="新規案件" />
+    <apex:pageMessages id="messagearea" showDetail="false" />
+
+    <!-- 編集エリア -->
+    <apex:form >
+        <apex:pageBlock id="editArea" title="案件の編集" mode="edit">
+            <!-- ボタンエリア -->
+            <apex:pageBlockButtons location="both">
+                <apex:commandButton id="btnSave" value="保存" action="{!save}"/>
+                <apex:commandButton id="btnSaveNew" value="保存 & 新規" action="{!saveNew}"/>
+                <apex:commandButton id="btnCancel" value="キャンセル" action="{!cancel}" immediate="true"/>
+            </apex:pageBlockButtons>
+
+            <!-- 情報エリア -->
+            <apex:pageBlockSection title="情報" columns="2">
+                <!-- 顧客名 -->
+                <apex:outputField value="{!anken.KokyakuName__c}"/>
+                <!-- お客様発注番号 -->
+                <apex:inputField value="{!anken.ClientOrderNumber__c}"/>
+                <!-- 顧客担当者（主） -->
+                <apex:selectList value="{!anken.KokyakuTantosya_Main__c}" multiselect="false" size="1" >
+                    <apex:selectOptions value="{!tantosyaSelectOptions}"></apex:selectOptions>
+                </apex:selectList>
+                <!-- 案件名 -->
+                <apex:inputField value="{!anken.AnkenName__c}"/>
+                <!-- 顧客担当者（CC1） -->
+                <apex:selectList value="{!anken.KokyakuTantosya_CC1__c}" multiselect="false" size="1" >
+                    <apex:selectOptions value="{!tantosyaSelectOptions}"></apex:selectOptions>
+                </apex:selectList>
+                <!-- 点数 -->
+                <apex:inputField value="{!anken.ItemCnt__c}" styleClass="ime-disabled"/>
+                <!-- 顧客担当者（CC2） -->
+                <apex:selectList value="{!anken.KokyakuTantosya_CC2__c}" multiselect="false" size="1" >
+                    <apex:selectOptions value="{!tantosyaSelectOptions}"></apex:selectOptions>
+                </apex:selectList>
+                <!-- 納期（日付） -->
+                <apex:inputField value="{!anken.Nouki_Date__c}"/>            
+                <!-- 顧客担当者（CC3） -->
+                <apex:selectList value="{!anken.KokyakuTantosya_CC3__c}" multiselect="false" size="1" >
+                    <apex:selectOptions value="{!tantosyaSelectOptions}"></apex:selectOptions>
+                </apex:selectList>
+                <!-- 納期（時間） -->
+                <apex:inputField value="{!anken.Nouki_Time__c}"/>
+                <!-- 顧客担当者（CC4） -->
+                <apex:selectList value="{!anken.KokyakuTantosya_CC4__c}" multiselect="false" size="1" >
+                    <apex:selectOptions value="{!tantosyaSelectOptions}"></apex:selectOptions>
+                </apex:selectList>
+                <!-- フォルダ名 -->
+                <apex:inputTextarea value="{!anken.FolderName__c}" rows="4" cols="40"/>
+                <!-- firestorageでの納品を希望 -->
+                <apex:inputCheckbox value="{!anken.firestorage__c}"/>
+                <!-- メール番号 -->
+                <apex:inputField value="{!anken.EmailNo__c}"/>
+                <!-- サンプル顧客フラグ -->
+                <apex:inputField value="{!anken.SampleKokyakuFlg__c}"/>
+                <!-- 受注日時 -->
+                <apex:inputField value="{!anken.JuchuDateTime__c}" required="true"/>
+                <!-- 一律価格顧客 -->
+                <apex:inputField value="{!kokyaku.IchiritsuKakakuKokyakuFkg__c}"/>
+                <!-- 受注ソース -->
+                <apex:inputField value="{!anken.JuchuSorce__c}"/>
+                <!-- 発注タイミング -->
+                <apex:inputField value="{!anken.Hatyutaimingu__c}"/>
+                <!-- ステータス -->
+                <apex:inputField value="{!anken.Status__c}"/>
+                <!-- ファイルサーバURL（Win用） -->
+                <apex:pageBlockSectionitem >
+                    ファイルサーバURL（Win用）<apex:outputLink value="{!WinUrl}"  target="_blank"> {!WinUrl} </apex:outputLink>
+                </apex:pageBlockSectionitem>
+                <!-- 請求先送り日 -->
+                <apex:inputField value="{!anken.SeikyuSkipDate__c}"/>
+                <!-- ファイルサーバURL（Mac用） -->
+                <apex:pageBlockSectionitem >
+                ファイルサーバURL（Mac用）<apex:outputLink value="{!MacUrl}" target="_blank"> {!MacUrl} </apex:outputLink>
+                </apex:pageBlockSectionitem>
+                <!-- 空白 -->
+                <apex:pageBlockSectionitem />
+                <!-- 顧客別見本（Box） -->
+                <apex:inputField value="{!kokyaku.BoxSync__c}"/> 
+
+            </apex:pageBlockSection>
+
+            <!-- 納品形式エリア -->
+            <apex:pageBlockSection title="納品形式" columns="2">
+                <!-- 背景処理 -->
+                <apex:inputField value="{!anken.Background__c}"/>
+                <!-- 平滑度 -->
+                <apex:inputField value="{!anken.Flatness__c}"/> 
+                <!-- ファイル形式 -->
+                <apex:inputField value="{!anken.FileFormat__c}"/>               
+                <!-- クリッピングパス名 -->
+                <apex:inputField value="{!anken.ClippingPathName__c}"/>
+                <!-- 解像度 -->
+                <apex:inputField value="{!anken.Resolution__c}"/>
+                <!-- クリッピングパス -->
+                <apex:inputField value="{!anken.ClippingPath__c}"/>
+                <!-- カラーモード -->
+                <apex:inputField value="{!anken.ColorMode__c}"/>                
+                <!-- 余白 -->
+                <apex:inputField value="{!anken.Margin__c}"/>
+                <!-- 日本での納品フラグ -->
+                <apex:inputField value="{!anken.Nihondeno_nouhin__c}"/>
+
+
+
+            </apex:pageBlockSection>
+
+            <!-- 作業内容エリア -->
+            <apex:pageBlockSection title="作業内容" columns="1">
+                <!-- 受注時の注意点 -->
+                <apex:inputTextarea value="{!anken.SagyoNaiyo__c}" rows="30" cols="75"/>
+                <!-- 発注先への作業指示 -->
+                <apex:inputTextarea value="{!anken.Sagyoshiji_Renrakujiko__c}" rows="30" cols="75"/>
+                <!-- 納品時の注意点 -->
+                <apex:inputTextarea value="{!anken.SagyoNaiyo_2__c}" rows="30" cols="75"/>
+                <!-- 顧客からのコメント -->
+                <apex:inputTextarea value="{!anken.EndUserComment__c}" rows="30" cols="75"/>
+            </apex:pageBlockSection>
+
+            
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

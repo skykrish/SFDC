@@ -1,0 +1,2267 @@
+<apex:page controller="EPMS_MyDirectory" id="viewPo" tabstyle="Production_Order__c" sidebar="false"> 
+    
+        <apex:stylesheet value="{!URLFOR($Resource.View_Directory,'css/jquery.treeview.css')}" /> 
+        <apex:stylesheet value="{!URLFOR($Resource.View_Directory,'css/custom.css')}" /> 
+        
+        <apex:includeScript value="{!URLFOR($Resource.View_Directory,'js/jquery.js')}" />
+        <apex:includeScript value="{!URLFOR($Resource.View_Directory,'js/jquery.treeview.js')}" />
+        <apex:includeScript value="{!URLFOR($Resource.View_Directory,'js/jquery-checktree.js')}" />
+        <apex:includeScript value="{!URLFOR($Resource.View_Directory,'js/custom.js')}" />
+        
+        <apex:includeScript value="{!URLFOR($Resource.ConfirmPopJs)}" />    
+        
+        <apex:includeScript value="{!URLFOR($Resource.csspopup,'add-style.js')}" />
+        <apex:includeScript value="{!URLFOR($Resource.csspopup,'css-pop.js')}" />
+        
+        <apex:includeScript value="{!URLFOR($Resource.attendance,'jquery-ui.min.js')}"/>
+        <apex:includeScript value="{!URLFOR($Resource.attendance,'gridviewScroll.js')}"/>
+        <script type="text/javascript">
+            var __sfdcSessionId = '{!GETSESSIONID()}';
+        </script>
+                <script src="/soap/ajax/36.0/connection.js" type="text/javascript"></script>
+
+        <style type="text/css">
+body .bRelatedList .pbBody table.list, body .apexp .pbBody table.list {border:0;}
+body .pbBody table.list tr th, body .pbBody table.list tr td 
+    {   
+        border-width:0 1px 0 0;
+        border-color:#ECECEC;
+        border-style:solid;
+    }
+
+        
+table.list
+    {
+        background-color: #fff;
+        border-top: 0px solid #e0e3e5;
+    }
+.list td, .list th, body.oldForecast .list .last td, body.oldForecast .list .last th {
+    /*padding: 10px 2px 0px 5px;*/
+    color: #000;
+    padding:2px 2px;
+    vertical-align:middle;
+    }
+.GridviewScrollHeader
+{
+background: #f2f3f3;
+    border-width: 0 0 1px 1px;
+    border-color: #e0e3e5;
+    color: #000;
+    font-size: .9em;
+    font-weight: bold;
+    padding: 4px 2px 4px 5px;
+}
+.pbBody, .pbBody a, .pbBody td, .lbBody a, .lbBodyDescription, .list .headerRow .noRowsHeader {
+    color: #000;
+}
+.pbBody table.list tr.dataRow td:first-child {
+    border-left-width: 0;
+    }
+table.list tr.dataRow td {
+    border-width: 0 0 1px 0;
+    vertical-align: middle;
+    text-align:center;
+}
+.GridviewScrollHeader td {
+border-right:0px solid #ededed;
+}
+.list-custom {
+    margin: 0px;
+    float: left;
+    border: 0px solid #ededed;
+} 
+
+.apexp .bPageBlock.apexDefaultPageBlock.pbBody {width:100%; margin:0px 0; float:left;}
+
+.jobtitle {
+display:none; 
+    background: #fff none repeat scroll 0 0;
+    border: 1px solid #ccc;
+    min-height: 510px;
+    left: 50%;
+    margin-left: -250px;
+    /*margin-top: -265px;*/
+     padding: 10px;
+    position: absolute;
+    top:0%;
+    width: 500px;
+    z-index: 999;
+    border-radius: 3px;
+    box-shadow: 0 0 5px 1px #ccc;
+    -webkit-border-radius: 3px;
+    -webkit-box-shadow: 0 0 5px 1px #ccc;
+    -moz-border-radius: 3px;
+    -moz-box-shadow: 0 0 5px 1px #ccc;
+}
+.jobtitlegraybox
+{
+position:fixed;
+left:0;
+top:0;
+right:0;
+bottom:0;
+}
+.closejobtitle
+{
+background: #605F61 none repeat scroll 0 0;
+    border-radius: 40px;
+    color: #fff !important;
+    display: block;
+    float: right;
+    font-weight: bold;
+    padding: 3px;
+    position: absolute;
+    right: -10px;
+    text-align: center;
+    top: -10px;
+    width: 15px;
+    text-decoration:none;
+}
+.jobtitleHd
+{
+font-weight:bold;
+}
+
+.filetree li span {color:#000;}
+.text-left
+{
+text-align:left !important;
+}
+body .pbBody table.list tr.dataRow th, body .pbBody table.list tr.dataRow td
+{
+border-left:1px solid #ECECEC;
+}
+
+.filetree span.folder:hover {cursor:pointer;}
+
+#blanket {position:fixed;}
+.popUpDiv {position:fixed;}
+
+ .ontop {
+        z-index: 999;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;        
+        position: fixed;                
+        background-color: #000;
+        color: #000;
+        opacity: .8;
+        filter: alpha(opacity = 50);
+    }
+
+#popupStatus {
+    width: 385px;
+    /*height: 200px;*/
+    position: fixed;
+    z-index: 999;
+    color: #000000;
+    /*background-color: #ffffff;*/
+    top: 50%; /* To align popup window at the center of screen*/
+    left: 50%;
+    margin-top: -100px;
+    margin-left: -150px;
+}
+
+#popupStatus .pbTitle
+{
+    width:100%;
+}
+.ontop .btn {color:#000;}
+
+.changeExtBtnStatusSec {width:32%; margin:0 auto; overflow:hidden;}
+.changeExtBtnStatusSec input {float:left; margin-right:10px;}
+
+.convertInstruction{
+    display:none;
+}
+.blanket-div {
+    width: 100%;
+    background: #000;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 99;
+    opacity: 0.5;
+}
+
+.lefttblPart {
+    width: 280px; 
+}
+
+.changeInstPopup,.changeExtPopup,.penaltyPopup,.changeCategoryDiv,.changeStatusDiv,.showQCPopupCheck,.showQCPopupRedo,.showQCPopupApprove{
+        display:none;
+    }   
+    ul.leftmenu li {
+    display: block;
+    padding: 0px !important; 
+     margin-bottom: 0px !important;
+    margin-left: 5px;
+}
+
+
+ #popup {
+        width: 300px;
+        /*height: 200px;*/
+        position: fixed;
+        z-index: 999;
+        color: #000000;
+        /*background-color: #ffffff;*/
+        top: 25%; /* To align popup window at the center of screen*/
+        left: 50%;
+        margin-top: -100px;
+        margin-left: -150px;
+    }
+    
+    #popupStatus {
+        width: 385px;
+        /*height: 200px;*/
+        position: fixed;
+        z-index: 999;
+        color: #000000;
+        /*background-color: #ffffff;*/
+        top: 50%; /* To align popup window at the center of screen*/
+        left: 50%;
+        margin-top: -100px;
+        margin-left: -150px;
+    }
+    
+    #popupStatus .pbTitle
+    {
+        width:100%;
+    }
+    #popup .pbTitle
+    {
+        width:100%;
+    }
+
+    .ontop .btn {color:#000;}
+
+    .changeExtSec {float:left; padding-bottom:10px;}    
+    .changeExtSec .changeExtLabel {width:50%; float:left; padding:2px 0;}
+    .changeExtSec .changeExtTextBox {width:50%; float:left;}
+    .changeExtSec .changeExtTextBox input {width:100%;}
+    .changeExtSec .changeExtTextBox textarea {resize:none;}
+
+    .changeExtBtnSec {width:42%; margin:0 auto; overflow:hidden;}
+    .changeExtBtnSec input {float:left; margin-right:10px;}
+    
+    
+    .changeExtStatusSec {width:100%; float:left; padding-bottom:10px;}
+    .changeExtStatusSec .changeExtLabel {width:50%; float:left; padding:2px 0;}
+    .changeExtStatusSec .changeExtTextBox {width:50%; float:left;}
+    .changeExtStatusSec .changeExtTextBox input {width:100%;}
+    .changeExtStatusSec .changeExtTextBox textarea {resize:none;}
+    
+    .changeExtBtnStatusSec {width:32%; margin:0 auto; overflow:hidden;}
+    .changeExtBtnStatusSec input {float:left; margin-right:10px;}
+    
+    .filetree span.folder, .filetree span.file
+    {
+        display:inline-block;
+    }
+    .changeInstPopup,.changeExtPopup,.penaltyPopup,.changeCategoryDiv,.changeStatusDiv{
+        display:none;
+    }
+    ul.leftmenuCustom   
+    {
+        width: 280px !important;
+    }
+    ul.leftmenuCustom li
+    {
+    padding: 8px !important;
+    }
+    ul.leftmenuCustom li.active
+    {
+    background:#ccc;
+
+    }
+    ul.leftmenuCustom li.active a{
+    font-weight:bold;
+    }
+    #sel1{
+    cursor:pointer;
+    background-color:rgb(120, 202, 228);
+    padding:10PX 0px;
+    width:49%;
+    text-align:center;
+    DISPLAY: inline-block;
+    color:#000;
+    font-weight:bold;
+    
+}
+#sel2{
+    cursor:pointer;
+    background-color:rgb(207, 238, 248);
+    padding:10PX 0px;
+    width:49%;
+    text-align:center;
+    DISPLAY: inline-block;
+    color:#000;
+    font-weight:bold;
+}
+#resultsel1{
+    display:block;
+    position:relative;
+    bottom:1px;
+    width:99%;
+   height: auto;
+    background-color: rgb(255, 255, 255);
+    OVERFLOW: HIDDEN;
+        border: 1px solid #78CAE4;
+}
+#resultsel2{
+    display:none;
+    position:relative;
+    bottom:1px;
+    width:99%;
+   height: auto;
+    background-color: rgb(255, 255, 255);
+    OVERFLOW: HIDDEN;
+        border: 1px solid #78CAE4;
+}
+.bPageBlock{
+padding:0 !important;
+}
+.viewdirectoryNewClass{display:none;}
+.tblCustom td
+{
+    vertical-align:top;
+}
+.child.collapsable span.fileTypes:first-child
+{
+color:#9C0606 !important;
+font-weight:normal;    
+    
+}
+.child.collapsable span.fileTypes
+{
+    color:#1B2EC3 !important;
+font-weight:bold;
+
+}
+.splitedfiles{color:#F919C7 !important;}
+
+.legend-content {
+    float: right;
+    width: auto;
+}
+.legend-content ul {
+    float: right;
+    list-style: outside none none;
+    margin: 0 0 5px;
+    padding: 0;
+}
+.legend-content ul li {
+    color: #808080;
+    float: left;
+    font-size: 12px;
+    margin: 0 15px 0 0;
+}
+.legend-content ul li em {
+    float: left;
+    height: 8px;
+    margin: 2px 5px 0 0;
+    width: 8px;
+}
+.splitedColor em {
+    background: #F919C7 none repeat scroll 0 0;
+    border: 1px solid #F919C7;
+}
+.copyColor em {
+    background: #9C0606 none repeat scroll 0 0;
+    border: 1px solid #9C0606;
+}
+.parentColor em{
+    background: #1B2EC3 none repeat scroll 0 0;
+    border: 1px solid #1B2EC3;
+}
+
+</style>
+        <script type="text/javascript">
+            var __sfdcSessionId = '{!GETSESSIONID()}';
+        </script>
+        <script src="/soap/ajax/31.0/connection.js" type="text/javascript"></script>
+        
+        <script>          
+         function Reloadpage(Sucessmessage){
+            var currentID='{!$CurrentPage.Parameters.Id}';
+            popup('popUpalert','alert','',Sucessmessage); 
+            window.location.assign('/apex/EPMS_MyDirectory');
+         }       
+        
+        function showpopup3(jobdiv){
+        document.getElementById(jobdiv).style.display='block';
+        
+        }        
+        
+        function showpopup4(jobdiv){
+        document.getElementById(jobdiv).style.display='block';
+        
+        }
+        
+        function showpopup5(jobdiv){
+            document.getElementById(jobdiv).style.display='block';
+        }
+        
+        
+        function showpopup6(jobdiv){
+            document.getElementById(jobdiv).style.display='block';
+        }
+        
+        function updateInstruction(){
+            var url = encodeURI("/apex/ChangeInstruction"); 
+            var width = "520"; 
+            var height = "400"; 
+            window.open(url, '','scrollbars=no,resizable=no,status=no,toolbar=no,menubar=no, width=' + width + ',height=' + height + ',left=' + ((window.innerWidth - width)/2) + ',top=' + ((window.innerHeight - height)/2) );
+            return false;
+        }
+    
+        $(document).ready(function () {
+        //mbaapp.init();
+        
+       // $(".viewdirectoryNewClass").hide();
+        
+        $("#browser").treeview({
+        toggle: function() {
+            console.log("%s was toggled.", $(this).find(">span").text());
+            }   
+        });
+            var winwidth = screen.width - 710;
+            var winheight = screen.height- 300;
+             gridviewScroll(winwidth, winheight);
+            });
+
+            function gridviewScroll(winwidth, winheight ) {
+           
+                gridView1 = $('#GridView1').gridviewScroll({
+                    width: winwidth,
+                    height: winheight,
+                    railcolor: "#F0F0F0",
+                    barcolor: "#CDCDCD",
+                    barhovercolor: "#606060",
+                    bgcolor: "#F0F0F0",
+                    arrowsize: 30,
+                    varrowtopimg: "{!URLFOR($Resource.attendance,'Images/arrowvt.png')}",               
+                    varrowbottomimg: "{!URLFOR($Resource.attendance,'Images/arrowvb.png')}",
+                    harrowleftimg:"{!URLFOR($Resource.attendance,'Images/arrowhl.png')}",
+                    harrowrightimg: "{!URLFOR($Resource.attendance,'Images/arrowhr.png')}",
+            
+                /*  varrowtopimg: "images/arrowvt.png",
+                    varrowbottomimg: "images/arrowvb.png",
+                    harrowleftimg: "images/arrowhl.png",
+                    harrowrightimg: "images/arrowhr.png",*/
+                    
+                    headerrowcount: 1,
+                    railsize: 16,
+                    barsize: 8,
+                    
+                });
+                
+                $('#browser').checktree();
+        }
+        
+        
+        function openDirectoryJS(obj){
+        
+        var fileClass = $("input[type='checkbox']:checked").parent().prop('className');
+        var errorFlag = false;
+        var latestValue = new Array();
+          $("input[type='checkbox']:checked").each(function(){
+               var val1=$(this).attr('class');
+               latestValue.push(val1);                
+            });
+             
+            
+            var price = $.map(latestValue, function(value, key) {
+             if (value == 'child file')
+             {
+                errorFlag = true;   
+             }
+            });
+            
+        if(errorFlag == false)
+        {
+            var outputStatus=[];
+            var checkedValues = $('.folder:checked').map(function() {
+                return this.value;
+            }).get();
+            
+            if(checkedValues==""){
+                popup('popUpalert','alert','','Please Select Atleast One folder'); 
+                return false;
+            }else{
+                checkedValues=$("input[type='checkbox']:checked").map(function() {
+                return this.value;
+                        }).get();
+                
+                var  output="";
+                for (var i = 0, len = checkedValues.length; i<len; i++){
+                    if(checkedValues[i]!='on'){
+                       // output += checkedValues[i]+',';
+                        //alert('--checkedValues--:'+checkedValues[i]);
+                        output += checkedValues[i].substr(0,18)+',';
+                        console.log('OutputID='+output);
+                        
+                        outputStatus.push(checkedValues[i].substring(19));
+                        console.log('outputStatus='+outputStatus);
+                    }
+                }
+
+                CallApexMethod(output);
+                
+            }
+            return false;
+            }else{
+          popup('popUpalert','alert','','File Types are not allowed');
+            }
+        }
+        
+    function openFilesJS(){
+         var fileClass = $("input[type='checkbox']:checked").parent().prop('className');
+        var errorFlag = false;
+        var latestValue = new Array();
+       $("input[type='checkbox']:checked").each(function(){
+           var val1=$(this).attr('class');
+           latestValue.push(val1);                
+        });
+         
+        
+        var price = $.map(latestValue, function(value, key) {
+         if (value == 'child file')
+         {
+            errorFlag = true;   
+         }
+        });
+        
+        if(errorFlag == false)
+        {
+        var outputStatus=[];
+        var checkedValues = $('.folder:checked').map(function() {
+                return this.value;
+            }).get();
+
+        if(checkedValues!=""){
+                popup('popUpalert','alert','','Please Select only Files'); 
+                return false;
+        }else{
+                checkedValues=$("input[type='checkbox']:checked").map(function() {
+                return this.value;
+                        }).get();
+                if(checkedValues==""){
+                    popup('popUpalert','alert','','Please Select Atleast one File'); 
+                }else{
+                    var  output="";
+                    for (var i = 0, len = checkedValues.length; i<len; i++){
+                         if(checkedValues[i]!='on'){
+                            //output += checkedValues[i]+',';
+                            //alert('--checkedValues--:'+checkedValues[i]);
+                            output += checkedValues[i].substr(0,18)+',';
+                            console.log('OutputID='+output);
+                            
+                            outputStatus.push(checkedValues[i].substring(19));
+                            console.log('outputStatus='+outputStatus);
+                        }
+                    }
+                    
+                    
+                    for(var j=0;j<outputStatus.length;j++){
+                        if(outputStatus[j] != 'QC'){ 
+                                if(outputStatus[j] != 'Assigned'){
+                                    error = true;
+                                    popup('popUpalert','alert','','File Types are not allowed');
+                                    break; 
+                                }
+                        } 
+                    }
+                    
+                    CallApexMethod(output);
+                }
+         } 
+        } else{
+          popup('popUpalert','alert','','File Types are not allowed');
+        }
+    }
+    
+    function JobFilesJS(obj){
+        var fileClass = $("input[type='checkbox']:checked").parent().prop('className');
+        var errorFlag = false;
+        var latestValue = new Array();
+       $("input[type='checkbox']:checked").each(function(){
+           var val1=$(this).attr('class');
+           latestValue.push(val1);                
+        });
+         
+        var price = $.map(latestValue, function(value, key) {
+         if (value == 'child file')
+         {
+            errorFlag = true;   
+         }      
+        });
+        
+        if(errorFlag == false)
+        {
+        var checkedValues="";
+        var outputStatus=[];
+        checkedValues=$("input[type='checkbox']:checked").map(function() { return this.value; }).get();
+        
+        var checkedclass = $('.file:checked').map(function() {return this.value;}).get();  
+        if(checkedValues==""){
+            popup('popUpalert','alert','','Please Select Atleast one record to proceed'); 
+            return false;
+        }
+        console.log('Instruction Files='+checkedclass);
+        if(checkedclass.length>0){
+            popup('popUpalert','alert','','Please select file\'s have file type other than Instruction'); 
+            return false;
+        }
+        else{
+            var  output="";
+            
+            for (var i = 0, len = checkedValues.length; i<len; i++){
+                
+                //alert('--checkedValues--:'+checkedValues[i]);
+                output += checkedValues[i].substr(0,18)+',';
+                console.log('OutputID='+output);
+                
+                outputStatus.push(checkedValues[i].substring(19));
+                console.log('outputStatus='+outputStatus);
+            }
+            console.log('outputStatus length='+outputStatus.length);
+            console.log('output Files Id='+output);
+            /*if(outputStatus.length>0){
+                for(var j=0;j<outputStatus.length;j++){
+                    
+                }
+            }
+            for (var i = 0, len = checkedValues.length; i<len; i++){
+                output += checkedValues[i]+',';
+                
+                addy.substr(0, addy.indexOf(',')); 
+                outputStatus=checkedValues[i].split(':');
+                alert('--testing--:'+checkedValues[i]);
+            }*/
+            
+            if(output!=''){         
+                $(".blanket-div").show();
+                CallApexJob(output);
+            }
+            
+        }
+        }else{
+          popup('popUpalert','alert','','File Types are not allowed');
+        }
+         
+    }
+    function JobinstrcutionJS(obj){
+        var fileClass = $("input[type='checkbox']:checked").parent().prop('className');
+        console.log('Test THE TYPE OF FOLDER : ' + fileClass);
+        if(fileClass != 'folder'){
+            popup('popUpalert','alert','','Please Select folder to proceed'); 
+            return false;
+        }
+        
+        var errorFlag = false;
+        var latestValue = new Array();
+        $("input[type='checkbox']:checked").each(function(){
+           var val1=$(this).attr('class');
+           latestValue.push(val1);                
+        });
+         
+        
+       /* var price = $.map(latestValue, function(value, key) {
+         if (value == 'child file')
+         {
+            errorFlag = true;  
+         }
+        });*/
+        console.log('SELECT THE FLAG :::' + errorFlag);
+        if(errorFlag == false)
+        {
+        var checkedValues="";
+        var outputStatus=[];
+        checkedValues=$("input[type='checkbox']:checked").map(function() { return this.value; }).get();
+        if(checkedValues==""){
+            popup('popUpalert','alert','','Please Select Atleast one record to proceed'); 
+            return false;
+        }else{
+            var  output="";
+            for (var i = 0, len = checkedValues.length; i<len; i++){
+                //output += checkedValues[i]+',';
+                if(checkedValues[i]!='on'){
+                    output += checkedValues[i].substr(0,18)+',';
+                    console.log('OutputID='+output);
+                    
+                    outputStatus.push(checkedValues[i].substring(19));
+                    console.log('outputStatus='+outputStatus);
+                }
+            }
+            
+            if(output!='')
+            {   
+                $(".blanket-div").show();
+                CallApexJobInstruction(output);
+            }
+        }
+    }else{
+          popup('popUpalert','alert','','File Types are not allowed');
+          return false;
+        }
+         
+    }
+    
+    function QCFilesJS(obj){
+     
+    var fileClass = $("input[type='checkbox']:checked").parent().prop('className');
+    var errorFlag = false;
+    var latestValue = new Array();
+      $("input[type='checkbox']:checked").each(function(){
+           var val1=$(this).attr('class');
+           latestValue.push(val1);                
+        });
+         
+        
+        var price = $.map(latestValue, function(value, key) {
+         if (value == 'child file')
+         {
+            errorFlag = true;   
+         }
+        });
+        
+        if(errorFlag == false)
+        {
+        var checkedValues="";
+        var outputStatus=[];
+        checkedValues=$("input[type='checkbox']:checked").map(function() { return this.value; }).get();     
+        if(checkedValues=="" || checkedValues=='on'){
+            popup('popUpalert','alert','','Please Select Atleast one record to proceed'); 
+            return false;
+        }else{
+            var output='';
+            var len = checkedValues.length;
+            //alert(len);
+            for (var i = 0; i<len; i++){
+                
+                //output += checkedValues[i]+',';
+                output += checkedValues[i].substr(0,18)+',';
+                outputStatus.push(checkedValues[i].substring(19));
+            }
+            console.log('OutputID='+output);
+            console.log('outputStatus='+outputStatus);
+            if(output!=""){
+                var authorise = false; 
+                var pname='{!$Profile.Name}'; 
+                 
+                if(pname == 'システム管理者'){ 
+                    authorise = true; 
+                }else if(pname == 'Production Administrator'){ 
+                    authorise = true; 
+                } else if(pname == 'Shift Administrator'){ 
+                    authorise = true;   
+                } else if(pname == 'Team Leader'){ 
+                    authorise = true; 
+                } 
+                else if(pname == Label.EPMS_MEMBER_DESIG_OPERATOR_PS){ 
+                    authorise = false; 
+                } 
+                if(authorise == false){ 
+                    popup('popUpalert','alert','','{!$Label.EPMS_MBO_Not_have_access}'); 
+                } 
+                
+                var error = false; 
+                console.log('Before for loop error='+error);    
+                for(var j=0;j<outputStatus.length;j++){
+                    if(outputStatus[j] != 'New'){ 
+                        if(outputStatus[j] != 'Handover'){ 
+                            if(outputStatus[j] != 'Assigned'){
+                                error = true;
+                                console.log('inside if conditon error='+error);                             
+                                break; 
+                            }
+                        } 
+                    } 
+                }
+                console.log('outside if conditon error='+error);
+                if(error){ 
+                    popup('popUpalert','alert','','Please select files\'s status have New or Handover or Assigned '); 
+                } 
+                else{ 
+                    var first = true; 
+                    var ids ='';
+                    for(var i=0;i<checkedValues.length;i++){ 
+                        if(first){ 
+                            ids+=checkedValues[i].substr(0,18); 
+                            first = false; 
+                        }else 
+                            ids+=','+checkedValues[i].substr(0,18);
+                    } 
+                    
+                    if (ids.length) { 
+                        var url2 = 'apex/EPMS_Change_FileQCIncharge?ids='+ids; 
+                        window.open(url2, "Change QC : Quality Controller", "scrollbars=1,width=700, height=700"); 
+                    } else { 
+                        alert('{!$Label.Select_one_or_more_production_order}'); 
+                    } 
+                }
+                
+                //window.open('apex/EPMS_Change_FileQCIncharge?ids='+output, "", "scrollbars=1,width=700, height=700"); 
+            }
+            else{
+                popup('popUpalert','alert','','Directory is empty.Please select directory with files');
+            }             
+        }
+        }else{
+          popup('popUpalert','alert','','File Types are not allowed');
+        }         
+    }
+    
+    function TLFilesJS(obj){
+        var fileClass = $("input[type='checkbox']:checked").parent().prop('className');
+    var errorFlag = false;
+    var latestValue = new Array();
+      $("input[type='checkbox']:checked").each(function(){
+           var val1=$(this).attr('class');
+           latestValue.push(val1);                
+        });
+         
+        
+        var price = $.map(latestValue, function(value, key) {
+         if (value == 'child file')
+         {
+            errorFlag = true;   
+         }
+        });
+        
+        if(errorFlag == false)
+        {
+        var checkedValues="";
+        var outputStatus=[];
+        checkedValues=$("input[type='checkbox']:checked").map(function() { return this.value; }).get();
+        if(checkedValues=="" || checkedValues=='on'){
+            popup('popUpalert','alert','','Please Select Atleast one record to proceed'); 
+            return false;
+        }else{
+            var  output="";
+            for (var i = 0, len = checkedValues.length; i<len; i++){
+                //output += checkedValues[i]+',';
+                output += checkedValues[i].substr(0,18)+',';
+                console.log('OutputID='+output);
+                
+                outputStatus.push(checkedValues[i].substring(19));
+                console.log('outputStatus='+outputStatus);
+            }
+            console.log('OutputID='+output);
+            console.log('outputStatus='+outputStatus);
+            if(output!=""){
+                var authorise = false; 
+                var pname='{!$Profile.Name}'; 
+                 
+                if(pname == 'システム管理者'){ 
+                    authorise = true; 
+                }else if(pname == 'Production Administrator'){ 
+                    authorise = true; 
+                } else if(pname == 'Shift Administrator'){ 
+                    authorise = true;   
+                } else if(pname == 'Team Leader'){ 
+                    authorise = true; 
+                } 
+                else if(pname == Label.EPMS_MEMBER_DESIG_OPERATOR_PS){ 
+                    authorise = false; 
+                } 
+                if(authorise == false){ 
+                    popup('popUpalert','alert','','{!$Label.EPMS_MBO_Not_have_access}'); 
+                } 
+                
+                var error = false; 
+                console.log('Before for loop error='+error);    
+                for(var j=0;j<outputStatus.length;j++){
+                    if(outputStatus[j] != 'New'){ 
+                        if(outputStatus[j] != 'Handover'){ 
+                            if(outputStatus[j] != 'Assigned'){
+                                error = true;
+                                console.log('inside if conditon error='+error);                             
+                                break; 
+                            }
+                        } 
+                    } 
+                }
+                console.log('outside if conditon error='+error);
+                if(error){ 
+                    popup('popUpalert','alert','','Please select files\'s status have New or Handover or Assigned '); 
+                } 
+                else{  
+                    var first = true; 
+                    var ids ='';
+                    for(var i=0;i<checkedValues.length;i++){ 
+                        if(first){ 
+                            ids+=checkedValues[i].substr(0,18); 
+                            first = false; 
+                        }else 
+                            ids+=','+checkedValues[i].substr(0,18);
+                    } 
+                    if (ids.length) { 
+                        var url2 = 'apex/EPMS_File_ChangeTLIncharge?ids='+ids; 
+                        window.open(url2, "EPMS Team Lead Asssignment : Team Leader", "scrollbars=1,width=700, height=700"); 
+                    } else { 
+                        alert('{!$Label.Select_one_or_more_production_order}'); 
+                    } 
+                }
+            
+                //window.open('apex/EPMS_File_ChangeTLIncharge?ids='+output, "", "scrollbars=1,width=700, height=700"); 
+            }
+            else{
+                popup('popUpalert','alert','','Directory is empty.Please select directory with files');
+            } 
+        }
+        }else{
+                popup('popUpalert','alert','','File Types are not allowed');
+        }         
+    }
+    
+    
+    function showInstPopUp(isMemberExist){
+        var isMemExist=false;
+        if(isMemberExist =='true'){
+            isMemExist=true;
+        }else{
+            isMemExist=false;
+        }
+        //isMemExist = Boolean(isMemberExist);
+        console.log('Js variable is member Exist:'+isMemExist);
+        console.log('From controller:'+isMemberExist);
+        if(isMemExist){
+            console.log('--- member exist ---');
+            $('.convertInstruction').show();
+            
+        }else{
+            console.log('--no member exist in selected files---');
+            //convertToInstructMember();
+        }
+        
+    }
+    function cancelConvertInst(){
+        $('.convertInstruction').hide();
+        
+    }
+
+    function showTLWindow(id){
+        //alert('id===>' + id);
+        var url = encodeURI("/apex/EPMS_ChangeTLIncharge?Id="+id); 
+        var width = "520"; 
+        var height = "400"; 
+        window.open(url, '','scrollbars=no,resizable=no,status=no,toolbar=no,menubar=no, width=' + width + ',height=' + height + ',left=' + ((window.innerWidth - width)/2) + ',top=' + ((window.innerHeight - height)/2) );
+        return false;
+    
+    } 
+    function SuccessFully(Msg) {
+        $('.convertInstruction').hide();
+          popup('popUpalert','alert','',Msg); 
+    }
+    function SuccessFullyDelete(Msg) {
+        popup('popUpalert','alert','',Msg);
+        location.reload();        
+    }
+    
+    
+    function closeInstructionPopup()
+    {
+       
+       $('#VDFolPop').hide();
+       //$(".blanket-div").hide();
+       location.reload();  
+    }
+    
+    
+    //JS method for modifying the extention of the selected file
+        function changeExtJS(){
+        
+            var checkedValues = $('.folder:checked').map(function() {
+                    return this.value;
+                }).get();
+                
+            var checkedclass = $('.file:checked').map(function() {
+                    return this.value;
+                }).get();   
+                
+            if(checkedValues!=""){
+                    popup('popUpalert','alert','','Please Select only Files'); 
+                    return false;
+            }else{
+                checkedValues=$("input[type='checkbox']:checked").map(function() {
+                return this.value;
+                        }).get();
+                            
+                if(checkedValues==""){
+                    popup('popUpalert','alert','','Please Select Atleast one File to proceed'); 
+                    return false;
+                }
+                if(checkedclass.length>0)
+                {
+                    popup('popUpalert','alert','','Please Select Only Image Type of Files to Change Extention'); 
+                    return false;
+                }
+                else
+                {
+                    var  output="";
+                    for (var i = 0, len = checkedValues.length; i<len; i++){
+                        if(checkedValues[i]!='on'){
+                    var NewVal = checkedValues[i].substr(0,18)+',';
+                        output += NewVal;
+                         console.log('OutputID='+output);
+                        }
+                    }
+                    
+                    changeExtention(output);
+                    var displayPopup = '{!displayChangeExt}'
+                }
+            } 
+        }
+        
+        
+         
+        function showChangeExtPopup(){
+            $('.changeExtPopup').show();
+        }
+        
+        function cancelChangeExt(){
+            $('.changeExtPopup').hide();
+        }
+        
+        /*
+        
+        function changeCategoryValid()
+        {    
+            checkedValues=$("input[type='checkbox']:checked").map(function() {
+                return this.value;
+                        }).get();
+                        
+            if(checkedValues=="")
+            {
+                popup('popUpalert','alert','','Please Select Atleast one File to proceed'); 
+                return false;
+            }else{
+                    var checkSeleted=$("input[type='checkbox']:checked").map(function() { return this.className; }).get();  
+                    console.log('Selected Ins' + checkSeleted); 
+                    if(checkSeleted!=""){
+                         for (var i = 0, len = checkSeleted.length; i<len; i++){
+                            console.log('File Type ='+checkSeleted[i]);
+                            if(checkSeleted[i] =='child file'){
+                                popup('popUpalert','alert','','Please select image record to proceed'); 
+                                return false;
+                            }
+                         }
+                    }
+                    var  output="";
+                    for (var i = 0, len = checkedValues.length; i<len; i++){
+                        if(checkedValues[i]!='on')
+                        {
+                            //output += checkedValues[i]+',';
+                            output += checkedValues[i].substr(0,18)+',';
+                            console.log('OutputID='+output);
+                        }
+                    }
+                    changeCategory(output);
+                    //document.getElementById('changeCategoryDiv').style.display = 'block';
+            }        
+        }
+        */
+        function showChangeCategory()
+        {
+            $('.changeCategoryDiv').show();
+            // document.getElementById('changeCategoryDiv').style.display = 'none';
+        }
+        
+        function cancelchangeCategory()
+        {
+            $('.changeCategoryDiv').hide();
+            // document.getElementById('changeCategoryDiv').style.display = 'none';
+        }
+        
+        
+         function changeStatusValid()
+        {
+            checkedValues=$("input[type='checkbox']:checked").map(function() {
+                return this.value;
+                        }).get();
+                        
+            if(checkedValues=="")
+            {
+                popup('popUpalert','alert','','Please Select Atleast one File to proceed'); 
+                return false;
+            }else{
+                    var checkSeleted=$("input[type='checkbox']:checked").map(function() { return this.className; }).get();  
+                    console.log('Selected Ins' + checkSeleted); 
+                    if(checkSeleted!=""){
+                         for (var i = 0, len = checkSeleted.length; i<len; i++){
+                            console.log('File Type ='+checkSeleted[i]);
+                            if(checkSeleted[i] =='child file'){
+                                popup('popUpalert','alert','','Please select image record to proceed'); 
+                                return false;
+                            }
+                         }
+                    }
+                    var output="";
+                    for (var i = 0, len = checkedValues.length; i<len; i++){
+                        if(checkedValues[i]!='on')
+                        {
+                           // output += checkedValues[i]+',';
+                           output += checkedValues[i].substr(0,18)+',';
+                        }
+                    }
+                    changeStatus(output);
+                    //document.getElementById('changeStatusDiv').style.display = 'block';
+            }        
+        }
+        
+        function showChangeStatus()
+        {
+            $('.changeStatusDiv').show();
+            // document.getElementById('changeCategoryDiv').style.display = 'none';
+        }
+        
+        function cancelchangeStatus()
+        {
+             $('.changeStatusDiv').hide();
+            // document.getElementById('changeStatusDiv').style.display = 'none';
+        } 
+
+
+        function assignPenaltyJS()
+        {
+
+            var outputStatus=[];
+                 var checkedValues = $('.folder:checked').map(function() {
+                return this.value;
+            }).get();
+            if(checkedValues!=""){
+                  popup('popUpalert','alert','','Please Select Only Files');
+            }else{
+                var checkSeleted=$("input[type='checkbox']:checked").map(function() { return this.className; }).get();  
+                console.log('Selected Ins' + checkSeleted); 
+                if(checkSeleted!=""){
+                     for (var i = 0, len = checkSeleted.length; i<len; i++){
+                        console.log('File Type ='+checkSeleted[i]);
+                        if(checkSeleted[i] =='child file'){
+                            popup('popUpalert','alert','','Please select image record to proceed'); 
+                            return false;
+                        }
+                     }
+                }
+                checkedValues=$("input[type='checkbox']:checked").map(function() { return this.value; }).get();
+                if(checkedValues==""){
+                    popup('popUpalert','alert','','Please Select Atleast one record to proceed'); 
+                    return false;
+                 }else{
+                    var  output="";
+                    for (var i = 0, len = checkedValues.length; i<len; i++){
+                       // output += checkedValues[i]+',';
+                       if(checkedValues[i]!='on'){
+                        output += checkedValues[i].substr(0,18)+',';
+                        console.log('OutputID='+output);
+                        
+                        outputStatus.push(checkedValues[i].substring(19));
+                        console.log('outputStatus='+outputStatus);
+                    }   
+                    }
+                    console.log('OutputID='+output);
+                    console.log('outputStatus='+outputStatus);
+                    
+                    if(output!=""){
+                    
+                        var error = false; 
+                        console.log('Before for loop error='+error);    
+                        for(var j=0;j<outputStatus.length;j++){
+                            if(outputStatus[j] != 'QC'){
+                            if(outputStatus[j] != 'QCIP'){
+                            if(outputStatus[j] != 'Redo')
+                             if(outputStatus[j] != 'Completed'){
+                             {                                   
+                                error = true;
+                                console.log('inside if conditon error='+error);                             
+                                break; 
+                            }}}} 
+                        }
+                        console.log('outside if conditon error='+error);
+                        if(error){ 
+                            popup('popUpalert','alert','','Please select files\'s have status QC or QCIP or Redo'); 
+                        }else{
+                          var url2 = '/apex/AssignPenality?ids=' +output;   
+                        window.open(url2, "EPMS Order Assignment : Anken", "scrollbars=0,width=700, height=600,left=200,top=200,resizable=0,titlebar=0,toolbar=0,status=0"); 
+                            //convertToInstrFile(output);
+                        }                               
+                    
+                    }
+                   
+                 }
+                 
+            }
+                    
+        }   
+
+        //JS method to skip penality for selected files 
+        function skipPenaltyJS(){
+        
+        var outputStatus=[];
+                 var checkedValues = $('.folder:checked').map(function() {
+                return this.value;
+            }).get();
+            if(checkedValues!=""){
+                  popup('popUpalert','alert','','Please Select Only Files');
+            }else{
+                var checkSeleted=$("input[type='checkbox']:checked").map(function() { return this.className; }).get();  
+                console.log('Selected Ins' + checkSeleted); 
+                if(checkSeleted!=""){
+                     for (var i = 0, len = checkSeleted.length; i<len; i++){
+                        console.log('File Type ='+checkSeleted[i]);
+                        if(checkSeleted[i] =='child file'){
+                            popup('popUpalert','alert','','Please select image record to proceed'); 
+                            return false;
+                        }
+                     }
+                }
+                checkedValues=$("input[type='checkbox']:checked").map(function() { return this.value; }).get();
+                if(checkedValues==""){
+                    popup('popUpalert','alert','','Please Select Atleast one record to proceed'); 
+                    return false;
+                 }else{
+                    var  output="";
+                    for (var i = 0, len = checkedValues.length; i<len; i++){
+                       // output += checkedValues[i]+',';
+                       if(checkedValues[i]!='on'){
+                        output += checkedValues[i].substr(0,18)+',';
+                        console.log('OutputID='+output);
+                        
+                        outputStatus.push(checkedValues[i].substring(19));
+                        console.log('outputStatus='+outputStatus);
+                    }   
+                    }
+                    console.log('OutputID='+output);
+                    console.log('outputStatus='+outputStatus);
+                    
+                    if(output!=""){
+                    
+                        var error = false; 
+                        console.log('Before for loop error='+error);    
+                        for(var j=0;j<outputStatus.length;j++){
+                            if(outputStatus[j] != 'QC'){
+                            if(outputStatus[j] != 'QCIP'){
+                            if(outputStatus[j] != 'Redo'){                                   
+                                error = true;
+                                console.log('inside if conditon error='+error);                             
+                                break; 
+                            }}} 
+                        }
+                        console.log('outside if conditon error='+error);
+                        if(error){ 
+                            popup('popUpalert','alert','','Please select files\'s have status QC or QCIP or Redo'); 
+                        }else{
+                          var url2 = '/apex/AssignSkipPenality?ids=' +output;   
+                        window.open(url2, "EPMS Order Assignment : Anken", "scrollbars=1,width=700, height=300,left=200,top=200,resizable=0,titlebar=0,toolbar=0,status=0"); 
+                            //convertToInstrFile(output);
+                        }                               
+                    
+                    }
+                   
+                 }
+                 
+            }
+          
+        }
+        
+        
+        function assignOperatorJS()
+        {
+
+            var outputStatus=[];
+                // var checkedValues = $('.folder:checked').map(function() {
+               // return this.value;
+            //}).get();
+            
+            var checkSeleted=$("input[type='checkbox']:checked").map(function() { return this.className; }).get();  
+            console.log('Selected Ins' + checkSeleted); 
+            if(checkSeleted!=""){
+                 for (var i = 0, len = checkSeleted.length; i<len; i++){
+                    console.log('File Type ='+checkSeleted[i]);
+                    if(checkSeleted[i] =='child file'){
+                        popup('popUpalert','alert','','Please select image record to proceed'); 
+                        return false;
+                    }
+                 }
+            }
+            var checkedValues=$("input[type='checkbox']:checked").map(function() { return this.value; }).get();
+            if(checkedValues==""){
+                popup('popUpalert','alert','','Please Select Atleast one record to proceed'); 
+                return false;
+            }else{
+                var  output="";
+                for (var i = 0, len = checkedValues.length; i<len; i++){
+                   // output += checkedValues[i]+',';
+                   if(checkedValues[i]!='on'){
+                    output += checkedValues[i].substr(0,18)+',';
+                    console.log('OutputID='+output);
+                    
+                    outputStatus.push(checkedValues[i].substring(19));
+                    console.log('outputStatus='+outputStatus);
+                }   
+                }
+                console.log('OutputID='+output);
+                console.log('outputStatus='+outputStatus);
+                
+                if(output!=""){
+                
+                    var error = false;
+                    var assigned = false;
+                    console.log('Before for loop error='+error);    
+                    for(var j=0;j<outputStatus.length;j++){
+                        if(outputStatus[j] != 'New'){
+                        if(outputStatus[j] != 'Handover'){
+                        if(outputStatus[j] != 'Assigned'){                                   
+                            error = true;
+                            console.log('inside if conditon error='+error);                             
+                            break; 
+                        }}} 
+                        if(outputStatus[j] == 'Assigned'){ 
+                                //alert("mari")
+                                assigned = true;
+                                
+                            }                         
+                    }
+                    console.log('outside if conditon error='+error);
+                    if(error){                  
+                        popup('popUpalert','alert','','Please select files\'s have status New or Handover or Assigned'); 
+                    }else{  
+                    //alert(assigned);
+                    if(assigned){
+                        var result = popup('popUpalert','confirm','','Are you surely want to re-assign files?'); 
+                         $(".butttonlist a").click(function(){
+                            if($(this).html()=='Ok')
+                            {
+                                 var url2 = '/apex/EPMS_Operator_File_Assignment?ids=' +output+'&type=assign&source=directory';    
+                            window.open(url2, "EPMS Order Assignment : Anken", "scrollbars=1,width=700, height=300,left=200,top=200,resizable=0,titlebar=0,toolbar=0,status=0"); 
+                               var popupbox = document.getElementById('popUpConfirm');
+                                var blonkerBox = document.getElementById("blanket");
+                                //popupbox.style.display = 'none';
+                                popupbox.parentNode.removeChild(popupbox);
+                                blonkerBox.parentNode.removeChild(blonkerBox);
+                            }else{
+                                var popupbox = document.getElementById('popUpConfirm');
+                                var blonkerBox = document.getElementById("blanket");
+                                //popupbox.style.display = 'none';
+                                popupbox.parentNode.removeChild(popupbox);
+                                blonkerBox.parentNode.removeChild(blonkerBox);
+                            }
+                        });
+                        
+                        $("#close").click(function()
+                        {
+                            var popupbox = document.getElementById('popUpConfirm');
+                            var blonkerBox = document.getElementById("blanket");
+                            //popupbox.style.display = 'none';
+                            popupbox.parentNode.removeChild(popupbox);
+                            blonkerBox.parentNode.removeChild(blonkerBox);                      
+                        });
+                    
+                    } else {
+                        var url2 = '/apex/EPMS_Operator_File_Assignment?ids=' +output+'&type=assign&source=directory';   
+                        window.open(url2, "EPMS Order Assignment : Anken", "scrollbars=1,width=700, height=300,left=200,top=200,resizable=0,titlebar=0,toolbar=0,status=0"); 
+                        
+                    }
+                    }                               
+                
+                }
+                   
+            }
+        } 
+        
+        function reAssignOperatorJS()
+        {
+
+            var outputStatus=[];
+                // var checkedValues = $('.folder:checked').map(function() {
+                //return this.value;
+            //}).get();
+            
+            var checkSeleted=$("input[type='checkbox']:checked").map(function() { return this.className; }).get();  
+            console.log('Selected Ins' + checkSeleted); 
+            if(checkSeleted!=""){
+                 for (var i = 0, len = checkSeleted.length; i<len; i++){
+                    console.log('File Type ='+checkSeleted[i]);
+                    if(checkSeleted[i] =='child file'){
+                        popup('popUpalert','alert','','Please select image record to proceed'); 
+                        return false;
+                    }
+                 }
+            }
+            var checkedValues=$("input[type='checkbox']:checked").map(function() { return this.value; }).get();
+            if(checkedValues==""){
+                popup('popUpalert','alert','','Please Select Atleast one record to proceed'); 
+                return false;
+            }else{
+                var  output="";
+                for (var i = 0, len = checkedValues.length; i<len; i++){
+                   // output += checkedValues[i]+',';
+                   if(checkedValues[i]!='on'){
+                    output += checkedValues[i].substr(0,18)+',';
+                    console.log('OutputID='+output);
+                    
+                    outputStatus.push(checkedValues[i].substring(19));
+                    console.log('outputStatus='+outputStatus);
+                }   
+                }
+                console.log('OutputID='+output);
+                console.log('outputStatus='+outputStatus);
+                
+                if(output!=""){
+                
+                    var error = false; 
+                    console.log('Before for loop error='+error);    
+                    for(var j=0;j<outputStatus.length;j++){
+                        if(outputStatus[j] != 'Redo'){
+                        if(outputStatus[j] != 'Handover'){
+                            error = true;
+                            console.log('inside if conditon error='+error);                             
+                            break; 
+                        }
+                        } 
+                    }
+                    console.log('outside if conditon error='+error);
+                    if(error){ 
+                        popup('popUpalert','alert','','Please select files\'s have status Redo or Handover'); 
+                    }else{
+                     
+                    
+                    var url2 = '/apex/EPMS_Operator_File_Assignment?ids=' +output+'&type=reassign&source=directory';    
+                    window.open(url2, "EPMS Order Assignment : Anken", "scrollbars=1,width=700, height=300,left=200,top=200,resizable=0,titlebar=0,toolbar=0,status=0"); 
+                    }                               
+                
+                }
+                   
+            }
+        }
+        
+        
+        function handOverDirectoriesJS()
+      {
+          var fileClass = $("input[type='checkbox']:checked").parent().prop('className');
+        console.log('Test THE TYPE OF FOLDER : ' + fileClass);
+        //if(fileClass != 'folder'){
+          //  popup('popUpalert','alert','','Please Select folder to proceed'); 
+          //  return false;
+        //}
+        
+        var errorFlag = false;
+        var latestValue = new Array();
+        $("input[type='checkbox']:checked").each(function(){
+           var val1=$(this).attr('class');
+           latestValue.push(val1);                
+        });
+         
+        console.log('New Values update ' + latestValue);
+       /* var price = $.map(latestValue, function(value, key) {
+         if (value == 'child file')
+         {
+            errorFlag = true;  
+         }
+        });*/
+        console.log('SELECT THE FLAG :::' + errorFlag);
+        if(errorFlag == false)
+        {
+        var checkedValues="";
+        var outputStatus=[];
+        checkedValues=$("input[type='checkbox']:checked").map(function() { return this.value; }).get();
+        if(checkedValues==""){
+            popup('popUpalert','alert','','Please Select Atleast one record to proceed'); 
+            return false;
+        }else{
+            console.log('SELECT THE FILES ::: $$$' + checkedValues);
+            var  output="";
+            // Comment for Order Folder Consideration
+            /*
+            for (var i = 0, len = checkedValues.length; i<len; i++){
+                //output += checkedValues[i]+',';
+                if(checkedValues[i]!='on'){
+                        
+                     var checkSeleted=$("input[type='checkbox']:checked").map(function() { return this.className; }).get();  
+                    console.log('Selected Ins' + checkSeleted); 
+                    if(checkSeleted!=""){
+                         for (var i = 0, len = checkSeleted.length; i<len; i++){
+                            console.log('File Type ='+checkSeleted[i]);
+                            if(checkSeleted[i] !='child file'){
+                               output += checkedValues[i].substr(0,18)+',';
+                                console.log('OutputID='+output);
+                                
+                                outputStatus.push(checkedValues[i].substring(19));
+                                console.log('outputStatus='+outputStatus);
+                            }
+                         }
+                    }                    
+                    
+                }
+            }*/
+            
+            // Code from EPMS 1
+            
+            for (var i = 0, len = checkedValues.length; i<len; i++){
+                //output += checkedValues[i]+',';
+                if(checkedValues[i]!='on'){
+                    $("input[type='checkbox']:checked").each(function(){
+                    var val1=$(this).attr('class');
+                    console.log('FILE TYPE IS ::: &&&& '+val1);
+                    if(val1 = 'child fileTypes'){
+                    output += checkedValues[i].substr(0,18)+',';
+                    console.log('OutputID='+output);
+                    
+                    outputStatus.push(checkedValues[i].substring(19));
+                    console.log('outputStatus='+outputStatus);
+                    }
+                    });
+                }
+            }
+            
+            if(output!='')
+            {
+                var error = false; 
+                var qcerror = false;
+                var pname='{!$Profile.Name}'; 
+                    console.log('Before for loop error='+error);    
+                    for(var j=0;j<outputStatus.length;j++){
+                        if(pname != 'Quality Control'){ 
+                        
+                            if((outputStatus[j] == 'QCIP' || outputStatus[j] == 'QC' || outputStatus[j] == 'On-Hold' || outputStatus[j] == 'Approved')){
+                                error = true;
+                                console.log('inside if conditon error='+error);                             
+                                break; 
+                            
+                            }
+                        }
+                        if(pname == 'Quality Control'){ 
+                            if(outputStatus[j] == 'On-Hold' || outputStatus[j] == 'Approved'){
+
+                                    qcerror = true;
+                                    console.log('inside if conditon error='+error);                             
+                                    break; 
+
+                            }
+                        }
+                        
+                    }
+                    console.log('outside if conditon error='+error);
+                    if(error){ 
+                        popup('popUpalert','alert','','Please select File / Directory status should be New, Assigned or Handover'); 
+                    } else if(qcerror){
+                        popup('popUpalert','alert','','Please select file / Directory status should be New, Assigned, QC or QCIP'); 
+                    }else{
+                        var url2 = '/apex/EPMS_HandOverDir_TL?ids=' +output;   
+                        window.open(url2, "EPMS Handover Directories : Anken", "scrollbars=1,width=700, height=300,left=200,top=200,resizable=0,titlebar=0,toolbar=0,status=0"); 
+                    } 
+                    
+            }
+        }
+    }else{
+          popup('popUpalert','alert','','File Types are not allowed');
+          return false;
+        }        
+    
+      }
+     
+      function checkButtonHide(val,className)
+      {
+     
+        var outputButtonStatus = new Array();
+        var outputClasses= new Array();
+
+        if(className == 'child fileTypes')
+        {
+            var tte = $('.fileTypes').is(':checked');
+
+            if(tte==true)
+            {
+
+            outputButtonStatus.push(val.substring(19));
+            console.log('outputButtonStatus='+outputButtonStatus);
+            console.log('come insideeee$$$$$$$$$'+outputButtonStatus.length);
+            for(var j=0;j<outputButtonStatus.length;j++){
+            console.log('come insideeee$$$$$$$$$'+outputButtonStatus);
+                if(outputButtonStatus =='Completed')
+                {
+                    console.log('come insideeee'+outputButtonStatus);
+                    $(".status_change").hide();     
+                    $(".category_change").hide();   
+                    $(".extention_change").hide();                  
+                }
+            }
+            }else if(tte==false)
+            {
+                outputButtonStatus.push(val.substring(19));
+                if(outputButtonStatus.length == 1)
+                {
+                    $(".status_change").show();     
+                    $(".category_change").show();   
+                    $(".extention_change").show();
+                }               
+            }
+            }
+            else if(className == 'folder folder')
+            {
+                var  output="";
+                var checkedValuesFolder="";
+                var tte1 = $('.folder').is(':checked');
+                if(tte1==true)
+                {
+                 checkedValuesFolder=$("input[type='checkbox']:checked").map(function() { return this.value; }).get();
+                 console.log('checkedValues ==>'+checkedValuesFolder);
+                 console.log('checkedValues ==>'+checkedValuesFolder[0]);
+                 var newVal = checkedValuesFolder[0].substring(0, 18);
+
+                 var result = sforce.connection.query("Select Id,Name,Status__c, File_Type__c from Files__c where Parent_Id__c = '"+newVal+"' "); 
+                console.log('--File list records 3333--'+result);
+                                            var records = result.getArray("records");
+
+                 console.log('--File list records--'+records);                          
+                  
+                if(records.length>0){
+                    for(var i=0;i<records.length;i++){ 
+                        if(records[i].File_Type__c == 'Image' && records[i].Status__c == 'Completed'){ 
+                            //error=true;
+                            //break;  
+                            $(".status_change").hide();     
+                            $(".category_change").hide();   
+                            $(".extention_change").hide();                      
+                        }
+                    }
+                    
+                }
+                }else if(tte1==false)
+                {
+            
+                    $(".status_change").show();     
+                    $(".category_change").show();   
+                    $(".extention_change").show();                              
+                }
+            }
+        }
+        
+    function showQCPopupCheck()
+    {
+        $(".showQCPopupRedo").hide();   
+        $(".showQCPopupApprove").hide();  
+        $(".showQCPopupCheck").show();   
+    }
+    
+    function showQCPopupRedo()
+    {
+        $(".showQCPopupApprove").hide(); 
+        $(".showQCPopupCheck").hide();             
+        $(".showQCPopupRedo").show(); 
+    }
+    
+    function showQCPopupApprove()
+    {    
+        $(".showQCPopupRedo").hide();   
+        $(".showQCPopupCheck").hide(); 
+        $(".showQCPopupApprove").show(); 
+    }
+    
+    
+    var selected="sel1";
+    var disp="resultsel1";
+    function show(a,b)
+    {
+      document.getElementById(selected).style.backgroundColor = "rgb(207, 238, 248)";
+      document.getElementById(disp).style.display = "none";
+      
+    
+      document.getElementById(a).style.backgroundColor = "rgb(120, 202, 228)";      
+      
+document.getElementById(b).style.display = "block";
+    selected=a;
+    disp=b;
+    }
+    
+    
+    function hideviewdirectoryNew()
+    {
+        $(".viewdirectoryNewClass").hide();
+        $(".orderFiles").hide();
+        $(".viewdirectoryClass").show();
+
+    }
+    function hideviewdirectory()
+    {
+        $(".viewdirectoryClass").hide();
+        $(".orderFiles").hide();
+        $(".viewdirectoryNewClass").show();
+    }
+    
+    
+function popupCenter(url, name, w, h)
+{
+  // Fudge factors for window decoration space.
+  // In my tests these work well on all platforms & browsers.
+  w += 32;
+  h += 56;
+  wleft = (screen.width - w) / 2;
+  wtop = (screen.height - h) / 2;
+  // IE5 and other old browsers might allow a window that is
+  // partially offscreen or wider than the screen. Fix that.
+  // (Newer browsers fix this for us, but let\''s be thorough.)
+  if (wleft < 0) {
+    w = screen.width;
+    wleft = 0;
+  }
+  if (wtop < 0) {
+    h = screen.height-400;
+    wtop = 200;
+  }
+  var win = window.open(url,
+    name,
+    'width=' + w + ', height=' + h + ', ' +
+    'left=' + wleft + ', top=' + wtop + ', ' +
+    'location=no, menubar=no, ' +
+    'status=no, toolbar=no, scrollbars=no, resizable=no');
+  // Just in case width and height are ignored
+  win.resizeTo(w, h);
+  // Just in case left and top are ignored
+  win.moveTo(wleft, wtop);
+  win.focus();
+}
+
+    
+    function myDirectoryQC(prodID)
+    {
+
+       if (prodID) { 
+       
+       
+             //var url2 = 'apex/EPMS_MyDirectoryQCcheck?id='+prodID; 
+             var url2 = 'apex/EPMS_MyDirectoryQCcheckSearch_IT?id='+prodID; 
+               var paramsW  = screen.width-100;
+               var paramsH = screen.height-100;
+              //var params  = 'width='+screen.width;
+                // params += ', height='+screen.height;
+                // params += ', top=0, left=0'
+                // params += ', fullscreen=yes';
+             
+            //window.open(url2, "Change QC : Quality Controller", paramsW, paramsH);
+            popupCenter(url2,"Change QC", paramsW,paramsH); 
+        
+        } else { 
+            //alert('Select Production Order'); 
+            popup('popUpalert','alert','','Please select Production Order'); 
+            return false;
+        } 
+         return false;
+    }
+ </script>  
+ 
+ <script type="text/javascript">
+ 
+    $(function(){
+  
+    $("#selectall_Copy").click(function () {
+    $("input:checkbox").prop('checked', $(this).prop("checked"));
+    $("input:checkbox").attr('checked', $(this).attr("checked"));
+
+    });
+     $(".case").click(function(){
+        if($(".case").length == $(".case:checked").length) {
+            $("#selectall_Copy").prop('checked', true);
+
+        } else {
+            $("#selectall_Copy").removeAttr("checked");
+        }
+ 
+    })
+$(".leftmenuCustom li a").on("click", function(){
+  $(this).parent('li').addClass('active').siblings().removeClass('active');
+    //$(this).parent('li').addClass("active");
+});
+});
+
+function closeBg()
+{
+    $(".blanket-div").hide();
+}
+
+
+
+//$(document).ready(function(){ 
+//});
+
+
+$(function(){
+    $("#sel1, #sel2").click(function(){
+        $(".hideDivInitial").hide();
+    });
+});
+
+</script>
+    
+<apex:form >
+    <div class="convertInstruction">
+        <div id="popDiv" class="ontop"></div>
+        <div id="popupStatus">
+                   
+        </div>
+    </div>
+    <apex:outputPanel id="testRefreshId"> 
+    </apex:outputPanel>
+
+<html> 
+    <body>
+    
+           <table border="1" width="100%" class="tblCustom">
+                <tr>
+                    <td class="lefttblPart">  
+                    <div width="100%">
+                    <apex:outputPanel rendered="{!$Profile.Name!='Quality Control'}">
+                    <apex:outputPanel rendered="{!$Profile.Name !='Team Leader'}">
+                    <span id='sel1' style="width:100%;" onclick="show('sel1','resultsel1');">My Orders</span>                   
+                    </apex:outputPanel>  </apex:outputPanel>
+                    
+                    <apex:outputPanel rendered="{!$Profile.Name='Quality Control' || $Profile.Name='Team Leader'}">
+                    <span id='sel1' onclick="show('sel1','resultsel1');">My Orders</span>
+                    <span id='sel2' onclick="show('sel2','resultsel2');">Received Orders</span>
+                    </apex:outputPanel>
+                    </div>
+                    <div id="resultsel1">
+                        <apex:outputPanel rendered="{!IF(productionOrderDetails.size > 0,true,false)}" >
+                        <apex:variable var="inc" value="{!0}"/>                                   
+                        <ul class="leftmenu leftmenuCustom">
+                         <apex:repeat value="{!productionOrderDetails}" var="prodOrder">
+                         <!-- <apex:commandlink styleClass="iconDir" action="{!parentChildNodes}" value="{!prodOrder.Name} ( {!prodOrder.Production_Order_Status__c} )" rerender="viewdirectory"> -->
+                         <!--  <span onclick="return hideviewdirectoryNew();"> -->  <li onclick="return hideviewdirectoryNew();">
+                          <apex:commandlink styleClass="iconDir" action="{!parentChildNodes}" value="{!prodOrder.Name}" rerender="viewdirectory">
+                            <apex:param name="prodOrderID" value="{!prodOrder.Id}"/>
+                            </apex:commandlink></li>           
+                        <apex:variable var="inc" value="{!inc+1}"/>
+                        </apex:repeat>      
+                        </ul>                      
+                        </apex:outputPanel> 
+
+                    <apex:pageBlock >
+                        <apex:pageBlockButtons location="bottom" >
+                        <apex:commandButton value="Previous" action="{!Previous}"  status="status" disabled="{!DisablePrevious}" />
+                        <apex:commandButton value="Next" action="{!Next}" status="status" disabled="{!DisableNext}" />
+                        <apex:actionStatus id="status" startText="Please Wait..."/>
+                    </apex:pageBlockButtons>        
+                </apex:pageBlock>                       
+                    </div>
+                    <div id="resultsel2">
+                        <apex:outputPanel rendered="{!IF(AssignedFileListWithoutProductionOrders.size > 0,true,false)}" >
+                        <apex:variable var="inc" value="{!0}"/>                                   
+                        <ul class="leftmenu leftmenuCustom">
+                         <apex:repeat value="{!AssignedFileListWithoutProductionOrders}" var="prodOrder">         
+                            <!--<li onclick="return hideviewdirectory();"><apex:commandlink styleClass="iconDir" action="{!parentChildNodesNew}" value="{!prodOrder.Name} ( {!prodOrder.Production_Order_Status__c} )" rerender="viewdirectoryNew"> -->
+                            <li onclick="return hideviewdirectory();"><apex:commandlink styleClass="iconDir" action="{!parentChildNodesNew}" value="{!prodOrder.Name}" rerender="viewdirectoryNew">
+                            <apex:param name="prodOrderID" value="{!prodOrder.Id}"/>
+                            </apex:commandlink></li>                    
+                        <apex:variable var="inc" value="{!inc+1}"/>
+                        </apex:repeat>      
+                        </ul>                      
+                        </apex:outputPanel> 
+                        
+                        <apex:pageBlock >
+                        <apex:pageBlockButtons location="bottom" >
+                        <apex:commandButton value="Previous" action="{!PreviousNew}"  status="status" disabled="{!DisablePreviousNew}" />
+                        <apex:commandButton value="Next" action="{!NextNew}" status="status" disabled="{!DisableNextNew}" />
+                        <apex:actionStatus id="status" startText="Please Wait..."/>
+                        </apex:pageBlockButtons>        
+                        </apex:pageBlock>
+                        </div>
+                    </td>
+                    <td>
+        
+
+    
+    <div class="blanket-div" style="display:none;"></div>
+    
+    <apex:outputPanel id="VDFolPop"  styleClass="jobtitle">
+     
+    
+        <apex:outputPanel id="VDFolpopInnerOutputPnl"  styleClass="customPopup" layout="block"  rendered="{!displayVDFolPopUp}">
+        
+            <apex:pageBlock > 
+                <apex:pageblockSection columns="1">                        
+                    <apex:outputLabel styleClass="jobtitleHd" value="Change Folder Instruction"></apex:outputLabel>
+                    <UL>
+                        <apex:pageblockSectionItem >
+                            <apex:outputLabel value="Folder Instruction"></apex:outputLabel>
+                            <apex:inputTextArea id="instro" value="{!VDFolInstrucEntered}" html-maxlength="1024" rows="25" style="width: 99%;"/>                            
+                        </apex:pageblockSectionItem>
+                        <apex:inputHidden value="{!FileListInsruction}" id="hiddenField"/>
+                    </UL>
+                </apex:pageblockSection>
+                <apex:commandButton value="Submit" action="{!redirectVDFolPopup}" styleClass="closeButton" oncomplete="SuccessFullyDelete('SuccessFully Instruction updated') ;"/>
+                <!--<apex:commandButton value="Cancel"  action="{!cancelVDFolPop}" styleClass="closeButton"  rerender="VDFolPop"/>   -->
+                <apex:commandButton value="Cancel"  action="{!cancelVDFolPop}" onclick="closeInstructionPopup();"  styleClass="closeButton"  rerender="VDFolPop"/>
+                    
+            </apex:pageBlock>  
+        </apex:outputPanel>
+    </apex:outputPanel>
+    
+    
+       <span class="viewdirectoryClass">
+        <apex:pageBlock rendered="true" id="viewdirectory"> 
+            <apex:pageMessages id="errorMessages" />
+           <!-- <apex:commandButton value="Open Files" onclick="openFilesJS('{!$Component.openFiles}'); return false;" rendered="{!$Profile.Name='Quality Control' || $Profile.Name='Team Leader'|| $Profile.Name='システム管理者'}" /> -->
+         <!--   <apex:commandButton value="Change File Instructions"   onclick="JobinstrcutionJS('{!$Component.openInstrFiles}'); return false;"  rendered="{$Profile.Name='Team Leader'|| $Profile.Name='システム管理者'|| $Profile.Name='System Administrator'}"  />  -->  
+            <apex:commandButton value="Change Extension Type"  styleClass="extention_change" onclick="changeExtJS(); return false;" rendered="{!$Profile.Name='Quality Control' || $Profile.Name='システム管理者' || $Profile.Name='Country Administrator'}"/> 
+
+            <apex:commandButton value="Assign Operator"  onclick="assignOperatorJS(); return false;" rendered="{!$Profile.Name='Team Leader' ||  $Profile.Name='システム管理者' || $Profile.Name='Country Administrator'}" />      
+            <apex:commandButton value="Re-Assign Operator"  onclick="reAssignOperatorJS(); return false;" rendered="{!$Profile.Name='Team Leader' || $Profile.Name='システム管理者' || $Profile.Name='Country Administrator'}" /> 
+            <apex:commandButton value="Handover Files / Directories" onclick="handOverDirectoriesJS(); return false;" rendered="{!$Profile.Name='Quality Control' || $Profile.Name='システム管理者' || $Profile.Name='Team Leader' || $Profile.Name='Country Administrator'}" /> 
+
+            <apex:commandButton value="QC Check"  onClick="return myDirectoryQC('{!parentid}');" rendered="{!$Profile.Name='Quality Control' || $Profile.Name='システム管理者' || $Profile.Name='Country Administrator'}" />
+         
+         <apex:actionFunction name="changeExtention" action="{!changeExtention}" onComplete="showChangeExtPopup() ;" immediate="true" rerender="changeExtentionId" >
+            <apex:param id="fileExt" name="fileExt" value=""/>
+        </apex:actionFunction>
+  
+ 
+          <apex:actionFunction name="CallApexMethod" action="{!openDirectory}" onComplete="if('{!errorFlag}' == 'false') {Reloadpage('Selected Files Are Marked to Open in Photoshop');};">
+             <apex:param id="openFiles" name="openFiles" value=""/>
+          </apex:actionFunction>
+          
+         
+           <apex:actionFunction name="CallApexJobInstruction" action="{!showVDFolPopup}"   rerender="VDFolPop, errorMessages" oncomplete="showpopup3('{!$Component.VDFolPop}');">
+             <apex:param id="openInstrFiles" name="openInstrFiles" value=""/>
+          </apex:actionFunction>
+          
+          
+        <div class="treeheader" style="height:10px;margin-bottom:5px;">&nbsp;</div> 
+        <div class="hideDivInitial">
+        <apex:outputPanel rendered="{!parentid != null}">
+        <h3> Production Order : {!parentid}  </h3>
+        <div class="legend-content">
+                <ul>
+                    <li class="parentColor"><em></em>Parent Files</li>
+                    <li class="copyColor"><em></em>Copy Files</li>                                
+                    <li class="splitedColor"><em></em>Splitted Files</li>
+                    
+                </ul>
+          </div>
+        
+        <div class="treeheader" style="height:10px;margin-bottom:5px;">&nbsp;</div> 
+        <ul id="browser1" class="filetree treeview-famfamfam">
+        
+                <li>
+                    <span class="folder">
+                        <input type="checkbox" />
+                        <span style="font-weight:bold;"><apex:outputLabel value="{!parentid}"/> </span>
+                    </span>
+                     <ul id="treesctruc">
+                     </ul>
+                </li>  
+        </ul>               
+        </apex:outputPanel> 
+        </div>
+        <div id="regionTree">
+        </div>
+        
+    <script type="text/javascript">
+       
+        function convert(array){
+            var map = {};
+            for(var i = 0; i < array.length; i++){
+                var obj = array[i];
+                obj.children= [];
+                map[obj.FileIDId] = obj;
+                var parent = obj.parentId || obj.splittedParentId ||'-';
+                console.log(' !!!!!!! &&& !!!!!!! ' + JSON.stringify(obj));
+                console.log(' !!!!! FILE ID !!! ' + obj.FileIDId);
+                console.log(' !!!!!! PARENT ID !! ' + obj.parentId);
+                if(!map[parent]){
+                    map[parent] = {
+                        children: []
+                    };
+                }
+                map[parent].children.push(obj);
+            }
+            return map['-'].children;
+        }
+        
+        var replacedString='{!AllDetails}';
+        var splitedarray= JSON.parse(replacedString);
+        var r = convert(splitedarray);        
+        
+        var treeString = '';
+        function cnvertTotree(json){
+           var classDirname=''; 
+           var classchidDir=''; 
+            $(json).each(function(key, value) {
+                
+              if(value.fileType=='Directory'){
+                treeString+='<li>';
+                classDirname='folder';
+                classchidDir='folder';
+              }else if(value.fileType=='Image'){
+                classDirname='fileTypes';
+                classchidDir='child';
+                treeString+="<li class='child'>";
+              }else{
+                classDirname='file';
+                classchidDir='child';
+                treeString+="<li class='child'>";                
+              }              
+                    var profileName = '{!proflieName}' ;
+                    var currentLoginUserID = '{!currentLoginUserID}';
+                    console.log('currentLoginUserID===>'+currentLoginUserID);
+                    console.log('currentQCUserID===>'+value.currentQCUserID);
+                    console.log('currentTLUserID===>'+value.currentTLUserID);
+                    if((profileName == 'Quality Control' &&  currentLoginUserID != value.currentQCUserID) ||  (profileName == 'Team Leader' &&  currentLoginUserID != value.currentTLUserID ))               
+                    {
+                    treeString+='<span  class='+classDirname+' style="float: left;margin-bottom: 8px;padding-left: 40px;width: 100%;"><span style="background-color:#CCC;padding:5px;">'+value.File_AutoNumber+' - '+' ( ' + value.FileStatus+' ) '+'</span></span>';
+                    }                 
+                    else{                
+                        
+                        if(value.splittedParentId && value.parentId == null)
+                        {
+                            treeString+='<span class='+classDirname+'><span class="splitedfiles"><input type="checkbox" onclick="checkButtonHide(this.value,this.className);" class="'+classchidDir+' '+classDirname+'" value='+value.FileIDId+'-'+value.FileStatus+'>'+value.File_AutoNumber+' - '+' ( ' + value.FileStatus+' ) '+'</span></span>';
+                        }else{
+                            treeString+='<span  class='+classDirname+'><input type="checkbox" onclick="checkButtonHide(this.value,this.className);" class="'+classchidDir+' '+classDirname+'" value='+value.FileIDId+'-'+value.FileStatus+'>'+value.File_AutoNumber+' - '+' ( ' + value.FileStatus+' ) '+'</span>';
+                        }
+                        //treeString+='<span  class='+classDirname+'><input type="checkbox" onclick="checkButtonHide(this.value,this.className);" class="'+classchidDir+' '+classDirname+'" value='+value.FileIDId+'-'+value.FileStatus+'>'+value.File_AutoNumber+' - '+' ( ' + value.FileStatus+' ) '+'</span>';
+                    }    
+            
+               
+                
+                if(value.children != undefined && value.children.length > 0){
+                    treeString+="<ul>";
+                        cnvertTotree(value.children);
+                    treeString+="</ul>";
+                }
+                
+                if(value.fileType=='Directory'){
+                    treeString+='</li>';    
+                }else if(value.fileType=='Image'){
+                    treeString+="</li>";
+                }else{
+                    treeString+="</li>";
+                }
+                
+            
+            });
+        }
+        
+        $(function(){
+
+        var json = r;
+        //debugger;
+        cnvertTotree(json);
+        $('#treesctruc').append(treeString);
+         $('#browser1').checktree();   
+         $('#browser1').treeview()
+ 
+    });
+    </script>
+  </apex:pageBlock></span>
+  
+    <span class="viewdirectoryNewClass">
+    <apex:pageBlock rendered="true" id="viewdirectoryNew"> 
+            <apex:pageMessages id="errorMessages" />
+           <!-- <apex:commandButton value="Open Files" onclick="openFilesJS('{!$Component.openFiles}'); return false;" rendered="{!$Profile.Name='Quality Control' ||$Profile.Name='Team Leader'|| $Profile.Name='システム管理者'}" /> -->
+          <!--  <apex:commandButton value="Change File Instructions"   onclick="JobinstrcutionJS('{!$Component.openInstrFiles}'); return false;"  rendered="{$Profile.Name='Team Leader'|| $Profile.Name='システム管理者'}"  />  -->    
+            <apex:commandButton value="Change Extension Type"  styleClass="extention_change" onclick="changeExtJS(); return false;" rendered="{!$Profile.Name='Quality Control' || $Profile.Name='システム管理者'}"/>           
+
+           <!--   <apex:commandButton value="Change Category" styleClass="category_change" onclick="changeCategoryValid();return false;" rendered="{!$Profile.Name='Quality Control' || $Profile.Name='システム管理者'}"/> 
+            <apex:commandButton value="Change Status" styleClass="status_change" onclick="changeStatusValid();return false;" rendered="{!$Profile.Name='Quality Control' || $Profile.Name='システム管理者'}"/> --> 
+            <apex:commandButton value="Assign Penalty"  onclick="assignPenaltyJS(); return false;" rendered="{!$Profile.Name='Quality Control' || $Profile.Name='システム管理者' || $Profile.Name= 'Sales Region'}"/>       
+            <apex:commandButton value="Skip Penalty"  onclick="skipPenaltyJS(); return false;"  rendered="{!$Profile.Name='Quality Control' || $Profile.Name='システム管理者' || $Profile.Name= 'Sales Region'}" />            
+            <apex:commandButton value="Assign Operator"  onclick="assignOperatorJS(); return false;" rendered="{!$Profile.Name='Team Leader' || $Profile.Name='システム管理者' || $Profile.Name='システム管理者'}" />      
+            <apex:commandButton value="Re-Assign Operator"  onclick="reAssignOperatorJS(); return false;" rendered="{!$Profile.Name='Team Leader' || $Profile.Name='システム管理者'}" /> 
+            <apex:commandButton value="Handover Files / Directories" onclick="handOverDirectoriesJS(); return false;" rendered="{!$Profile.Name='Quality Control' || $Profile.Name='システム管理者' || $Profile.Name='Team Leader' }" /> 
+           
+            <apex:commandButton value="QC Check"  onClick="return myDirectoryQC('{!parentid}');" rendered="{!$Profile.Name='Quality Control' || $Profile.Name='システム管理者'}" />
+            
+         <apex:actionFunction name="changeExtention" action="{!changeExtention}" onComplete="showChangeExtPopup() ;" immediate="true" rerender="changeExtentionId" >
+            <apex:param id="fileExt" name="fileExt" value=""/>
+        </apex:actionFunction>
+        
+        
+          <apex:actionFunction name="CallApexMethod" action="{!openDirectory}" onComplete="SuccessFullyDelete('SuccessFully updated Selected Records') ;">
+             <apex:param id="openFiles" name="openFiles" value=""/>
+          </apex:actionFunction>
+
+           <apex:actionFunction name="CallApexJobInstruction" action="{!showVDFolPopup}"   rerender="VDFolPop, errorMessages" oncomplete="showpopup3('{!$Component.VDFolPop}');">
+             <apex:param id="openInstrFiles" name="openInstrFiles" value=""/>
+          </apex:actionFunction>
+          
+
+          
+         
+        <div class="treeheader" style="height:10px;margin-bottom:5px;">&nbsp;</div> 
+        
+        <div class="hideDivInitial">
+         <apex:outputPanel rendered="{!parentid != null}">
+        <h3> Production Order : {!parentid}  </h3>      
+        <div class="legend-content">
+                <ul>
+                    <li class="parentColor"><em></em>Parent Files</li>
+                    <li class="copyColor"><em></em>Copy Files</li>                                
+                    <li class="splitedColor"><em></em>Splitted Files</li>
+                    
+                </ul>
+          </div>
+        <div class="treeheader" style="height:10px;margin-bottom:5px;">&nbsp;</div> 
+        <ul id="browser2" class="filetree treeview-famfamfam">
+        
+                <li>
+                    <span class="folder">
+                        <input type="checkbox" />
+                          <span style="font-weight:bold;"><apex:outputLabel value="{!parentid}"/> </span>
+                    </span>
+                     <ul id="Newtreesctruc">
+                     </ul>
+                </li>  
+        </ul>  
+         </apex:outputPanel>                 
+         </div>
+         
+        <div id="regionTree">
+        </div>
+        
+    <script type="text/javascript">
+       
+        function convert(array){
+            var map = {};
+            for(var i = 0; i < array.length; i++){
+                var obj = array[i];
+                obj.children= [];
+                map[obj.FileIDId] = obj;
+                var parent = obj.parentId || obj.splittedParentId || '-';
+                console.log(' !!!!!!! &&& !!!!!!! ' + JSON.stringify(obj));
+                console.log(' !!!!! FILE ID !!! ' + obj.FileIDId);
+                console.log(' !!!!!! PARENT ID !! ' + obj.parentId);
+                if(!map[parent]){
+                    map[parent] = {
+                        children: []
+                    };
+                }
+                map[parent].children.push(obj);
+            }
+            return map['-'].children;
+        }
+        
+        var replacedString='{!AllDetailsNew}';
+        console.log('---- replaced -----' + replacedString);
+        var splitedarray= JSON.parse(replacedString);
+        var r = convert(splitedarray);        
+        
+        var treeString = '';
+        function cnvertTotree(json){
+           var classDirname=''; 
+           var classchidDir=''; 
+            $(json).each(function(key, value) {
+                
+              if(value.fileType=='Directory'){
+                treeString+='<li>';
+                classDirname='folder';
+                classchidDir='folder';
+              }else if(value.fileType=='Image'){
+                classDirname='fileTypes';
+                classchidDir='child';
+                treeString+="<li class='child'>";
+              }else{
+                classDirname='file';
+                classchidDir='child';
+                treeString+="<li class='child'>";                
+              }
+              
+           
+            if(value.splittedParentId && value.parentId == null)
+            {
+                treeString+='<span class='+classDirname+'><span class="splitedfiles"><input type="checkbox" onclick="checkButtonHide(this.value,this.className);" class="'+classchidDir+' '+classDirname+'" value='+value.FileIDId+'-'+value.FileStatus+'>'+value.File_AutoNumber+' - '+' ( ' + value.FileStatus+' ) '+'</span></span>';
+            }else{
+                treeString+='<span  class='+classDirname+'><input type="checkbox" onclick="checkButtonHide(this.value,this.className);" class="'+classchidDir+' '+classDirname+'" value='+value.FileIDId+'-'+value.FileStatus+'>'+value.File_AutoNumber+' - '+' ( ' + value.FileStatus+' ) '+'</span>';
+            }
+                    
+                    
+                if(value.children != undefined && value.children.length > 0){
+                    treeString+="<ul>";
+                        cnvertTotree(value.children);
+                    treeString+="</ul>";
+                }
+                
+                if(value.fileType=='Directory'){
+                    treeString+='</li>';    
+                }else if(value.fileType=='Image'){
+                    treeString+="</li>";
+                }else{
+                    treeString+="</li>";
+                }
+            });
+        }
+        
+        $(function(){
+
+        var json = r;
+        //debugger;
+        cnvertTotree(json);
+        $('#Newtreesctruc').append(treeString);
+         $('#browser2').checktree();   
+         $('#browser2').treeview()
+ 
+    });
+    </script>
+  </apex:pageBlock> 
+  </span>
+
+            
+            <apex:outputPanel id="callJS">                
+            <script type="text/javascript">
+            function refreshParent(){            
+                window.location.reload();
+            }  
+            </script>   
+            </apex:outputPanel>
+            
+            <div class="changeExtPopup">
+            <div id="popDiv" class="ontop"></div>
+            <div id="popup">            
+            <apex:outputPanel id="changeExtentionId">                
+                    <apex:pageblock title="Change Extension">                    
+                        <apex:pageMessages />
+                    <div class="changeExtSec">      
+                        <div class="changeExtLabel">Extension :</div>
+                        <div class="changeExtTextBox"><apex:selectList value="{!extentionTxt}" size="1" id="elementStatus" >
+                            <apex:selectoptions value="{!AllFileExtension}" />
+                                              
+                        </apex:selectList></div>
+                    </div>  
+                        
+                    <div class="changeExtBtnSec">      
+                          <apex:commandButton value="Submit" action="{!saveChangeExtention}"   rerender="changeExtentionId" />
+                          <apex:commandButton value="Close" onclick="cancelchangeStatus()" OnComplete="closeInstructionPopup()" />                          
+                    </div>
+                    </apex:pageblock>                
+            </apex:outputPanel>
+            </div>
+        </div>
+              
+            <div class="changeCategoryDiv">
+            <div id="popDiv" class="ontop"></div>
+            <div id="popupStatus">
+            
+            </div>
+        </div> 
+              
+         <div class="changeStatusDiv">
+            <div id="popDiv" class="ontop"></div>
+            <div id="popupStatus">
+            
+            </div>
+         </div> 
+
+                   </td>  
+                </tr>
+                 </table>
+                 
+                </body>
+    
+            </html>
+        
+    </apex:form>
+   
+</apex:page>

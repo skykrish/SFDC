@@ -1,0 +1,158 @@
+<apex:page controller="SitesMypageControllerRakuten" action="{!init}" cache="false" sidebar="false" showHeader="false" standardStylesheets="false">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>マイページ</title>
+
+    <!-- Design Style -->
+    <apex:stylesheet value="{!URLFOR($Resource.SitesContentsRakuten, 'common/css/import.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.SitesContentsRakuten, 'common/css/editorial/mypage.css')}" />
+
+    <!-- JQuery --> 
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>
+    
+    <!-- Design Script -->
+    <apex:includeScript value="{!URLFOR($Resource.SitesContentsRakuten, 'common/js/jquery.blend-min.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.SitesContentsRakuten, 'common/js/scrollsmoothly.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.SitesContentsRakuten, 'common/js/heightLine.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.SitesContentsRakuten, 'common/js/curvycorners.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.SitesContentsRakuten, 'common/js/common.js')}"/>
+    <script language="JavaScript" type="text/javascript">
+        var settings = {
+            tl: { radius: 10 },
+            tr: { radius: 10 },
+            bl: { radius: 10 },
+            br: { radius: 10 },
+            antiAlias: true
+        };
+        /* moooo */
+        $('.round').each(function(rd) {
+            curvyCorners(settings,rd);
+        });
+    </script>
+
+    <meta name="Keywords" content="" />
+    <meta name="Description" content="" />
+    <meta name="robots" content="index,follow" />
+
+    <!--Google Analytics-->
+    <script type="text/javascript">
+
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-17698964-1', 'auto', {'allowLinker': true}); 
+    ga('require', 'linker');
+    ga('linker:autoLink', ['kirinuki.jp','kirinuki.secure.force.com','mediabackoffice.co.jp'] ); 
+    ga('send', 'pageview');
+
+    </script>
+    <!--Google Analytics-->
+</head>
+
+<body>
+    <div id="wrapper">
+    <div id="header" class="cf">
+        <div class="left">
+            <h1>
+            </h1>
+        </div><!--div.left -->
+        <div class="right">
+            <apex:form >
+                <ul>
+                    <li>
+                        <apex:commandLink action="{!order}">
+                            <img src="{!URLFOR($Resource.SitesContents, 'common/img/btn_form.png')}" width="89" height="24" alt="発注フォームへ"/>
+                        </apex:commandLink>                
+                    </li>
+                    <li>
+                        <apex:commandLink action="{!logout}">
+                            <img src="{!URLFOR($Resource.SitesContents, 'common/img/btn_logout.png')}" width="89" height="24" alt="ログアウト"/>
+                        </apex:commandLink>                
+                    </li>
+                </ul>
+            </apex:form>
+        </div><!--div.right -->
+    </div><!--div#header -->
+
+    <div id="container" class="cf">
+    <div id="content" class="cf onecolumn">
+        <apex:form >
+            <div class="article" id="article-01">
+                <h3>
+                    <apex:commandLink action="{!orderlist}">ご利用履歴</apex:commandLink>
+                </h3>
+                ご発注済みの案件の一覧をご確認頂けます。ご発注日、納品日、点数、金額、ご発注担当者様などが表示されます。また、お見積書、納品書などのPDFのダウンロード、ご注文情報のCSVデータのダウンロードも可能です。
+            </div>
+    
+            <div class="article" id="article-03">
+                <h3>
+                    <apex:commandLink action="{!useredit}">お客様情報の変更</apex:commandLink>
+                </h3>
+                
+                <!-- 2016/05/11 edit Start -->
+                <!--
+                ご住所、お電話番号、ご担当者様の追加、削除、編集など、お取引に関する情報の変更がこちらから可能です。
+                -->
+                こちらからご担当者様の追加、削除、編集が可能です。
+                <!-- 2016/05/11 edit End -->
+                
+            </div>
+    
+            <div class="article" id="article-04">
+                <h3>
+                    <apex:commandLink action="{!password}">パスワードの変更</apex:commandLink>
+                </h3>
+                ログイン用パスワードの変更がこちらから可能です。<br/>&nbsp;
+            </div>
+
+        </apex:form>
+    </div><!--div#content -->
+    </div><!--div#container -->
+
+    <div id="footer">
+        <div class="inner">
+        </div><!--div.inner -->
+    </div><!--div#footer -->
+
+    </div><!--div#wrapper -->
+
+    <div id="copyright">
+        Powered by<a href="http://www.force.com/" target="_blank"> force.com</a>
+    </div>
+
+<!--Google リマーケティング-->
+<!-- Google Code for &#20840;&#27969;&#20837; -->
+<!-- Remarketing tags may not be associated with personally identifiable information or placed on pages related to sensitive categories. For instructions on adding this tag and more information on the above requirements, read the setup guide: google.com/ads/remarketingsetup -->
+<script type="text/javascript">
+/* <![CDATA[ */
+var google_conversion_id = 995058442;
+var google_conversion_label = "5mxVCK7c2wYQisa92gM";
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+/* ]]> */
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/995058442/?value=0&amp;label=5mxVCK7c2wYQisa92gM&amp;guid=ON&amp;script=0"/>
+</div>
+</noscript>
+<!--Google リマーケティング-->
+
+<!-- YDN リターゲティング -->
+<script type="text/javascript" language="javascript">
+/* <![CDATA[ */
+var yahoo_retargeting_id = 'T15AP4YAQ4';
+var yahoo_retargeting_label = '';
+/* ]]> */
+</script>
+<script type="text/javascript" language="javascript" src="//b92.yahoo.co.jp/js/s_retargeting.js"></script>
+<!-- YDN リターゲティング -->
+
+</body>
+
+</apex:page>

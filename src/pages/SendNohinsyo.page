@@ -1,0 +1,54 @@
+<apex:page title="納品書送付" controller="SendNohinsyoController" action="{!initCheck}">
+
+    <!-- スタイルシート -->
+    <style type="text/css">
+    body {
+        display:none;
+    }
+    </style>
+
+    <!-- 共通スクリプト -->
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>
+
+    <!-- スクリプト -->
+    <script type="text/javascript">
+        // 初期表示時
+        $(document).ready(function(){
+            var initCheck = {!isInitCheck};
+            var isSendPdf = {!isSendPdf};
+            // 初期表示チェックOK
+            if (initCheck) {
+                if (isSendPdf) {
+                    // 納品書送付処理を起動
+                    window.setTimeout(callSend, 100);
+                } else {
+                    // 案件更新処理を起動
+                    window.setTimeout(callUpdate, 100);
+                }
+            } else {
+                // 初期表示チェックNGの場合
+                $("body").css("display", "block");
+            }
+        });
+    </script>
+
+    <apex:sectionHeader title="納品書送付" />
+    <apex:pageMessages id="messagearea" showDetail="false" />
+
+    <apex:form >
+
+        <!-- 初期表示チェックNG時 -->
+        <apex:pageBlock title="納品書送付エラー" rendered="{!(!isInitCheck)}">
+            <!-- ボタンエリア -->
+            <apex:pageBlockButtons location="top">
+                <apex:commandButton value="戻る" action="{!cancel}" immediate="true" />
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+
+        <!-- Javascriptより実行されるコマンド -->
+        <apex:actionFunction name="callUpdate" action="{!updateAnkenData}"/>
+        <apex:actionFunction name="callSend" action="{!sendPdf}"/>
+
+    </apex:form>
+
+</apex:page>

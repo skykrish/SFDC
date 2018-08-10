@@ -1,0 +1,90 @@
+<apex:page controller="EPMS_File_OnHold_Controller" showHeader="false">
+
+<script src="/soap/ajax/35.0/connection.js"></script>
+
+     <script>
+         function ClosePopup(){ 
+            sforce.connection.sessionId = '{!$Api.Session_ID}';
+            var describeSObjectResult = sforce.connection.describeSObject("Files__c");
+            var prefix = describeSObjectResult.keyPrefix;                          
+            var url = location.href;
+            var basepath = '{!basepath}';
+            var filerec = '{!fileRecord}';
+            var baseURL = url.substring(0, url.indexOf('/', 14));
+            
+            if(basepath == 'detailpage'){                        
+               window.opener.location.href="/" + filerec;
+            } else {
+               window.opener.location.href="/" + prefix;
+            }
+            
+            if(baseURL) {
+               window.top.close();     
+            }
+            refreshParentPage();
+        }
+        
+        function refreshParentPage() 
+        {
+            alert(window.opener.location.href)
+            var redirectURL = window.opener.location.href;
+            if(redirectURL)
+            {
+                window.opener.location.href = window.opener.location.href;
+                if (window.opener.progressWindow) 
+                {
+                    window.opener.progressWindow.close();
+                }
+                window.close();
+            }
+        }
+     </script>
+     <style>
+.orderAssignmentSec {width:650px; margin:0 auto; padding:10px 0px 0; overflow:hidden;}
+.orderAssignmentSec .rowSec {width:100%; font-size:12px; color:#4a4a56; padding:0 0 10px; overflow:hidden;}
+
+.rowSec .leftSec {width:35%; float:left; text-align:left;}
+.rowSec .rightSec {width:63%; float:right;}
+.rowSec .leftSecShiftTeam {width:35%; float:left; text-align:left;}
+.rowSec .rightSecShiftTeam {width:63%; float:right;}
+.rowSec .leftSecSelType {width:35%; float:left; text-align:left;}
+.rowSec .rightSecSelType {width:63%; float:right;}
+.rowSec .rightSec select, .rowSec .rightSecShiftTeam select, .rowSec .rightSecSelType select {width:380px; float:right;}
+
+.pbHeader td.pbTitle {width:43%}
+.pbBottomButtons td.pbTitle {width:43%}
+     </style>
+    <apex:form >
+        <apex:pageBlock >
+            <apex:pageBlockButtons >
+                <apex:commandButton action="{!onhold_save}" value="On-Hold"/>
+                <apex:commandButton value="Close" onclick="ClosePopup();"/>
+            </apex:pageBlockButtons>
+        
+    
+        <div class="orderAssignmentSec">
+    
+        <table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="pbTitle">&nbsp;<h3>On-Hold Files  </h3></td></tr></tbody></table>
+        <div class="paddingBotton10"> 
+           <apex:outputPanel id="thePageBlock">
+              <apex:pageMessages />
+            </apex:outputPanel>
+        </div>
+        
+        
+        <div class="rowSec">
+             <div class="leftSec">
+                <apex:outputlabel value="QC Comments"/>
+            </div>
+            <div class="rightSec">
+                <div class="rightSecInnerDiv">
+                    <apex:inputTextarea value="{!qcCommentsForFiles}" label="QC Comments"/>
+                </div>    
+            </div>
+        </div>
+        
+        </div>
+        </apex:pageBlock>
+                
+    </apex:form>
+</apex:page>

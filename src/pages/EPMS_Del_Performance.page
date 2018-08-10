@@ -1,0 +1,13 @@
+<apex:page standardController="Performance_Rating__c" action="{!if($User.Id !=Performance_Rating__c.OwnerId,
+    null,
+    urlFor($Action.Performance_Rating__c.Delete, $CurrentPage.Parameters.id, [retURL='/a0n'], true)
+    )
+    }"
+  >
+     <apex:pageBlock >
+        <apex:PageMessage summary="You are not allowed to delete Accounts"
+            severity="Warning"
+            strength="3"/>
+        <apex:pageMessages />
+    </apex:pageBlock>
+</apex:page>

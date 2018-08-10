@@ -1,0 +1,30 @@
+<apex:Page tabStyle="Production_Order__c" >
+<script src="/soap/ajax/35.0/connection.js"></script>
+<script type="text/javascript" />
+<script>
+     window.onload = function() {
+
+     sforce.connection.sessionId = '{!$Api.Session_ID}';
+
+     var describeSObjectResult = sforce.connection.describeSObject("Production_Order__c");
+     var prefix = describeSObjectResult.keyPrefix;
+
+     // Determine the View based on the Role of the User
+     var cView;
+     switch ( "{!$UserRole.Name}" ) {
+     case "CEO": cView = "00B5F000004NW2r" ; break ;
+     case "Quality Control": cView = "00B5F000004NVVM" ; break ;
+     case "Team Leader": cView = "00B5F000004NVVM" ; break ;
+     case "Shift Administrator": cView = "00B5F000004NW2r" ; break ;
+     case "Production Administrator": cView = "00B5F000004NW2r" ; break ;
+     case "IT Administrator": cView = "00B5F000004NW2r" ; break ;
+     case "Sales Region": cView = "00B5F000004NW2r" ; break ;
+     default: cView = "00B5F000004NW2r"; break;
+     }
+
+     // Change the whole window to point to this location
+     parent.document.location.href = "/" + prefix + "?fcf=" + cView ;
+}
+</script>
+
+</apex:page>

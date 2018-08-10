@@ -1,0 +1,29 @@
+<apex:page controller="ChangeToTranfer">
+    <apex:form >
+        <apex:pageBlock >
+      <apex:pageBlockSection >
+          
+           StartingorderNumber: <apex:inputText value="{!startOrder}"/>
+        <br/>
+     EndingOrderNumber: <apex:inputText value="{!endOrder}"/>
+        
+        </apex:pageBlockSection>
+            
+              </apex:pageBlock>
+        <apex:pageBlock >
+        	 <apex:commandButton value="saverecords" action="{!saverec}"/>
+             <apex:commandButton value="Get Records" action="{!displyRecords}"/>
+        </apex:pageBlock>
+        <apex:pageBlock >
+            <apex:pageBlockTable value="{!ankrecords}" var="ank">
+            	<apex:column value="{!ank.Name}" headerValue="Anken Name"/>
+                <apex:column value="{!ank.Status__c}" headerValue="Status"/>
+                <apex:column value="{!ank.Delivery_Time_Difference__c}" headerValue="Time Difference"/>
+                <apex:column value="{!ank.Delivery_Process_Time_Long__c}" headerValue="Delivery Log"/>
+            </apex:pageBlockTable>
+        </apex:pageBlock>
+  
+    	
+    </apex:form>
+  
+</apex:page>

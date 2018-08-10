@@ -1,0 +1,108 @@
+<apex:page standardController="Mistakes__c" extensions="EPMS_AssignPenality" sidebar="false" showHeader="false">
+    <script src="/soap/ajax/35.0/connection.js"></script>
+
+    <script type="text/javascript">
+                 
+      function ClosePopup(){
+       sforce.connection.sessionId = '{!$Api.Session_ID}';
+       var describeSObjectResult = sforce.connection.describeSObject("Files__c");
+       var prefix = describeSObjectResult.keyPrefix;     
+     
+       var url = location.href;
+       var basepath = '{!basepath}';
+       var filerec = '{!fileRecord}';
+        var baseURL = url.substring(0, url.indexOf('/', 14));      
+        if(basepath == 'file'){
+            window.opener.location.href="/" + prefix;
+        }else if(basepath =='penality')
+        {
+            window.opener.location.href=baseURL+"/apex/EPMS_MyDirectory";
+        }else if(basepath =='detailpage') {
+               window.opener.location.href="/"+filerec;
+           }
+        if(baseURL)
+        {
+            window.top.close();     
+        }
+        refreshParentPage();
+    }
+    
+    function refreshParentPage() 
+    {
+        alert(window.opener.location.href)
+        var redirectURL = window.opener.location.href;
+        if(redirectURL)
+        {
+            window.opener.location.href = window.opener.location.href;
+            if (window.opener.progressWindow) 
+            {
+                window.opener.progressWindow.close();
+            }
+            window.close();
+        }
+    }
+             
+    </script>
+
+   
+   
+   <style>
+    .bPageBlock {
+         background-color: white;
+     }
+    .bPageTitle h3 {
+            font-family: arial,"Times New Roman", Georgia, Serif;
+            font-size: 90% !important; 
+            // you can write this way also font-size: 40px !important;
+        }
+      
+        .bPageTitle h1{
+            font-style: Arial;
+            font-weight: bold;
+            font-size: 150% !important;
+            text-align:center;
+         }  
+         
+         .combolist {
+        min-width: 280px;
+    }   
+     
+     </style>
+    <apex:form >
+              <apex:sectionHeader title="Assign Penalty For Files" />
+
+        <br/>
+            <table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="pbTitle">&nbsp;</td></tr></tbody></table>
+        <br/>
+        <apex:pageBlock mode="maindetail" >
+            <apex:pageMessages />
+            <apex:pageBlock title="Mistake Details">
+            <apex:pageblockSection columns="1">
+               <apex:inputField value="{!Mistakes__c.Mistake_Category__c}" styleClass="combolist"/>           
+               <apex:inputField value="{!Mistakes__c.Mistake__c}" />
+             </apex:pageblockSection> 
+             <apex:pageblockSection >              
+            
+                <apex:inputCheckbox value="{!isSkipPenalty}" label="Do you want to skip the penalty ?"/>
+               <apex:inputtextarea value="{!penaltycomments}" label="QC Comments" />
+             </apex:pageblockSection>              
+            </apex:pageBlock>
+                      
+            <apex:pageBlock title="File Details" mode="maindetail">
+                <apex:pageBlockTable value="{!files}" var="file" width="200">
+                    <apex:column value="{!file.File_Auto_Number__c}"/>
+                    <apex:column value="{!file.Production_Order_Name__c}"/>
+                    <apex:column value="{!file.Name}"/>
+                    <apex:column value="{!file.Penalty__c}"/>
+                    <apex:column value="{!file.Mistake__c}"/>
+                </apex:pageBlockTable>
+            </apex:pageBlock>
+            <apex:pageBlock >
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="Submit" action="{!save}" disabled="{!diableButton}"/>
+                <apex:commandbutton value="Close" onclick="ClosePopup();" /> 
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+      </apex:pageBlock>
+    </apex:form>
+</apex:page>

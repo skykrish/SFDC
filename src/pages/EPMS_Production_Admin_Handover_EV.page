@@ -1,0 +1,37 @@
+<apex:page controller="EPMS_Handover_ProductionOrder_Controller" showHeader="false"> 
+    
+    <apex:includeScript value="{!URLFOR($Resource.attendance,'jquery-ui.min.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.attendance,'jquery.min.js')}"/>
+    
+    <script>   
+    function ClosePopup(){
+        window.opener.location.reload();
+        close();
+    }
+    
+    </script>   
+    
+    
+    
+    <apex:form >
+        <apex:sectionHeader title="Handover Production Order" />
+        
+        <apex:pagemessages id="error"/>
+        <apex:pageBlock >
+            <apex:outputPanel id="teamSelectionSection" styleClass="requiredInput" layout="block"> 
+                <apex:outputtext value="Select Location to Handover :"/>&nbsp;
+                <apex:selectList value="{!selectvalue}" size="1" styleClass="form-select">
+                    <apex:selectOptions value="{!LocOptionList}"/>
+                </apex:selectList>
+            </apex:outputPanel> 
+            
+            <apex:pageblockbuttons location="top">   
+                <apex:commandbutton value="Save" action="{!Handover}" rerender="error,teamSelectionSection"/>
+                <apex:commandbutton value="Close" onclick="javascript:ClosePopup();" immediate="true"/>                 
+                
+            </apex:pageblockbuttons>
+            
+        </apex:pageBlock>
+        
+    </apex:form>
+</apex:page>

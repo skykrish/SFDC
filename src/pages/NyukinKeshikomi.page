@@ -1,0 +1,272 @@
+<apex:page title="入金消し込み" controller="NyukinKeshikomiController" action="{!init}" label="入金消し込み" tabstyle="Nyukin__c" cache="false">
+
+    <!-- 共通スクリプト -->
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>
+
+    <!-- スクリプト -->
+    <script type="text/javascript">
+
+        // 画面ロード時に実行
+        $(document).ready(function(){
+
+            // 請求額合計を取得
+            calcSeikyuTotal();
+            // 入金額合計を取得
+            calcNyukinTotal();
+        });
+
+        // 請求ヘッダデータ全チェック
+        function seikyuHeaderCheckAll() {
+
+            var checked = $('input[id$="seikyuHeaderSelectCheckedAll"]').attr('checked');
+            if(checked){
+                $('input[id$="seikyuHeaderSelectChecked"]').attr('checked', 'checked');
+            }else{
+                $('input[id$="seikyuHeaderSelectChecked"]').removeAttr('checked');
+            }
+            calcSeikyuTotal();
+        }
+
+        // 入金データ全チェック
+        function nyukinCheckAll() {
+
+            var checked = $('input[id$="nyukinSelectCheckedAll"]').attr('checked');
+            if(checked){
+                $('input[id$="nyukinSelectChecked"]').attr('checked', 'checked');
+            }else{
+                $('input[id$="nyukinSelectChecked"]').removeAttr('checked');
+            }
+            calcNyukinTotal();
+        }
+
+        // 請求額再計算
+        function calcSeikyuTotal() {
+            // チェックされている請求額を加算
+            var totalSeikyugaku = 0;
+            $('input[id$="seikyuHeaderSelectChecked"]').each(function(){
+                // チェックのみ            
+                if (this.checked) {
+                    // 各IDを取得
+                    var checkId = $(this).attr("id"); 
+                    var seikyugakuId = checkId.replace('seikyuHeaderSelectChecked', 'seikyugaku');
+                    // 各値取得
+                    var seikyugaku = document.getElementById(seikyugakuId).value;
+                    // 加算
+                    totalSeikyugaku += parseInt(seikyugaku);
+                }
+            });
+            
+            // 合計金額に反映
+            $('input[id$="seikyugakuTotalHidden"]').val(totalSeikyugaku);
+            $('span[id$="seikyugakuTotal"]').html(moneyFormat(String(totalSeikyugaku)));
+        }
+
+        // 入金額再計算
+        function calcNyukinTotal() {
+            // チェックされている入金額を加算
+            var totalNyukingaku = 0;
+            $('input[id$="nyukinSelectChecked"]').each(function(){
+                // チェックのみ            
+                if (this.checked) {
+                    // 各IDを取得
+                    var checkId = $(this).attr("id"); 
+                    var nyukingakuId = checkId.replace('nyukinSelectChecked', 'nyukingaku');
+                    var sagakuId = checkId.replace('nyukinSelectChecked', 'sagaku');
+                    // 各値取得
+                    var nyukingaku = document.getElementById(nyukingakuId).value;
+                    var sagaku = document.getElementById(sagakuId).value;
+                    // 差額が入力されていない場合は0に設定
+                    if (sagaku == null || sagaku == '') {
+                        sagaku = 0;
+                    }
+                    
+                    // 加算
+                    totalNyukingaku += (parseInt(nyukingaku) + parseInt(sagaku));
+                }
+            });
+            
+            // 合計金額に反映
+            $('input[id$="nyukingakuTotalHidden"]').val(totalNyukingaku);
+            $('span[id$="nyukingakuTotal"]').html(moneyFormat(String(totalNyukingaku)));
+        }
+
+        // 差額入力
+        function addSagaku(sagakuId, nyukingakuId, nyukingakuSagakuId, nyukingakuSagakuHiddenId) {
+        
+            var sagaku = document.getElementById(sagakuId);
+            var nyukingaku = document.getElementById(nyukingakuId);
+            var nyukingakuSagaku = document.getElementById(nyukingakuSagakuId);
+            var nyukingakuSagakuHidden = document.getElementById(nyukingakuSagakuHiddenId);
+            
+            // 入力された差額が空白の場合
+            if (sagaku.value == null || sagaku.value == '') {
+                // 入金額を設定
+                nyukingakuSagaku.innerHTML = moneyFormat(nyukingaku.value);
+                nyukingakuSagakuHidden.value = nyukingaku.value;
+                return false;
+            }
+
+            // 入力された差額が数値でない場合
+            if (isNaN(sagaku.value)) {
+                // エラーとする
+                alert('入力された差額は数値ではありません。');
+                sagaku.value = '';
+                return false;
+            }
+            
+            // 入金額合計へ反映
+            var total = parseInt(sagaku.value) + parseInt(nyukingaku.value);
+            nyukingakuSagaku.innerHTML = moneyFormat(String(total));
+            nyukingakuSagakuHidden.value = total;
+
+            // 合計金額を再計算
+            calcNyukinTotal();
+        }
+
+        // 消し込み対象のデータにチェック
+        // 入金金額または請求金額の合計をカンマ区切り編集
+        function moneyFormat(kingaku) {
+
+            var tmpTotal = kingaku;
+            var total = "";
+            var count = 0;
+            if(kingaku == null || kingaku == ""){
+                tmpTotal = "0";
+            }
+            for(var i = tmpTotal.length - 1; i >= 0; i--){
+                if(tmpTotal.charAt(i) != "."){
+                    total = tmpTotal.charAt(i) + total;
+                    count++;
+                    if(count % 3 == 0 && i != 0){
+                        total = "," + total;
+                    }
+                }else{
+                    total = "";
+                    count = 0;
+                }
+            }
+            return "￥" + total;
+        }
+
+    </script>
+
+    <apex:sectionHeader title="入金消し込み" />
+    <apex:pageMessages id="messagearea" showDetail="false" />
+
+    <apex:form >
+        <apex:pageBlock id="editArea" title="{!kokyaku.Name}">
+            <apex:pageBlockSection >
+            </apex:pageBlockSection>
+            <table style="width:100%">
+                <tr>
+                    <td align="right">
+                        <apex:commandButton action="{!keshikomi}" value="消し込み"/>
+                    </td>
+                </tr>
+            </table>
+            <!-- データ取得結果 -->
+            <table style="width:100%">
+                <tr>
+                    <!-- 請求ヘッダエリア -->
+                    <td style="width:50%" valign="top" colspan="2">
+                        <apex:outputPanel id="resultArea1">
+                            <apex:pageBlockSection title="請求一覧" columns="1" rendered="{!(NOT(ISNULL(seikyuHeaderList))) && (seikyuHeaderList.size != 0)}">
+                                <apex:pageBlockTable var="seikyuHeaderDummy" value="{!seikyuHeaderList}">
+                                    <!-- チェックボックス -->
+                                    <apex:column style="width:30px">
+                                        <apex:facet name="header">
+                                            <apex:inputCheckbox id="seikyuHeaderSelectCheckedAll" onclick="javascript:seikyuHeaderCheckAll();"/>
+                                        </apex:facet>
+                                        <apex:inputcheckbox id="seikyuHeaderSelectChecked" value="{!seikyuHeaderDummy.checked}" onclick="javascript:calcSeikyuTotal()"/>
+                                    </apex:column>
+                                    <!-- 請求日時 -->
+                                    <apex:column >
+                                        <apex:facet name="header">
+                                            <apex:outputText value="{!$ObjectType.SeikyuHeader__c.fields.SeikyuDateTime__c.label}"/>
+                                        </apex:facet>
+                                        <apex:outputField value="{!seikyuHeaderDummy.seikyuHeader.SeikyuDateTime__c}"/>
+                                    </apex:column>
+                                    <!-- 請求額（税込み） -->
+                                    <apex:column >
+                                        <apex:facet name="header">
+                                            <apex:outputText value="{!$ObjectType.SeikyuHeader__c.fields.Seikyugaku_Tax__c.label}"/>
+                                        </apex:facet>
+                                        <apex:outputField value="{!seikyuHeaderDummy.seikyuHeader.Seikyugaku_Tax__c}"/>
+                                        <apex:inputHidden id="seikyugaku" value="{!seikyuHeaderDummy.seikyuHeader.Seikyugaku_Tax__c}"/>
+                                    </apex:column>
+                                </apex:pageBlockTable>
+                            </apex:pageBlockSection>
+                        </apex:outputPanel>
+                    </td>
+
+                    <!-- 入金エリア -->
+                    <td style="width:50%" valign="top" colspan="2">
+                        <apex:outputPanel id="resultArea2">
+                            <apex:pageBlockSection title="入金一覧" columns="1" rendered="{!(NOT(ISNULL(nyukinList))) && (nyukinList.size != 0)}">
+                                <apex:pageBlockTable var="nyukinDummy" value="{!nyukinList}">
+                                    <!-- チェックボックス -->
+                                    <apex:column style="width:30px">
+                                        <apex:facet name="header">
+                                            <apex:inputCheckbox id="nyukinSelectCheckedAll" onclick="javascript:nyukinCheckAll();"/>
+                                        </apex:facet>
+                                        <apex:inputcheckbox id="nyukinSelectChecked" value="{!nyukinDummy.checked}" onclick="javascript:calcNyukinTotal()"/>
+                                    </apex:column>
+                                    <!-- 入金日 -->
+                                    <apex:column >
+                                        <apex:facet name="header">
+                                            <apex:outputText value="{!$ObjectType.Nyukin__c.fields.NyukinDate__c.label}"/>
+                                        </apex:facet>
+                                        <apex:outputField value="{!nyukinDummy.nyukin.NyukinDate__c}"/>
+                                    </apex:column>
+                                    <!-- 入金額 -->
+                                    <apex:column >
+                                        <apex:facet name="header">
+                                            <apex:outputText value="{!$ObjectType.Nyukin__c.fields.Nyukingaku__c.label}"/>
+                                        </apex:facet>
+                                        <apex:outputField value="{!nyukinDummy.nyukin.Nyukingaku__c}"/>
+                                        <apex:inputHidden id="nyukingaku" value="{!nyukinDummy.nyukin.Nyukingaku__c}"/>
+                                    </apex:column>
+                                    <!-- 差額 -->
+                                    <apex:column >
+                                        <apex:facet name="header">
+                                            <apex:outputText value="{!$ObjectType.Nyukin__c.fields.Sagaku__c.label}"/>
+                                        </apex:facet>
+                                        <apex:inputText id="sagaku" value="{!nyukinDummy.nyukin.Sagaku__c}" onchange="javascript:addSagaku('{!$Component.sagaku}', '{!$Component.nyukingaku}', '{!$Component.nyukingakuSagaku}', '{!$Component.nyukingakuSagakuHidden}')"/>
+                                    </apex:column>
+                                    <!-- 入金額合計 -->
+                                    <apex:column >
+                                        <apex:facet name="header">
+                                            <apex:outputText value="入金額合計"/>
+                                        </apex:facet>
+                                        <apex:outputText id="nyukingakuSagaku" value="￥{0, number, ###,###}">
+                                            <apex:param value="{!nyukinDummy.nyukingakuSagaku}"/>
+                                        </apex:outputText>
+                                        <apex:inputHidden id="nyukingakuSagakuHidden" value="{!nyukinDummy.nyukingakuSagaku}"/>
+                                    </apex:column>
+                                </apex:pageBlockTable>
+                            </apex:pageBlockSection>
+                        </apex:outputPanel>
+                    </td>
+                </tr>
+
+                <tr align="right">
+                    <td style="width:35%">
+                        <apex:outputText value="合計金額"/>
+                    </td>
+                    <td style="width:15%">
+                        <apex:outputText id="seikyugakuTotal" style="width:70px"/>
+                        <apex:inputHidden id="seikyugakuTotalHidden" value="{!checkedSeikyugakuTotal}"/>
+                    </td>
+                    <td style="width:35%">
+                        <apex:outputText value="合計金額"/>
+                    </td>
+                    <td style="width:15%">
+                        <apex:outputText id="nyukingakuTotal"/>
+                        <apex:inputHidden id="nyukingakuTotalHidden" value="{!checkedNyukingakuTotal}"/>
+                    </td>
+                </tr>
+            </table>
+
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

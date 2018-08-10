@@ -1,0 +1,443 @@
+<apex:page Controller="EPMS_NewFTPSettings"  docType="html-5.0" sidebar="false"  showHeader="false" tabStyle="Team__c">
+<html>
+<head>
+<script src="/soap/ajax/35.0/connection.js"></script>
+<script>
+      sforce.connection.sessionId = '{!$Api.Session_ID}';
+       var describeSObjectResult = sforce.connection.describeSObject("Settings__c");
+       var prefix = describeSObjectResult.keyPrefix; 
+    aler('Prefix ::' + prefix );
+        function ClosePopup(){
+     
+           var url = location.href;
+           var basepath = '{!basepath}';
+           
+            var baseURL = url.substring(0, url.indexOf('/', 14));      
+            if(basepath == 'assign'){
+                window.opener.location.href="/" + prefix;
+            }
+            else
+            {
+                window.parent.location.href="/" + prefix + "/o";
+                return true;
+
+            }        
+            if(baseURL)
+            {
+                window.top.close(); 
+                refreshParentPage();
+            }
+            
+        }
+        
+        function refreshParentPage() 
+        {
+            alert(window.opener.location.href)
+            var redirectURL = window.opener.location.href;
+            if(redirectURL)
+            {
+                window.opener.location.href = window.opener.location.href;
+                if (window.opener.progressWindow) 
+                {
+                    window.opener.progressWindow.close();
+                }
+                window.close();
+            }
+        }    
+        
+    
+</script>
+    
+<style>
+input[type='checkbox']:checked {
+    background: blue;
+}
+.lookupTab div.srch {
+    padding: 4px 3px;
+    font-family: "Arial", "Helvetica", sans-serif;
+    font-weight: bold;
+    font-size: 118%;
+}
+
+
+.pbHeader td.pbTitle {width:43%}
+.pbBottomButtons td.pbTitle {width:43%}
+
+.shiftAssignmentSec {width:650px; margin:0; padding:10px 0px 0; overflow:hidden;}
+.shiftAssignmentSec .rowSec {width:100%; font-size:12px; color:#4a4a56; padding:0 0 10px; overflow:hidden;}
+.rowSec .leftSec {width:35%; float:left; text-align:left;}
+.rowSec .rightSec {width:63%; float:right;}
+.rowSec .leftSecShiftTeam {width:35%; float:left; text-align:left;}
+.rowSec .rightSecShiftTeam {width:63%; float:right;}
+.rowSec .leftSecSelType {width:35%; float:left; text-align:left;}
+.rowSec .rightSecSelType {width:63%; float:right;}
+.rowSec .rightSec select, .rowSec .rightSecShiftTeam select, .rowSec .rightSecSelType select {width:380px; float:right;}
+
+.paddingTop10 {padding-top:10px !important;}
+.paddingBotton10 {padding-bottom:10px !important;}
+.paddingBotton-none {padding-bottom:0 !important;}
+
+.rightSecInnerDiv {width:380px; float:right;}
+.FromToInnerDiv {width:380px; float:right;}
+.FromToInnerDiv span.dateInput {float:left;}
+
+.GridviewScrollHeader
+{
+background: #f2f3f3;
+    border-width: 0 0 1px 1px;
+    border-color: #e0e3e5;
+    color: #000;
+    font-size: .9em;
+    font-weight: bold;
+   padding: 4px 2px 4px 5px;
+}
+.pbBody, .pbBody a, .pbBody td, .lbBody a, .lbBodyDescription, .list .headerRow .noRowsHeader {
+    color: #000;
+    
+}
+.pbBody table.list tr.dataRow td:first-child {
+    border-left-width: 0;
+    
+}
+table.list tr.dataRow td {
+    border-width: 0 0 1px 0;
+    vertical-align: middle;
+    text-align: left;
+    
+    
+    
+}
+.GridviewScrollHeader td {
+border-right:0px solid #ededed;
+}
+.list-custom {
+    margin: 0px;
+    float: left;
+    border: 1px solid #ededed;
+}
+.vtext {
+   -moz-transform: rotate(-90deg);  /* FF3.5+ */
+   -o-transform: rotate(-90deg);  /* Opera 10.5 */
+   -webkit-transform: rotate(-90deg);  /* Saf3.1+, Chrome */
+   filter:  progid:DXImageTransform.Microsoft.BasicImage(rotation=3);  /* IE6,IE7 */
+   -ms-filter: "progid:DXImageTransform.Microsoft.BasicImage(rotation=3)"; /* IE8 */
+    text-align:center;
+   padding: 35px 0px;
+   width:20px;
+   height:10px;
+   
+} 
+
+
+/****** Team Assignment 22-12-2015 *********/
+.clear
+{
+    clear:both;
+    margin:10px
+}
+.formWrpper
+{
+    width: 800px;
+
+}
+.innerwrapper
+{
+    padding:5px;
+}
+.innerwrapper .lbl
+{
+    display: inline-block;
+    width: 280px;
+}
+.combolist
+{
+    min-width: 44%;
+}
+.listViewer{
+    border: 1px solid #ececec;
+    padding: 5px;
+    margin-top: 10px;
+    width: 638px;
+    border-radius:3px;
+}
+.list_Assignment, .multilist
+{
+    height:300px;
+    width:100%;
+}
+.displayblock
+{
+    margin-bottom: 10px;
+    display: block;
+}
+td.selectCell
+{
+width:45%;
+}
+ 
+</style>
+ 
+</head> 
+<body>
+<apex:form id="form">
+<apex:outputPanel id="myHiddenField" />               
+<apex:pageblock >
+
+<apex:pageblockbuttons >
+  
+  <apex:commandbutton value="Save" action="{!SaveChanges}" />
+  <apex:commandbutton value="Close"  onclick="ClosePopup();return false;"/>
+</apex:pageblockbuttons>
+
+
+<div class="shiftAssignmentSec">
+    <table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="pbTitle">&nbsp;<h3>New FTP Setting</h3></td></tr></tbody></table>
+    <div class="paddingBotton10"> 
+        <apex:outputPanel id="thePageBlock">
+          <apex:pageMessages />
+        </apex:outputPanel>
+    </div>
+    
+    <div class="rowSec">
+        <div class="leftSec">
+            <apex:outputlabel value="Location"  />
+        </div>
+        <div class="rightSec">
+            <div class="rightSecInnerDiv">
+            <apex:outputPanel id="locationid">
+                <apex:outputPanel >
+                <apex:selectList value="{!selectvalue}" size="1" id="elementLocation" onchange="displaySettings2();">
+                  <apex:selectoptions value="{!location}" />
+                  <apex:actionFunction action="{!displayExistingSetting}" name="displaySettings2"/>
+                </apex:selectList>          
+                </apex:outputPanel>
+            </apex:outputPanel>
+            </div>
+        </div>
+    </div>
+    
+    <div class="rowSec">
+        <div class="leftSec">
+            <apex:outputlabel value="Sales Region "  />
+        </div>
+        <div class="rightSec">
+            <div class="rightSecInnerDiv">
+            <apex:outputPanel id="locationgroupid">
+                <apex:outputPanel >
+                <apex:selectList value="{!selectgroupname}" size="1" id="elementLocationgroup" onchange="displaySettings();">
+                  <apex:selectoptions value="{!locationgroup}" />
+                  <apex:actionFunction action="{!displayExistingSetting}" name="displaySettings"/>
+                </apex:selectList>          
+                </apex:outputPanel>
+            </apex:outputPanel>
+            </div>
+        </div>
+    </div>
+    
+    <table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="pbTitle">&nbsp;<h3>FTP Setting ( FTP Server of Sales Region )</h3></td></tr></tbody></table>
+    <div class="rowSec">
+        <div class="leftSec">
+            <apex:outputlabel value="Setting Name"  />
+        </div>
+        <div class="rightSec">
+            <div class="rightSecInnerDiv">
+            <apex:outputPanel id="settingNameOp">
+                <apex:inputText value="{!SettingName}" id="inputSettingName" />
+            </apex:outputPanel>
+            </div>
+        </div>
+    </div>
+    
+    <div class="rowSec">
+        <div class="leftSec">
+            <apex:outputlabel value="Host Name"  />
+        </div>
+        <div class="rightSec">
+            <div class="rightSecInnerDiv">
+            <apex:outputPanel id="HostNameOp">
+                <apex:inputText value="{!HostName}" id="inputHostName"  />
+            </apex:outputPanel>
+            </div>
+        </div>
+    </div>
+    
+    <div class="rowSec">
+        <div class="leftSec">
+            <apex:outputlabel value="FTP Port"  />
+        </div>
+        <div class="rightSec">
+            <div class="rightSecInnerDiv">
+            <apex:outputPanel id="FtpPortOp">
+                <apex:inputText value="{!FtpPort}" id="inputFtpPort"  />
+            </apex:outputPanel>
+            </div>
+        </div>
+    </div>
+    
+    <div class="rowSec">
+        <div class="leftSec">
+            <apex:outputlabel value="FTP User Name"  />
+        </div>
+        <div class="rightSec">
+            <div class="rightSecInnerDiv">
+            <apex:outputPanel id="FtpUserNameOp">
+                <apex:inputText value="{!FtpUserName}" id="inputFtpUserName"  />
+            </apex:outputPanel>
+            </div>
+        </div>
+    </div>
+    
+    <div class="rowSec">
+        <div class="leftSec">
+            <apex:outputlabel value="FTP Password"  />
+        </div>
+        <div class="rightSec">
+            <div class="rightSecInnerDiv">
+            <apex:outputPanel id="FtpPasswordOp">
+                <apex:inputText value="{!FtpPassword}" id="inputFtpPassword"  />
+            </apex:outputPanel>
+            </div>
+        </div>
+    </div>
+    
+    
+    <div class="rowSec">
+        <div class="leftSec">
+            <apex:outputlabel value="Client FTP File Input Location"  />
+        </div>
+        <div class="rightSec">
+            <div class="rightSecInnerDiv">
+            <apex:outputPanel id="ClientFTPFileInputLocationOp">
+                <apex:inputText value="{!ClientFTPFileInputLocation}" id="inputClientFTPFileInputLocation"  />
+            </apex:outputPanel>
+            </div>
+        </div>
+    </div>
+    
+    <div class="rowSec">
+        <div class="leftSec">
+            <apex:outputlabel value="Client FTP File Output Location"  />
+        </div>
+        <div class="rightSec">
+            <div class="rightSecInnerDiv">
+            <apex:outputPanel id="ClientFTPFileOutputLocationOp">
+                <apex:inputText value="{!ClientFTPFileOutputLocation}" id="inputClientFTPFileOutputLocation"  />
+            </apex:outputPanel>
+            </div>
+        </div>
+    </div>
+    
+    <table border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="pbTitle">&nbsp;<h3>File Server ( Location File Server Details )</h3></td></tr></tbody></table>
+    
+    <div class="rowSec">
+        <div class="leftSec">
+            <apex:outputlabel value="Samba User Name"  />
+        </div>
+        <div class="rightSec">
+            <div class="rightSecInnerDiv">
+            <apex:outputPanel id="SambaUsernameOp">
+                <apex:inputText value="{!SambaUsername}" id="inputSambaUsername"  />
+            </apex:outputPanel>
+            </div>
+        </div>
+    </div>
+    
+    <div class="rowSec">
+        <div class="leftSec">
+            <apex:outputlabel value="Samba Password"  />
+        </div>
+        <div class="rightSec">
+            <div class="rightSecInnerDiv">
+            <apex:outputPanel id="SambaPasswordOp">
+                <apex:inputText value="{!SambaPassword}" id="inputSambaPassword"  />
+            </apex:outputPanel>
+            </div>
+        </div>
+    </div>
+    
+    
+    <div class="rowSec">
+        <div class="leftSec">
+            <apex:outputlabel value="Samba File Input Location"  />
+        </div>
+        <div class="rightSec">
+            <div class="rightSecInnerDiv">
+            <apex:outputPanel id="SambaFileInputLocationOp">
+                <apex:inputText value="{!SambaFileInputLocation}" id="inputSambaFileInputLocation"  />
+            </apex:outputPanel>
+            </div>
+        </div>
+    </div>
+    
+    <div class="rowSec">
+        <div class="leftSec">
+            <apex:outputlabel value="Samba File Output Location"  />
+        </div>
+        <div class="rightSec">
+            <div class="rightSecInnerDiv">
+            <apex:outputPanel id="SambaFileOutputLocationOp">
+                <apex:inputText value="{!SambaFileOutputLocation}" id="inputSambaFileOutputLocation"  />
+            </apex:outputPanel>
+            </div>
+        </div>
+    </div>
+    
+    <div class="rowSec">
+        <div class="leftSec">
+            <apex:outputlabel value="File Server Samba Folder Location"  />
+        </div>
+        <div class="rightSec">
+            <div class="rightSecInnerDiv">
+            <apex:outputPanel id="fileserversambafolderlocationOp">
+                <apex:inputText value="{!fileserversambafolderlocation}" id="inputfileserversambafolderlocation" />
+            </apex:outputPanel>
+            </div>
+        </div>
+    </div>
+    
+    
+    <div class="rowSec">
+        <div class="leftSec">
+            <apex:outputlabel value="File Server nodejs Port Thumbnail Access"  />
+        </div>
+        <div class="rightSec">
+            <div class="rightSecInnerDiv">
+            <apex:outputPanel id="fileservernodejsportthumbnailaccessOp">
+                <apex:inputText value="{!fileservernodejsportthumbnailaccess}" id="inputfileservernodejsportthumbnailaccess" />
+            </apex:outputPanel>
+            </div>
+        </div>
+    </div>
+    
+    <div class="rowSec">
+        <div class="leftSec">
+            <apex:outputlabel value="File Server nodejs Port Ins File Access"  />
+        </div>
+        <div class="rightSec">
+            <div class="rightSecInnerDiv">
+            <apex:outputPanel id="fileservernodejsportinsfileaccessOp">
+                <apex:inputText value="{!fileservernodejsportinsfileaccess}" id="inputfileservernodejsportinsfileaccess" />
+            </apex:outputPanel>
+            </div>
+        </div>
+    </div>
+    
+    <div class="rowSec">
+        <div class="leftSec">
+            <apex:outputlabel value="File Server Host"  />
+        </div>
+        <div class="rightSec">
+            <div class="rightSecInnerDiv">
+            <apex:outputPanel id="fileServerHostOp">
+                <apex:inputText value="{!fileServerHost}" id="inputfileServerHost" />
+            </apex:outputPanel>
+            </div>
+        </div>
+    </div>
+    
+</div>  
+</apex:pageblock>
+</apex:form>
+</body>
+</html>
+</apex:page>

@@ -1,0 +1,279 @@
+<apex:page Controller="SoufujoController" renderAs="pdf">
+
+    <html>
+        <head>
+            <style>
+                @page {
+                    size: ;  /* A4 width and height */
+                    margin: 10px;
+                }
+
+                body {
+                    font-family: Arial Unicode MS;
+                }
+
+                div.main {
+                    font-size: 11px;
+                    width: 7.75in;
+                    padding-top:55px;
+                    padding-left:15px;
+                }
+
+                div.main table {
+                    font-size: 11px;
+                    border-collapse: collapse;
+
+                }
+
+                div.main td, th {
+                    padding: 0px;
+                }
+
+                table.header-basic {
+                    width: 100%;
+                    height: 280px;
+                    margin-bottom: 15px;
+                }
+
+                table.header-basic td {
+                    vertical-align: top;
+                    paddin: 0px;
+                }
+
+                table.header-basic span {
+                    font-size: 12px;
+                    font-weight: bold;
+                }
+
+                table.header-basic td table {
+                    paddin: 0px;
+                }
+
+                table.wording {
+                    width: 100%;
+                    height: 300px;
+                }
+
+                table.wording td.wording-title{
+                    height: 50px;
+                    font-size: 20px;
+                    text-align: center;
+                    vertical-align: top;
+                }
+
+                table.wording td.wording-body{
+                    height: 160px;
+                    font-size: 16px;
+                    vertical-align: top;
+                }
+
+                table.wording td.wording-footer{
+                    font-size: 16px;
+                    text-align: right;
+                }
+
+                table.note {
+                    width: 100%;
+                }
+
+                table.note td.note-title{
+                    height: 50px;
+                    font-size: 16px;
+                    text-align: center;
+                    vertical-align: top;
+                }
+
+                table.note td.note-body{
+                    height: 190px;
+                    font-size: 16px;
+                    vertical-align: top;
+                }
+
+                table.note td.note-footer{
+                    font-size: 16px;
+                    text-align: right;
+                    vertical-align: top;
+                }
+
+                div.break {
+                    page-break-before: always;
+                    height: 10px;
+                }
+
+                div.logo-seal {
+                    position: relative;
+                    top: 20px;
+                    left: 375px;
+                    width: 0px;
+                    height: 70px;
+                }
+
+            </style>
+        </head>
+        <body>
+            <!-- 請求先単位の繰り返し -->
+            <apex:repeat var="pageItem" value="{!soufujoList}">
+                <div class="main">
+                    <!-- ヘッダ：宛名／住所 -->
+                    <table class="header-basic">
+                        <tr>
+                            <!-- ヘッダ：宛名／住所（左側） -->
+                            <td width="50%" height="100%">
+                                <table width="100%" style="border-collapse;">
+                                    <tr>
+                                        <td style="padding-left:30px;">
+                                            <span>〒{!pageItem.sHead.BillingPostalCode__c}</span><br/>
+                                            <span>{!pageItem.sHead.BillingState__c}{!pageItem.sHead.BillingCity__c}</span><br/>
+                                            <span>{!pageItem.sHead.BillingStreet__c}</span>
+                                            <apex:repeat var="name" value="{!pageItem.seikyusakiNameList}">
+                                                <br/><span>{!name}</span>
+                                            </apex:repeat>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding-left:30px;">
+                                            <span>{!pageItem.department}</span><br/>
+                                            <span>{!pageItem.seikyuTantosya}&nbsp;様</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="right" style="padding-right:40px;">
+                                            <span>({!pageItem.sHead.Seikyusaki__r.KokyakuCd__c})</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <!-- ヘッダ：宛名／住所（右側） -->
+                            <td width="50%" height="100%" align="right" style="border-collapse: collapse;">
+                                <table width="100%">
+                                    <tr>
+                                        <td>
+                                            <apex:outputText value="{0, date, yyyy年MM月dd日}"><apex:param value="{!seikyubi}"/></apex:outputText>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <!-- ロゴ -->
+                                <div class="logo-seal">
+                                    <apex:image url="{!URLFOR($Resource.Logo, 'logo.png')}" width="120px" height="30px" alt="ロゴ"/>
+                                </div>
+                                <table width="100%">
+                                    <tr>
+                                        <td>
+                                            <span>{!$Organization.Name}</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <span>切り抜きJP事業部&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;カスタマーサポート</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <span>〒{!$Organization.PostalCode}&nbsp;&nbsp;{!$Organization.State}{!$Organization.City}{!$Organization.Street}</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <table width="100%">
+                                    <tr>
+                                        <td width="60%"></td>
+                                        <td align="left">
+                                            <span>Free&nbsp;&nbsp;Dial：0120-359-831</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td align="left">
+                                            <span>Tel&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;：{!$Organization.Phone}</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td align="left">
+                                            <span>Fax&nbsp;&nbsp;&nbsp;&nbsp;：{!$Organization.Fax}</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td align="left">
+                                            <span>E-mail：info@kirinuki.jp</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- 本文 -->
+                    <table class="wording">
+                        <tr>
+                            <td width="15%">
+                            </td>
+                            <td width="70%" class="wording-title">
+                                <b>書類送付のご案内</b>
+                            </td>
+                            <td width="15%">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="15%">
+                            </td>
+                            <td width="70%" class="wording-body">
+                                <span>拝啓&nbsp;&nbsp;平素は格別のお引き立てをいただき、厚く御礼申し上げます。</span><br/>
+                                <span>標題の件につきまして、以下を同封いたします。</span><br/>
+                                <span>なお、内容にご不明な点がございましたら、ご遠慮なくカスタマーサポート</span><br/>
+                                <span>までお問い合わせ下さい。</span>
+                            </td>
+                            <td width="15%">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="15%">
+                            </td>
+                            <td class="wording-footer">
+                                <span>敬具</span>
+                            </td>
+                            <td width="15%">
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- 記 -->
+                    <table class="note">
+                        <tr>
+                            <td width="15%">
+                            </td>
+                            <td width="65%" class="note-title" colspan="2">
+                                記
+                            </td>
+                            <td width="20%">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="15%">
+                            </td>
+                            <td width="45%" class="note-body">
+                                <span>・&nbsp;&nbsp;請求書</span>
+                            </td>
+                            <td width="20%" class="note-body" align="right">
+                                <span>1部</span>
+                            </td>
+                            <td width="20%">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="80%" colspan="3">
+                            </td>
+                            <td width="20%" class="note-footer">
+                                <span>以上</span>
+                            </td>
+                        </tr>
+                    </table>
+                    <!-- 改ページ -->
+                    <apex:outputPanel layout="none" rendered="{!(!pageItem.isLast)}">
+                        <div class="break"></div>
+                    </apex:outputPanel>
+                </div>
+            </apex:repeat>
+        </body>
+    </html>
+</apex:page>

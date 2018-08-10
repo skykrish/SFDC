@@ -1,0 +1,1712 @@
+<!--****************************************************************************************************************
+Page Name           :  EPMS_EnhancedViewFiles                                                            
+Created Date        :  20/12/2017                                                                                
+Description         :  Responsive "row" [vertical height] based on height of text field in all Files list view     
+*****************************************************************************************************************-->
+
+<apex:page controller="EPMS_EnhancedViewFilesController" tabStyle="Files__c" > 
+    
+    <apex:pageMessages id="errorMessages" />
+    <apex:stylesheet value="{!URLFOR($Resource.View_Directory,'css/jquery.treeview.css')}" /> 
+    <apex:stylesheet value="{!URLFOR($Resource.View_Directory,'css/custom.css')}" /> 
+    
+    <apex:includeScript value="{!URLFOR($Resource.View_Directory,'js/jquery.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.View_Directory,'js/jquery.treeview.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.View_Directory,'js/jquery-checktree.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.View_Directory,'js/custom.js')}" />
+    
+    <apex:includeScript value="{!URLFOR($Resource.csspopup,'add-style.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.csspopup,'css-pop.js')}" />
+    
+    <apex:includeScript value="{!URLFOR($Resource.attendance,'jquery-ui.min.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.attendance,'gridviewScroll.js')}"/>
+    
+    <apex:stylesheet value="{!URLFOR($Resource.Classification,'css/defaultTheme.css')}" /> 
+    <apex:stylesheet value="{!URLFOR($Resource.Classification,'css/myTheme.css')}" />
+    
+    <apex:includescript value="{!URLFOR($Resource.Classification,'js/jquery.fixedheadertable.js')}" />
+    <apex:includescript value="{!URLFOR($Resource.Classification,'js/custom-table.js')}" /> 
+    
+    
+    <style>
+        
+        td.pbTitle {display: none;}        
+        
+        .pageTitleIcon {
+        background-image: url(/img/icon/custom51_100/apple32.png);
+        background-position: 0 0;
+        width: 32px;
+        height: 32px;
+        }
+        .pbHeader .btn{display:inline-blcok !important; padding: 4px 3px !important;}
+        td.count_bg{ vertical-align:middle; text-align:center;}
+        td.Act span{ width:50px !important; display: inline-block; font-size:12px;}
+        td.title_widthh_incre span{ width:100px !important; display: inline-block; font-size:12px;}
+        td.title_widthh_incre a{ color:#015ba7 !important;}
+        td.FileTat span{ width:130px !important; display: inline-block; font-size:12px;}
+        td.Status { word-wrap: break-word;}
+        td.Status span{ width:150px !important; display: inline-block; font-size:12px;} 
+        td.Mem { word-wrap: break-word;}
+        td.Mem span{ width:200px !important; display: inline-block; font-size:12px;} 
+        td.QCIncha { word-wrap: break-word;}
+        td.QCIncha span{ width:200px !important; display: inline-block; font-size:12px;} 
+        td.TLIncha { word-wrap: break-word;}
+        td.TLIncha span{ width:200px !important; display: inline-block; font-size:12px;}
+        td.order_inst_width_incre span{width:250px !important; display:inline-block; font-size:12px;}
+        td.POrderName span{ width:135px !important; display: inline-block; font-size:12px;}
+        td.Thumbnail span{ width:350px !important; display: inline-block; font-size:12px;}
+        td.FilesName { word-wrap: break-word;}
+        td.FilesName span{ width:200px !important; display: inline-block; font-size:12px;}
+        td.FileInstruction span{ width:380px !important; display: inline-block; font-size:12px;text-align:left;}
+        td.OrderInstructions span{ width:380px !important; display: inline-block; font-size:12px;text-align:left;}
+        td.OrderAttachments span{ width:150px !important; display: inline-block; font-size:12px;}
+        td.QCComments span{ width:300px !important; display: inline-block; font-size:12px;}
+        td.FileInstr span{ width:300px !important; display: inline-block; font-size:12px;}        
+        td.FTPUploadStatus span{ width:150px !important; display: inline-block; font-size:12px;}
+        td.FTPUploadTime span{ width:100px !important; display: inline-block; font-size:12px;}
+        td.FileAttachments span{ width:150px !important; display: inline-block; font-size:12px;}
+        td.BorTest span {border: 0px solid #CCC;}
+        .norecord_foundtable{ 
+        width: 100%;
+        /*width: calc(100% - 200px);*/
+        height:200px;
+        overflow: scroll;
+        overflow-y: hidden;
+        padding-bottom: 20px;
+        }
+        tr.noBorder td {
+        border: 0;
+        }
+        
+        .btn.refreshListButton {
+        background-position: 2px 3px;
+        background-position-x: 2px;
+        background-position-y: 3px;
+        background: url(/resource/1457288657000/refresh) 2px 3px no-repeat !important;
+        width: 23px;     
+        height: 23px; 
+        padding:4px 0  !important; 
+        text-align:center;
+        
+        }
+        
+        
+        .fancyTable tbody tr td.textLeft {text-align:left;}
+        .fancyTable tbody tr td.textRight {text-align:right;}
+        .fancyTable thead  tr th.textLeft {text-align:left;}
+        .fancyTable thead  tr th.textRight {text-align:right;}
+        
+    </style>
+    
+    <script type="text/javascript">
+    var __sfdcSessionId = '{!GETSESSIONID()}';
+    </script>
+    
+    <script src="/soap/ajax/31.0/connection.js" type="text/javascript"></script>
+    
+    <script type="text/javascript">
+        $(window).load(function(){
+        var array = new Array();
+        $('.thumbImageBody').each(function() {
+            var a = $(this).width();
+            //alert($(this).width());
+            array.push(a);
+        });
+        var maxWidth = Math.max.apply(Math, array);
+        //alert (maxWidth); 
+        $('#thumbImageHeader .fht-cell').css('width',(maxWidth+1) + "px");
+        //alert($('#thumbImageHeader').width());
+    });
+    </script>
+    
+    <script type="text/javascript">
+    
+    function Reloadpage(Sucessmessage){
+        
+        var currentID='{!$CurrentPage.Parameters.Id}';
+        
+        popup('popUpalert','alert','',Sucessmessage); 
+        window.location.assign('/apex/EPMS_EnhancedViewFiles?id='+currentID);
+        
+    }
+    
+    
+    $(document).ready(function () {
+        
+        $(".case").removeAttr("checked");
+        $("#browser").treeview({
+            toggle: function() {
+                console.log("%s was toggled.", $(this).find(">span").text());
+            }   
+        });
+        
+        var winwidth = document.body.clientWidth-140;
+        var winheight = window.innerHeight - 350;
+        gridviewScroll(winwidth, winheight);
+        gridviewScrollauto();
+    });
+    
+    $(window).resize(function() {
+        
+        var winwidth = document.body.clientWidth-140;
+        var winheight = window.innerHeight - 350;
+        gridviewScroll(winwidth, winheight);
+        gridviewScrollauto();
+        
+        setWinSize();
+        
+        setTimeout(function(){
+            $(".sortListAsc").focus();
+        },2000);
+    });
+    
+    
+    /*$( '#GridView1Wrapper' ).load(function() {                
+                gridviewScrollauto();               
+            });*/
+    
+    $( '#GridView1Wrapper' ).load(function() {  
+        location.reload(true);
+    });
+    
+    function gridviewScrollauto()
+    {
+        
+        var winwidth = document.body.clientWidth-140;
+        var winheight = window.innerHeight - 350;
+        setTimeout(function(){
+            gridviewScroll(winwidth, winheight);
+        },2000);
+    }
+    
+    function gridviewScroll(winwidth, winheight ) {
+        
+        gridView1 = $('#GridView1').gridviewScroll({
+            width: winwidth,
+            height: winheight,
+            railcolor: "#F0F0F0",
+            barcolor: "#CDCDCD",
+            barhovercolor: "#606060",
+            bgcolor: "#F0F0F0",
+            arrowsize: 30,
+            varrowtopimg: "{!URLFOR($Resource.attendance,'Images/arrowvt.png')}",               
+            varrowbottomimg: "{!URLFOR($Resource.attendance,'Images/arrowvb.png')}",
+            harrowleftimg:"{!URLFOR($Resource.attendance,'Images/arrowhl.png')}",
+            harrowrightimg: "{!URLFOR($Resource.attendance,'Images/arrowhr.png')}",
+            headerrowcount: 1,
+            railsize: 16,
+            barsize: 8,
+            
+        });
+        
+        $('#browser').checktree();
+    }
+    
+    function setWinSize(){
+        var winwidth = document.body.clientWidth-70;
+        //var winheight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+        var winheight = window.innerHeight-250;
+        
+        $(".freezeTableAutoWidth").css('width', winwidth+"px");      
+        
+        $('.headerFreezeTable').fixedHeaderTable({ altClass: 'odd', height:winheight+"px"});            
+        $('.headerFreezeTable th.last').css('padding-right', '0px');
+        
+        //$(".freezeTableAutoWidth").css('height', b);   
+    }    
+    $(document).ready(function() {  
+        setWinSize();
+        
+        setTimeout(function(){
+            $(".sortListAsc").focus();
+        },2000);
+        
+    });
+    
+    $(window).load(function(){
+        var array = new Array();
+        $('.thumbImageBody').each(function() {
+            var a = $(this).width();
+            //alert($(this).width());
+            array.push(a);
+        });
+        var maxWidth = Math.max.apply(Math, array);
+        //alert (maxWidth); 
+        $('#thumbImageHeader .fht-cell').css('width',(maxWidth+1) + "px");
+        //alert($('#thumbImageHeader').width());
+    });
+    $(window).load(function(){
+        gridviewScrollautoNew();
+    });
+    
+    function gridviewScrollautoNew()
+    {
+        var winwidth = document.body.clientWidth-175;
+        var winheight = window.innerHeight - 350;
+        //var winwidth = screen.width - 175;
+        //  var winheight = screen.height- 300;
+        gridviewScroll(winwidth, winheight);
+    }
+    
+    function selectAllCheckboxes(obj,receivedInputID){
+        var inputCheckBox = document.getElementsByTagName("input");
+        for(var i=0; i<inputCheckBox.length; i++){
+            if(inputCheckBox[i].id.indexOf(receivedInputID)!=-1){
+                inputCheckBox[i].checked = obj.checked;
+            }
+        }
+    }
+    
+    
+    function Openfiles(){
+        var updateRecords = [];
+        var errorexist = false;
+        var checkedValues="";
+        checkedValues=$("input[type='checkbox']:checked").map(function() { return this.outerHTML.split(',')[1].match(/'([^']+)'/)[1] }).get();     
+        if(checkedValues==""){
+            console.log(checkedValues);
+            popup('popUpalert','alert','','{!$Label.EPMS_MBO_Select_Atleast_One_Record}'); 
+            return false;
+        }else{
+            var SelectedIds = '';
+            var first = true;
+            var error = false;
+            
+            var temp = 0;
+            if(document.getElementById("checkall").checked == true){
+                temp = 1;
+            }
+            
+            for(var i=temp;i<checkedValues.length;i++){
+                
+                if(first){
+                    SelectedIds+="'"+checkedValues[i]+"'";
+                    first = false;
+                }else
+                    SelectedIds+=",'"+checkedValues[i]+"'";
+            }
+            var Files = sforce.connection.query("Select Id, Name ,Status__c,File_PS_Version__c,Files_To_open__c from Files__c where Id in ("+SelectedIds+")");
+            
+            var records = Files.getArray("records");
+            var statusError = false;
+            recordsize = Files.size;
+            for(var i=0;i<recordsize ;i++){
+                if(records[i].Status__c!='Assigned' && records[i].Status__c!='Redo Re-Assigned' && records[i].Status__c!='QC' && records[i].Status__c!='Estimator Assigned'){
+                    statusError = true;
+                }
+                else{
+                    var update_Files = new sforce.SObject("Files__c");
+                    update_Files.Id = records[i].Id;
+                    update_Files.File_PS_Version__c='CS6';
+                    update_Files.Files_To_open__c=1;
+                    updateRecords.push(update_Files);
+                    errorexist = true;
+                }
+            }
+            if(statusError) {
+                
+                alert('{!$Label.EPMS_MBO_PO_VIEW_DIR_FILE_STATUS_TO_BE_OPEN_FOR_ASSIGNED_REDO_REASSIGN_QC}');
+                window.location.reload();
+            }
+            var resultupdate = sforce.connection.update(updateRecords);
+            if(errorexist==true){
+                
+                alert('{!$Label.EPMS_MBO_Files_CS6}');
+                window.location.reload();
+            } 
+        }
+    }
+    
+    function AssignOp(){
+        var profilename = '{!$Profile.Name}'; 
+        var operatorPS = '{!$Label.EPMS_MEMBER_DESIG_OPERATOR_PS}'; 
+        if(profilename == 'Quality Control' || profilename == operatorPS || profilename == 'Sales Region' || profilename == 'File Managers' ){ 
+            
+            alert('{!$Label.EPMS_MBO_Not_have_access}'); 
+        } 
+        else{
+            var checkedValues="";
+            checkedValues=$("input[type='checkbox']:checked").map(function() { return this.outerHTML.split(',')[1].match(/'([^']+)'/)[1]  }).get();   
+            if(checkedValues==""){
+                console.log(checkedValues);
+                popup('popUpalert','alert','','{!$Label.EPMS_MBO_Select_Atleast_One_Record}'); 
+                return false;
+            }else{
+                if(profilename != 'システム管理者' && profilename != 'Production Administrator' && profilename != 'Country Administrator'){ 
+                    var noshiftAssignError = false; 
+                    var cuser = sforce.connection.getUserInfo(); 
+                    var cuserid = cuser.userId; 
+                    if(cuserid != null){ 
+                        var memberInfo = sforce.connection.query("SELECT Id, Name FROM Member__c WHERE Status__c = 'Active' AND User_Id__c ='"+cuserid+"'"); 
+                        var arecords = memberInfo.getArray("records"); 
+                        if(arecords != null){ 
+                            var shiftAssignmentInfo = sforce.connection.query("SELECT Id, Name FROM Shift_Assignments__c WHERE ToTime__c = null AND Shift_Assigned__c=true AND Member__c ='"+arecords[0].Id+"'"); 
+                            var srecords = shiftAssignmentInfo.getArray("records"); 
+                            
+                            if(srecords.length == 0){ 
+                                noshiftAssignError = true; 
+                            } 
+                        } 
+                    } 
+                }
+                var SelectedIds = ''; 
+                var first = true; 
+                var error = false; 
+                
+                var temp = 0;
+                if(document.getElementById("checkall").checked == true){
+                    temp = 1;
+                }
+                
+                for(var i=temp;i<checkedValues.length;i++){ 
+                    if(first){ 
+                        SelectedIds+="'"+checkedValues[i]+"'"; 
+                        first = false; 
+                    }else 
+                        SelectedIds+=",'"+checkedValues[i]+"'"; 
+                }
+                var result = sforce.connection.query("Select Id, Name, Status__c, File_Location__c, File_Type__c,Member__c from Files__c where Id in ("+SelectedIds+")"); 
+                var records = result.getArray("records");
+                var location1 = ''; 
+                var nameDir = ''; 
+                var locationerror = false; 
+                var inserror = false; 
+                var answer= true; 
+                var allow= true; 
+                var nolocation = false; 
+                var fileTypeError = false; 
+                var isReassign = false; 
+                var isDirectory = false; 
+                var nofileInSelectedDirectory = false; 
+                var filelocation=records[0].File_Location__c; 
+                var locationcount=false; 
+                for(var i=0;i<records.length;i++){ 
+                    if(i == 0){ 
+                        location1 = records[i].File_Location__c; 
+                    } 
+                    if(records[i].File_Location__c == null){ 
+                        nolocation=true; 
+                        break; 
+                    }else if(records[i].File_Location__c != filelocation){ 
+                        locationcount=true; 
+                        break; 
+                    } 
+                    if(records[i].File_Type__c == null){ 
+                        fileTypeError=true; 
+                        break; 
+                    } 
+                    if(records[i].File_Type__c == 'Directory'){ 
+                        var result2 = sforce.connection.query("Select Id, Name, Status__c, File_Location__c, File_Type__c,Member__c from Files__c where Parent_Id__c = '"+records[i].Id+"'"); 
+                        var records2 = result2.getArray("records"); 
+                        if(records2.length == 0){ 
+                            nofileInSelectedDirectory = true; 
+                            nameDir = records[i].Name; 
+                            break; 
+                        } 
+                    } 
+                    if(records[i].Status__c != 'New'){ 
+                        if(records[i].Status__c != 'Handover'){ 
+                            if(records[i].Status__c != 'Assigned'){ 
+                                error = true; 
+                                break; 
+                            } 
+                        } 
+                    } 
+                    if(records[i].File_Type__c == 'Instruction'){ 
+                        inserror = true; 
+                        break; 
+                    } 
+                    if(i > 0){ 
+                        if(location1 != records[i].File_Location__c){ 
+                            locationerror = true; 
+                            break; 
+                        } 
+                    } 
+                } 
+                if(noshiftAssignError){ 
+                    alert('{!$Label.EPMS_TL_Error_NoShift}'); 
+                }else if(nolocation){ 
+                    alert('{!$Label.EPMS_MBO_NO_LOCATION}'); 
+                } else if(fileTypeError){ 
+                    alert('{!$Label.EPMS_MBO_NO_FILE_TYPE}'); 
+                }else if(error){ 
+                    alert('{!$Label.EPMS_MBO_TBI_Handover_Status}'); 
+                } else if(inserror){ 
+                    alert('{!$Label.EPMS_MBO_File_Assign_Operator}'); 
+                } else if(locationerror){ 
+                    alert('{!$Label.EPMS_MBO_File_Same_Location}'); 
+                }else if(locationcount){ 
+                    alert('{!$Label.Selected_Records_with_Same_Location}'); 
+                }else if(nofileInSelectedDirectory){ 
+                    alert('No file found in selected directory '); 
+                }else{
+                    for(var i=0;i<records.length;i++){ 
+                        if(records[i].File_Type__c == 'Directory'){ 
+                            isDirectory = true; 
+                            break; 
+                        } 
+                        if(records[i].Status__c == 'Assigned'){ 
+                            isReassign = true; 
+                            break; 
+                        } 
+                    }
+                    var ids ='';
+                    for(var i=0;i<checkedValues.length;i++){ 
+                        if(first){ 
+                            ids+=checkedValues[i].substr(0,18); 
+                            first = false; 
+                        }else 
+                            ids+=','+checkedValues[i].substr(0,18);
+                    }
+                    if(isDirectory && ids.length){ 
+                        var url2 = '/apex/EPMS_Operator_File_Assignment_EV?ids=' + ids+'&type=assign'; 
+                        var isConfirm = confirm('Are you sure assign all files inside the directory ???'); 
+                        if(isConfirm){ 
+                            window.open(url2, "", "scrollbars=1,width=700, height=700"); 
+                        } 
+                        
+                    } else if (ids.length && isReassign) { 
+                        var url2 = '/apex/EPMS_Operator_File_Assignment_EV?ids=' + ids+'&type=assign'; 
+                        var isproceed = confirm('Are you sure re-assign the file(s) to other operator ???'); 
+                        if(isproceed){ 
+                            window.open(url2, "", "scrollbars=1,width=700, height=700"); 
+                        } 
+                    } else { 
+                        var url2 = '/apex/EPMS_Operator_File_Assignment_EV?ids=' + ids+'&type=assign'; 
+                        window.open(url2, "", "scrollbars=1,width=700, height=700"); 
+                    }
+                }
+            }       
+        }
+    }
+    function AssignTeams(){
+        var profilename = '{!$Profile.Name}'; 
+        var operatorPS = '{!$Label.EPMS_MEMBER_DESIG_OPERATOR_PS}'; 
+        if(profilename == 'Quality Control' || profilename == operatorPS || profilename == 'Sales Region' || profilename == 'File Managers' ){ 
+            
+            alert('{!$Label.EPMS_MBO_Not_have_access}'); 
+        } 
+        else{
+            var checkedValues="";
+            checkedValues=$("input[type='checkbox']:checked").map(function() { return this.outerHTML.split(',')[1].match(/'([^']+)'/)[1]  }).get();   
+            
+            if(checkedValues==""){
+                console.log(checkedValues);
+                popup('popUpalert','alert','','{!$Label.EPMS_MBO_Select_Atleast_One_Record}'); 
+                return false;
+            }else{
+                if(profilename != 'システム管理者' && profilename != 'Production Administrator' && profilename != 'Country Administrator'){ 
+                    var noshiftAssignError = false; 
+                    var cuser = sforce.connection.getUserInfo(); 
+                    var cuserid = cuser.userId; 
+                    if(cuserid != null){ 
+                        var memberInfo = sforce.connection.query("SELECT Id, Name FROM Member__c WHERE Status__c = 'Active' AND User_Id__c ='"+cuserid+"'"); 
+                        var arecords = memberInfo.getArray("records"); 
+                        if(arecords != null){ 
+                            var shiftAssignmentInfo = sforce.connection.query("SELECT Id, Name FROM Shift_Assignments__c WHERE ToTime__c = null AND Shift_Assigned__c=true AND Member__c ='"+arecords[0].Id+"'"); 
+                            var srecords = shiftAssignmentInfo.getArray("records"); 
+                            
+                            if(srecords.length == 0){ 
+                                noshiftAssignError = true; 
+                            } 
+                        } 
+                    } 
+                }
+                
+                var SelectedIds = ''; 
+                var first = true; 
+                var error = false; 
+                var temp = 0;
+                if(document.getElementById("checkall").checked == true){
+                    temp = 1;
+                }
+                
+                for(var i=temp;i<checkedValues.length;i++){ 
+                    if(first){ 
+                        SelectedIds+="'"+checkedValues[i]+"'"; 
+                        first = false; 
+                    }else 
+                        SelectedIds+=",'"+checkedValues[i]+"'"; 
+                } 
+                
+                var result = sforce.connection.query("Select Id, Name, Status__c, File_Location__c, File_Type__c,Member__c from Files__c where Id in ("+SelectedIds+")"); 
+                var records = result.getArray("records"); 
+                
+                var location1 = ''; 
+                var nameDir = ''; 
+                var locationerror = false; 
+                var inserror = false; 
+                var answer= true; 
+                var allow= true; 
+                var nolocation = false; 
+                var fileTypeError = false; 
+                var isReassign = false; 
+                var isDirectory = false; 
+                var nofileInSelectedDirectory = false; 
+                var filelocation=records[0].File_Location__c; 
+                var locationcount=false; 
+                for(var i=0;i<records.length;i++){ 
+                    if(i == 0){ 
+                        location1 = records[i].File_Location__c; 
+                    } 
+                    if(records[i].File_Location__c == null){ 
+                        nolocation=true; 
+                        break; 
+                    }else if(records[i].File_Location__c != filelocation){ 
+                        locationcount=true; 
+                        break; 
+                    } 
+                    if(records[i].File_Type__c == null){ 
+                        fileTypeError=true; 
+                        break; 
+                    } 
+                    if(records[i].File_Type__c == 'Directory'){ 
+                        var result2 = sforce.connection.query("Select Id, Name, Status__c, File_Location__c, File_Type__c,Member__c from Files__c where Parent_Id__c = '"+records[i].Id+"'"); 
+                        records2 = result2.getArray("records"); 
+                        if(records2.length == 0){ 
+                            nofileInSelectedDirectory = true; 
+                            nameDir = records[i].Name; 
+                            break; 
+                        } 
+                    } 
+                    if(records[i].Status__c != 'New'){ 
+                        if(records[i].Status__c != 'Handover'){ 
+                            if(records[i].Status__c != 'Assigned'){ 
+                                error = true; 
+                                break; 
+                            } 
+                        } 
+                    } 
+                    if(records[i].File_Type__c == 'Instruction'){ 
+                        inserror = true; 
+                        break; 
+                    } 
+                    if(i > 0){ 
+                        if(location1 != records[i].File_Location__c){ 
+                            locationerror = true; 
+                            break; 
+                        } 
+                    } 
+                }
+                if(noshiftAssignError){ 
+                    alert('{!$Label.EPMS_TL_Error_NoShift}'); 
+                }else if(nolocation){ 
+                    alert('{!$Label.EPMS_MBO_NO_LOCATION}'); 
+                } else if(fileTypeError){ 
+                    alert('{!$Label.EPMS_MBO_NO_FILE_TYPE}'); 
+                }else if(error){ 
+                    alert('{!$Label.EPMS_MBO_TBI_Handover_Status}'); 
+                } else if(inserror){ 
+                    alert('{!$Label.EPMS_MBO_File_Assign_Operator}'); 
+                } else if(locationerror){ 
+                    alert('{!$Label.EPMS_MBO_File_Same_Location}'); 
+                }else if(locationcount){ 
+                    alert('{!$Label.Selected_Records_with_Same_Location}'); 
+                }else if(nofileInSelectedDirectory){ 
+                    alert('No file found in selected directory '); 
+                }else{ 
+                    for(var i=0;i<records.length;i++){ 
+                        if(records[i].File_Type__c == 'Directory'){ 
+                            isDirectory = true; 
+                            break; 
+                        } 
+                        if(records[i].Status__c == 'Assigned'){ 
+                            isReassign = true; 
+                            break; 
+                        } 
+                    }
+                    var ids ='';
+                    for(var i=0;i<checkedValues.length;i++){ 
+                        if(first){ 
+                            ids+=checkedValues[i].substr(0,18); 
+                            first = false; 
+                        }else 
+                            ids+=','+checkedValues[i].substr(0,18);
+                    }
+                    if(isDirectory && ids.length){ 
+                        var url2 = '/apex/EPMS_Operator_File_Assignment?ids=' + ids+'&type=assign'; 
+                        var isConfirm = confirm('Are you sure assign all files inside the directory ???'); 
+                        if(isConfirm){ 
+                            window.open(url2, "", "scrollbars=1,width=700, height=700"); 
+                        } 
+                        
+                    } else if (ids.length && isReassign) { 
+                        var url2 = '/apex/EPMS_Operator_File_Assignment?ids=' + ids+'&type=assign'; 
+                        var isproceed = confirm('Are you sure re-assign the file(s) to other operator ???'); 
+                        if(isproceed){ 
+                            window.open(url2, "", "scrollbars=1,width=700, height=700"); 
+                        } 
+                    } else { 
+                        var url2 = '/apex/EPMS_Operator_File_Assignment?ids=' + ids+'&type=assign'; 
+                        window.open(url2, "", "scrollbars=1,width=700, height=700"); 
+                    }       
+                }
+            }
+        }
+    } 
+    
+    function ReassignOp(){
+        var profilename = '{!$Profile.Name}'; 
+        var operatorPS = '{!$Label.EPMS_MEMBER_DESIG_OPERATOR_PS}'; 
+        if(profilename == 'Quality Control' || profilename == operatorPS || profilename == 'Sales Region' || profilename == 'File Managers' ){ 
+            
+            alert('{!$Label.EPMS_MBO_Not_have_access}'); 
+        } 
+        else{ 
+            var checkedValues="";
+            checkedValues=$("input[type='checkbox']:checked").map(function() { return this.outerHTML.split(',')[1].match(/'([^']+)'/)[1]  }).get();   
+            
+            if(checkedValues==""){
+                console.log(checkedValues);
+                popup('popUpalert','alert','','{!$Label.EPMS_MBO_Select_Atleast_One_Record}'); 
+                return false;
+            }else{
+                var SelectedIds = ''; 
+                var first = true; 
+                var error = false; 
+                var temp = 0;
+                if(document.getElementById("checkall").checked == true){
+                    temp = 1;
+                }
+                
+                for(var i=temp;i<checkedValues.length;i++){ 
+                    if(first){ 
+                        SelectedIds+="'"+checkedValues[i]+"'"; 
+                        first = false; 
+                    }else 
+                        SelectedIds+=",'"+checkedValues[i]+"'"; 
+                } 
+                var result = sforce.connection.query("Select Id, Name, Status__c, File_Location__c, File_Type__c,Member__c from Files__c where Id in ("+SelectedIds+")"); 
+                var records = result.getArray("records"); 
+                
+                var location1 = ''; 
+                var nameDir = ''; 
+                var locationerror = false; 
+                var inserror = false; 
+                var answer= true; 
+                var allow= true; 
+                var nolocation = false; 
+                var fileTypeError = false; 
+                var isReassign = false; 
+                var isDirectory = false; 
+                var nofileInSelectedDirectory = false; 
+                var filelocation=records[0].File_Location__c; 
+                var locationcount=false; 
+                for(var i=0;i<records.length;i++){ 
+                    if(i == 0){ 
+                        location1 = records[i].File_Location__c; 
+                        
+                    } 
+                    if(records[i].File_Location__c == null){ 
+                        nolocation=true; 
+                        break; 
+                    }else if(records[i].File_Location__c != filelocation){ 
+                        locationcount=true; 
+                        break; 
+                    } 
+                    if(records[i].File_Type__c == null){ 
+                        fileTypeError=true; 
+                        break; 
+                    } 
+                    if(records[i].File_Type__c == 'Directory'){ 
+                        var result2 = sforce.connection.query("Select Id, Name, Status__c, File_Location__c, File_Type__c,Member__c from Files__c where Parent_Id__c = '"+records[i].Id+"'"); 
+                        
+                        records2 = result2.getArray("records"); 
+                        if(records2.length == 0){ 
+                            nofileInSelectedDirectory = true; 
+                            nameDir = records[i].Name; 
+                            break; 
+                        } 
+                    } 
+                    
+                    if(records[i].Status__c != 'Assigned'){ 
+                        error = true; 
+                        break; 
+                    } 
+                    
+                    if(records[i].File_Type__c == 'Instruction'){ 
+                        inserror = true; 
+                        break; 
+                    } 
+                    if(i > 0){ 
+                        if(location1 != records[i].File_Location__c){ 
+                            
+                            locationerror = true; 
+                            break; 
+                        } 
+                    } 
+                }
+                if(nolocation){ 
+                    
+                    alert('{!$Label.EPMS_MBO_NO_LOCATION}'); 
+                } else if(fileTypeError){ 
+                    
+                    alert('{!$Label.EPMS_MBO_NO_FILE_TYPE}'); 
+                }else if(error){ 
+                    
+                    alert('{!$Label.EPMS_MBO_Assigned_Status}'); 
+                } else if(inserror){ 
+                    
+                    alert('{!$Label.EPMS_MBO_File_Assign_Operator}'); 
+                } else if(locationerror){ 
+                    
+                    alert('{!$Label.EPMS_MBO_File_Same_Location}'); 
+                }else if(locationcount){ 
+                    
+                    alert('{!$Label.Selected_Records_with_Same_Location}'); 
+                }else if(nofileInSelectedDirectory){ 
+                    
+                    alert('No file found in selected directory'); 
+                }else{
+                    for(var i=0;i<records.length;i++){ 
+                        if(records[i].File_Type__c == 'Directory'){ 
+                            isDirectory = true; 
+                            break; 
+                        } 
+                    }
+                    var ids ='';
+                    for(var i=0;i<checkedValues.length;i++){ 
+                        if(first){ 
+                            ids+=checkedValues[i].substr(0,18); 
+                            first = false; 
+                        }else 
+                            ids+=','+checkedValues[i].substr(0,18);
+                    }
+                    
+                    
+                    if(isDirectory && ids.length){ 
+                        var url2 = '/apex/EPMS_Operator_File_Assignment_EV?ids=' + ids+'&type=unassign'; 
+                        
+                        var isProceed = confirm('Are you sure assign all files inside the directory ???'); 
+                        if(isProceed){ 
+                            window.open(url2, "", "scrollbars=1,width=700, height=700"); 
+                        } 
+                    } else if (ids.length && isReassign) { 
+                        var url2 = '/apex/EPMS_Operator_File_Assignment_EV?ids=' + ids+'&type=unassign'; 
+                        
+                        var isConfirm = confirm('Are you sure re-assign the file(s) to other operator ???'); 
+                        if(isConfirm){ 
+                            window.open(url2, "", "scrollbars=1,width=700, height=700"); 
+                        } 
+                    } else { 
+                        var url2 = '/apex/EPMS_Operator_File_Assignment_EV?ids=' + ids+'&type=unassign'; 
+                        window.open(url2, "", "scrollbars=1,width=700, height=700"); 
+                        //EPMS Operator Assignment : Photo Artist 
+                    }               
+                    
+                }
+            }
+        }
+    }
+    
+    function RedoAssignOp(){
+        var profilename = '{!$Profile.Name}'; 
+        var operatorPS = '{!$Label.EPMS_MEMBER_DESIG_OPERATOR_PS}';
+        if(profilename == 'Quality Control' || profilename == operatorPS || profilename == 'Sales Region' || profilename == 'File Managers' ){ 
+            
+            alert('{!$Label.EPMS_MBO_Not_have_access}'); 
+        } 
+        else{ 
+            var checkedValues="";
+            checkedValues=$("input[type='checkbox']:checked").map(function() { return this.outerHTML.split(',')[1].match(/'([^']+)'/)[1]  }).get();   
+            
+            if(checkedValues==""){
+                console.log(checkedValues);
+                popup('popUpalert','alert','','{!$Label.EPMS_MBO_Select_Atleast_One_Record}'); 
+                return false;
+            }else{
+                var SelectedIds = ''; 
+                var first = true; 
+                var error = false;  
+                var temp = 0;
+                if(document.getElementById("checkall").checked == true){
+                    temp = 1;
+                }
+                
+                for(var i=temp;i<checkedValues.length;i++){ 
+                    if(first){ 
+                        SelectedIds+="'"+checkedValues[i]+"'"; 
+                        first = false; 
+                    }else 
+                        SelectedIds+=",'"+checkedValues[i]+"'"; 
+                } 
+                var result = sforce.connection.query("Select Id, Status__c, File_Location__c, File_Type__c from Files__c where Id in ("+SelectedIds+")"); 
+                var records = result.getArray("records"); 
+                
+                var location1 = ''; 
+                var locationerror = false; 
+                var inserror = false; 
+                var allow= true; 
+                var nolocation = false; 
+                var isDirectory = false; 
+                var nofileTypeError=false; 
+                var filelocation=records[0].File_Location__c; 
+                var locationcount=false; 
+                var nofileInSelectedDirectory = false; 
+                for(var i=0;i<records.length;i++){ 
+                    if(i == 0){ 
+                        location1 = records[i].File_Location__c; 
+                        
+                    } 
+                    if(records[i].File_Location__c == null){ 
+                        nolocation=true; 
+                        break; 
+                    }else if(records[i].File_Location__c != filelocation){ 
+                        locationcount=true; 
+                        break; 
+                    } 
+                    if(records[i].File_Type__c == null){ 
+                        nofileTypeError=true; 
+                        break; 
+                    } 
+                    if(records[i].File_Type__c == 'Directory'){ 
+                        var result2 = sforce.connection.query("Select Id, Name, Status__c, File_Location__c, File_Type__c,Member__c from Files__c where Parent_Id__c = '"+records[i].Id+"'"); 
+                        
+                        var records2 = result2.getArray("records"); 
+                        if(records2.length == 0){ 
+                            nofileInSelectedDirectory = true; 
+                            nameDir = records[i].Name; 
+                            break; 
+                        } 
+                    } 
+                    if(records[i].Status__c != 'Redo'){ 
+                        error = true; 
+                        break; 
+                    } 
+                    if(records[i].File_Type__c == 'Instruction'){ 
+                        inserror = true; 
+                        break; 
+                    } 
+                    if(i > 0){ 
+                        if(location1 != records[i].File_Location__c){ 
+                            
+                            locationerror = true; 
+                            break; 
+                        } 
+                    } 
+                } 
+                
+                if(nolocation){ 
+                    
+                    alert('{!$Label.EPMS_MBO_NO_LOCATION}'); 
+                } else if(nofileTypeError){ 
+                    
+                    alert('{!$Label.EPMS_MBO_NO_FILE_TYPE}'); 
+                }else if(error){ 
+                    
+                    alert('Please Select File with Status REDO'); 
+                } else if(inserror){ 
+                    
+                    alert('{!$Label.EPMS_MBO_File_Assign_Operator}'); 
+                } else if(locationerror){ 
+                    
+                    alert('{!$Label.EPMS_MBO_File_Same_Location}'); 
+                }else if(locationcount){ 
+                    
+                    alert('{!$Label.Selected_Records_with_Same_Location}'); 
+                }else if(nofileInSelectedDirectory){ 
+                    
+                    alert('No file found in selected directory'); 
+                }else{
+                    for(var i=0;i<records.length;i++){ 
+                        if(records[i].File_Type__c == 'Directory'){ 
+                            isDirectory = true; 
+                            break; 
+                        } 
+                    }
+                    var ids ='';
+                    for(var i=0;i<checkedValues.length;i++){ 
+                        if(first){ 
+                            ids+=checkedValues[i].substr(0,18); 
+                            first = false; 
+                        }else 
+                            ids+=','+checkedValues[i].substr(0,18);
+                    }
+                    
+                    if(isDirectory && ids.length){ 
+                        var url2 = '/apex/EPMS_Operator_File_Assignment_EV?ids=' + ids+'&type=reassign'; 
+                        
+                        var isproceed = confirm('Are you sure re-assign all files inside the directory ?'); 
+                        if(isproceed){ 
+                            window.open(url2, "", "scrollbars=1,width=700, height=700"); 
+                        } 
+                    } else if (ids.length) { 
+                        var url2 = '/apex/EPMS_Operator_File_Assignment_EV?ids=' + ids+'&type=reassign'; 
+                        window.open(url2, "", "scrollbars=1,width=700, height=700");
+                    } else { 
+                        
+                    }
+                }        
+            }
+            
+        }
+    }
+    
+    function ReAssignMe(){
+        var updateRecords = []; 
+        var errorexist = false; 
+        var profileerror = false; 
+        var profilename = '{!$Profile.Name}'; 
+        if(profilename == 'Sales Region' || profilename == 'Production Administrator' || profilename == 'File Managers' || profilename == 'Country Administrator' ){ 
+            
+            alert('{!$Label.EPMS_MBO_Not_have_access}'); 
+            statusError = true; 
+            profileerror = true; 
+        }
+        var checkedValues="";
+        checkedValues=$("input[type='checkbox']:checked").map(function() { return this.outerHTML.split(',')[1].match(/'([^']+)'/)[1]  }).get();   
+        
+        if(checkedValues==""){
+            console.log(checkedValues);
+            popup('popUpalert','alert','','{!$Label.EPMS_MBO_Select_Atleast_One_Record}'); 
+            return false;
+        }else{
+            var SelectedIds = ''; 
+            var first = true; 
+            var error = false; 
+            var temp = 0;
+            if(document.getElementById("checkall").checked == true){
+                temp = 1;
+            }
+            
+            for(var i=temp;i<checkedValues.length;i++){ 
+                
+                if(first){ 
+                    SelectedIds+="'"+checkedValues[i]+"'"; 
+                    first = false; 
+                }else 
+                    SelectedIds+=",'"+checkedValues[i]+"'"; 
+            }
+            var Files = sforce.connection.query("Select Id, Name ,Status__c,File_PS_Version__c,Files_To_open__c from Files__c where Id in ("+SelectedIds+")"); 
+            
+            var records = Files.getArray("records"); 
+            var statusError = false; 
+            var recordsize = Files.size; 
+            for(var i=0;i<recordsize ;i++) 
+            { 
+                if(records[i].Status__c!='WIP'){ 
+                    statusError = true; 
+                    break; 
+                } 
+                else{ 
+                    var update_Files = new sforce.SObject("Files__c"); 
+                    update_Files.Id = records[i].Id; 
+                    update_Files.Status__c='Assigned'; 
+                    updateRecords.push(update_Files); 
+                    errorexist = true; 
+                } 
+            }
+            if(statusError) { 
+                if(profileerror){ 
+                    
+                    alert('You Do not have access.'); 
+                } else{ 
+                    
+                    alert('Please Select WIP Status files.'); 
+                } 
+                window.location.reload(); 
+            } 
+            var resultupdate = sforce.connection.update(updateRecords); 
+            if(errorexist==true){ 
+                
+                alert('Selected Files are changed to Assigned status'); 
+                window.location.reload(); 
+            }            
+        } 
+    }
+    
+    function ChangeTL(){
+        var authorise = false; 
+        var nolocation = false; 
+        var pname='{!$Profile.Name}'; 
+        var operatorPS = '{!$Label.EPMS_MEMBER_DESIG_OPERATOR_PS}';
+        var userId =sforce.connection.getUserInfo().userId; 
+        if(pname == 'システム管理者'){ 
+            authorise = true; 
+        }else if(pname == 'Production Administrator'){ 
+            authorise = true; 
+        } else if(pname == 'Shift Administrator'){ 
+            authorise = true;   
+        } else if(pname == 'Team Leader'){ 
+            authorise = true; 
+        }else if(pname == 'Country Administrator'){ 
+            authorise = true; 
+        } 
+            else if(pname == operatorPS){ 
+                authorise = false; 
+            }
+        
+        if(authorise == false){ 
+            
+            alert('{!$Label.EPMS_MBO_Not_have_access}'); 
+        } else {
+            var checkedValues="";
+            checkedValues=$("input[type='checkbox']:checked").map(function() { return this.outerHTML.split(',')[1].match(/'([^']+)'/)[1] }).get();     
+            if(checkedValues==""){
+                console.log(checkedValues);
+                popup('popUpalert','alert','','{!$Label.EPMS_MBO_Select_Atleast_One_Record}'); 
+                return false;
+            }else{
+                var SelectedIds = ''; 
+                var first = true; 
+                var error = false; 
+                var Filetyperror = false; 
+                var temp = 0;
+                if(document.getElementById("checkall").checked == true){
+                    temp = 1;
+                }
+                
+                for(var i=temp;i<checkedValues.length;i++){ 
+                    if(first){ 
+                        SelectedIds+="'"+checkedValues[i]+"'"; 
+                        first = false; 
+                    }else 
+                        SelectedIds+=",'"+checkedValues[i]+"'"; 
+                } 
+                var MemberLocation = sforce.connection.query("Select Id,Location_id__c from Member__c where User_Id__c = '"+userId+"'"); 
+                var Memberrecords = MemberLocation.getArray("records"); 
+                
+                var result = sforce.connection.query("Select Id,Status__c,File_Location__c,File_Type__c from Files__c where Id in ("+SelectedIds+")"); 
+                var records = result.getArray("records"); 
+                var location1 = ''; 
+                var locationerror = false; 
+                var locationOwn = false; 
+                
+                for(var i=0;i<records.length;i++){ 
+                    if(i == 0){ 
+                        if(pname != 'システム管理者' && pname != 'Country Administrator' ){ 
+                            location1 = Memberrecords[0].Location_id__c; 
+                        } 
+                        
+                    } 
+                    if(records[i].File_Location__c == null){ 
+                        nolocation=true; 
+                        break; 
+                    } 
+                    if(records[i].File_Type__c == 'Instruction'){ 
+                        Filetyperror = true; 
+                        break; 
+                    } 
+                    if(records[i].Status__c != 'New'){ 
+                        if(records[i].Status__c != 'Handover'){ 
+                            if(records[i].Status__c != 'Assigned'){ 
+                                error = true; 
+                                break; 
+                            } 
+                        } 
+                    } 
+                    if(i >= 0){ 
+                        if(pname != 'システム管理者' && pname != 'Country Administrator'){ 
+                            if(location1 != records[i].File_Location__c ){ 
+                                locationerror = true; 
+                                break; 
+                            } 
+                        } 
+                        
+                    } 
+                }
+                if(nolocation){ 
+                    
+                    alert('{!$Label.No_Location_specified_in_selected_order}'); 
+                } else if(error){ 
+                    
+                    alert('{!$Label.EPMS_ChangeTL_InvalidStatus}'); 
+                }else if(Filetyperror){ 
+                    
+                    alert('{!$Label.EPMS_InvalidFileType}'); 
+                } else if(locationerror){ 
+                    
+                    alert('{!$Label.Please_select_production_order_in_same_location}'); 
+                } else{
+                    var ids ='';
+                    for(var i=0;i<checkedValues.length;i++){ 
+                        if(first){ 
+                            ids+=checkedValues[i].substr(0,18); 
+                            first = false; 
+                        }else 
+                            ids+=','+checkedValues[i].substr(0,18);
+                    }
+                    if (ids.length) { 
+                        var url2 = 'apex/EPMS_File_ChangeTLIncharge_EV?ids='+ids+'&base=file'; 
+                        window.open(url2, "", "scrollbars=1,width=700, height=700"); 
+                        //EPMS Team Lead Asssignment : Team Leader 
+                    } else { 
+                        alert('{!$Label.Select_one_or_more_production_order}'); 
+                    }   
+                }  
+                
+            }
+        }
+    }
+    function HandOver(){
+        var profilename = '{!$Profile.Name}'; 
+        var checkedValues="";
+        checkedValues=$("input[type='checkbox']:checked").map(function() { return this.outerHTML.split(',')[1].match(/'([^']+)'/)[1]  }).get();   
+        
+        if(checkedValues==""){
+            console.log(checkedValues);
+            popup('popUpalert','alert','','{!$Label.EPMS_MBO_Select_Atleast_One_Record}'); 
+            return false;
+        }else{
+            var SelectedIds = ''; 
+            var first = true; 
+            var error = false; 
+            var temp = 0;
+            if(document.getElementById("checkall").checked == true){
+                temp = 1;
+            }
+            
+            for(var i=temp;i<checkedValues.length;i++){ 
+                
+                if(first){ 
+                    SelectedIds+="'"+checkedValues[i]+"'"; 
+                    first = false; 
+                }else 
+                    SelectedIds+=",'"+checkedValues[i]+"'"; 
+            }
+            var Files = sforce.connection.query("Select Id, Status__c, File_Location__c, File_Type__c, TLInCharge__c from Files__c where Id in ("+SelectedIds+")"); 
+            records = Files.getArray("records"); 
+            recordsize = Files.size; 
+            var update = 0; 
+            for(var i=0;i<recordsize ;i++) 
+            {  
+                if(records[i].Status__c !='New'){ 
+                    if(records[i].Status__c !='Assigned'){ 
+                        if(records[i].Status__c !='QC'){ 
+                            if(records[i].Status__c !='Redo Re-Assigned'){ 
+                                update++; 
+                            } 
+                        } 
+                    } 
+                } 
+                
+                var update_order = new sforce.SObject("Files__c"); 
+                var ids ='';
+                for(var i=0;i<checkedValues.length;i++){ 
+                    if(first){ 
+                        ids+=checkedValues[i].substr(0,18); 
+                        first = false; 
+                    }else 
+                        ids+=','+checkedValues[i].substr(0,18);
+                } 
+                if(update>0){ 
+                    
+                    alert('{!$Label.EPMS_MBO_Select_Status_TBI_ASSIGNED_REDO}'); 
+                } else { 
+                    var url2 = 'apex/EPMS_File_Handover_Page_EV?ids='+ids; 
+                    window.open(url2, "", "scrollbars=1,width=700, height=700");                    
+                } 
+            }            
+        } 
+    }
+    
+    function AssignPenalty(){
+        var profilename = '{!$Profile.Name}'; 
+        var operatorPS = '{!$Label.EPMS_MEMBER_DESIG_OPERATOR_PS}';
+        if(profilename == 'Shift Administrator' || profilename == 'Team Leader' || profilename == operatorPS || profilename == 'File Managers' ){ 
+            
+            alert('{!$Label.EPMS_MBO_Not_have_access}'); 
+        } 
+        else{
+            var checkedValues="";
+            checkedValues=$("input[type='checkbox']:checked").map(function() { return this.outerHTML.split(',')[1].match(/'([^']+)'/)[1]  }).get();   
+            
+            if(checkedValues==""){
+                console.log(checkedValues);
+                popup('popUpalert','alert','','{!$Label.EPMS_MBO_Select_Atleast_One_Record}'); 
+                return false;
+            }else{
+                var SelectedIds = ''; 
+                var first = true; 
+                var error = false; 
+                var temp = 0;
+                if(document.getElementById("checkall").checked == true){
+                    temp = 1;
+                }
+                
+                for(var i=temp;i<checkedValues.length;i++){ 
+                    if(first){ 
+                        SelectedIds+="'"+checkedValues[i]+"'"; 
+                        first = false; 
+                    }else 
+                        SelectedIds+=",'"+checkedValues[i]+"'"; 
+                } 
+                var result = sforce.connection.query("Select Id, Status__c, File_Location__c, File_Type__c from Files__c where Id in ("+SelectedIds+")"); 
+                var records = result.getArray("records"); 
+                var location1 = ''; 
+                var locationerror = false; 
+                var inserror = false; 
+                var answer= true; 
+                var allow= true; 
+                var nolocation = false; 
+                var isDirectory = false; 
+                var saleregionerror = false; 
+                
+                for(var i=0;i<records.length;i++){ 
+                    if(i == 0){ 
+                        location1 = records[i].File_Location__c; 
+                    } 
+                    if(records[i].File_Location__c == null){ 
+                        nolocation=true; 
+                        break; 
+                    } 
+                    if(profilename != 'System Administrator'){ 
+                        if(profilename !='システム管理者'){ 
+                            if(profilename != 'Contract Employees (Japan)'){ 
+                                if(profilename != 'Permanent Employees (Japan)'){ 
+                                    if(profilename != 'Country Administrator'){ 
+                                        if(profilename != 'Full-time Employees (Japan)'){ 
+                                            if(profilename != 'Production Administrator'){ 
+                                                if(profilename != 'Shift Administrator'){ 
+                                                    if(records[i].Status__c != 'Redo'){ 
+                                                        if(records[i].Status__c != 'Redo Re-Assigned'){ 
+                                                            error = true; 
+                                                            break; 
+                                                        } 
+                                                    } 
+                                                } 
+                                            }   
+                                        } 
+                                    } 
+                                } 
+                            } 
+                        } 
+                    } 
+                    
+                    if(profilename == 'System Administrator'){ 
+                        if(records[i].Status__c != 'Approved'){ 
+                            saleregionerror = true; 
+                            break; 
+                        } 
+                    }else if(profilename =='システム管理者'){ 
+                        if(records[i].Status__c != 'Approved'){ 
+                            saleregionerror = true; 
+                            break; 
+                        } 
+                    } 
+                        else if(profilename == 'Full-time Employees (Japan)'){ 
+                            if(records[i].Status__c != 'Approved'){ 
+                                saleregionerror = true; 
+                                break; 
+                            } 
+                        } 
+                            else if(profilename == 'Permanent Employees (Japan)'){ 
+                                if(records[i].Status__c != 'Approved'){ 
+                                    saleregionerror = true; 
+                                    break; 
+                                } 
+                            } 
+                                else if(profilename == 'Country Administrator'){ 
+                                    if(records[i].Status__c != 'Approved'){ 
+                                        saleregionerror = true; 
+                                        break; 
+                                    } 
+                                } else if(profilename == 'Production Administrator'){ 
+                                    if(records[i].Status__c != 'Approved'){ 
+                                        saleregionerror = true; 
+                                        break; 
+                                    } 
+                                } else if(profilename == 'Shift Administrator'){ 
+                                    if(records[i].Status__c != 'Approved'){ 
+                                        saleregionerror = true; 
+                                        break; 
+                                    } 
+                                } 
+                    
+                    
+                    if(records[i].File_Type__c == 'Instruction'){ 
+                        inserror = true; 
+                        break; 
+                    } 
+                    if(i > 0){ 
+                        if(location1 != records[i].File_Location__c){ 
+                            locationerror = true; 
+                            break; 
+                        } 
+                    } 
+                }
+                if(nolocation){ 
+                    
+                    alert('{!$Label.EPMS_MBO_NO_LOCATION}'); 
+                } else if(saleregionerror){ 
+                    
+                    alert('Please select file status of approved'); 
+                } else if(error){ 
+                    
+                    alert('{!$Label.EPMS_MBO_status_is_Redo_or_Redo_Re_Assigned}'); 
+                } else if(inserror){ 
+                    
+                    alert('{!$Label.EPMS_MBO_Penalty_Assign_Instruction}'); 
+                } else if(locationerror){ 
+                    
+                    alert('{!$Label.EPMS_MBO_File_Same_Location}'); 
+                }else{ 
+                    var ids ='';
+                    for(var i=0;i<checkedValues.length;i++){ 
+                        if(first){ 
+                            ids+=checkedValues[i].substr(0,18); 
+                            first = false; 
+                        }else 
+                            ids+=','+checkedValues[i].substr(0,18);
+                    } 
+                    
+                    for(var i=0;i<records.length;i++){ 
+                        if(records[i].File_Type__c == 'Directory'){ 
+                            isDirectory = true; 
+                            break; 
+                        } 
+                    }
+                    if(!answer){ 
+                        allow = false; 
+                    } 
+                    if(isDirectory && ids.length){ 
+                        var url2 = '/apex/AssignPenality_EV?ids=' + ids+'&type=file'; 
+                        
+                        var isConfirm = confirm('Are you sure assign penalty for all the files inside the directory ???'); 
+                        if(isConfirm){ 
+                            window.open(url2, "", "scrollbars=1,width=700, height=700"); 
+                        } 
+                    } else if (ids.length && allow) { 
+                        var url2 = '/apex/AssignPenality_EV?ids=' + ids+'&type=file'; 
+                        window.open(url2, "", "scrollbars=1,width=700, height=700,left=0,top=0,resizable=0,titlebar=0,toolbar=0,status=0"); 
+                        //EPMS Order Assignment : Anken 
+                    } else { 
+                        
+                        alert('{!$Label.EPMS_MBO_Other_Type_File}'); 
+                    } 
+                }       
+            }  
+        } 
+    }
+    function ChangeJob(){
+        var profilename = '{!$Profile.Name}'; 
+        var checkedValues="";
+        var operatorPS = '{!$Label.EPMS_MEMBER_DESIG_OPERATOR_PS}';
+        if(profilename == operatorPS){ 
+            alert('{!$Label.EPMS_MBO_Not_have_access}'); 
+        } else{ 
+            
+            checkedValues=$("input[type='checkbox']:checked").map(function() { return this.outerHTML.split(',')[1].match(/'([^']+)'/)[1]  }).get();   
+            
+            if(checkedValues==""){
+                console.log(checkedValues);
+                popup('popUpalert','alert','','{!$Label.EPMS_MBO_Select_Atleast_One_Record}'); 
+                return false;
+            }else{
+                var SelectedIds = ''; 
+                var Ids = ''; 
+                var first = true; 
+                var error = false; 
+                var temp = 0;
+                if(document.getElementById("checkall").checked == true){
+                    temp = 1;
+                }
+                
+                for(var i=temp;i<checkedValues.length;i++){ 
+                    if(first){ 
+                        Ids+="'"+checkedValues[i]+"'"; 
+                        SelectedIds+=checkedValues[i]; 
+                        first = false; 
+                    }else{ 
+                        Ids+=",'"+checkedValues[i]+"'"; 
+                        SelectedIds+=","+checkedValues[i]; 
+                    } 
+                }
+                var stat; 
+                var filesToOpen; 
+                var result = sforce.connection.query("Select Id, Status__c,Files_To_open__c from Files__c where Id in ("+Ids+")"); 
+                var records = result.getArray("records"); 
+                for(var i=0;i<records.length;i++){ 
+                    //alert('Status : ' + records[i].Status__c); 
+                    if(records[i].Status__c == 'Approved' || records[i].Status__c == 'WIP'){ 
+                        stat = "'Approved' or 'WIP' "; 
+                        error = true; 
+                        break; 
+                    }
+                    //alert('Files To Open : ' + records[i].Files_To_open__c); 
+                    if (records[i].Files_To_open__c == 1 && records[i].Status__c != 'QC') { 
+                        filesToOpen = true; 
+                    } 
+                }
+                if (error == true){ 
+                    alert("Please select file status other than " + stat); 
+                } else if (filesToOpen == true){ 
+                    alert("The Selected Files are Opened in Photoshop,Cant change job title Now. Please try again."); 
+                } else{ 
+                    var jobTitleUrl = '/apex/EPMS_ChangeJobTitle?ids='+SelectedIds+'&type=filelist'; 
+                    var winfeature = 'directories=no, titlebar=no,toolbar=no,width=500,height=580, left=200,top=50,location=no,status=0,menubar=no,scrollbars=yes,resizable=no'; 
+                    window.childWin = window.open(jobTitleUrl, '_blank', winfeature); 
+                    
+                    window.intervalId = window.setInterval('window.checkIfChildWindowIsClosed()', 5*1000); 
+                }
+            }
+        }
+        //add check function to window
+        window.checkIfChildWindowIsClosed = function() 
+        { 
+            if(window.childWin.closed) 
+            { 
+                window.clearInterval(window.intervalId); 
+                window.parent.location.href = window.parent.location.href; 
+            } 
+        }   
+    }
+    function MyTeamFiles(){ 
+        var cuser = sforce.connection.getUserInfo(); 
+        var cuserid = cuser.userId; 
+        if(cuserid != null){
+            window.location.assign("apex/EPMS_MyTeamFiles?userId="+cuserid); 
+        }  
+    }
+    
+    function doCheckboxChange(cb,itemId)
+    {
+        if(cb.checked==true){
+            aSelectItem(itemId);
+        }
+        else{
+            aDeselectItem(itemId);
+        }        
+    } 
+    
+    </script>
+    
+    <script type="text/javascript">
+    var rootflog = false;
+    var count;
+    function selectAll(){
+        if(rootflog == false)
+        {
+            $('.fancyTable tbody tr').find('.childs').prop('checked', 'checked');
+            rootflog=true;
+            count = $(".childs:checked").length;    
+            jQuery('[id$=myPlaceholder]').text(count);
+            if(count>0)
+                jQuery('[id$=count]').css('background','#ffe324');
+            else
+                jQuery('[id$=count]').css('background','#FFF'); 
+            jQuery('[id$=myPlaceholder2]').text(count);
+            if(count>0)
+                jQuery('[id$=count]').css('background','#ffe324');
+            else
+                jQuery('[id$=count]').css('background','#FFF');
+        }
+        else{
+            $('.fancyTable tbody tr').find('.childs').removeProp('checked', 'checked');
+            rootflog=false;
+            count = $(".childs:checked").length;    
+            jQuery('[id$=myPlaceholder]').text(count);
+            if(count>0)
+                jQuery('[id$=count]').css('background','#ffe324');
+            else
+                jQuery('[id$=count]').css('background','#FFF'); 
+            jQuery('[id$=myPlaceholder2]').text(count);
+            if(count>0)
+                jQuery('[id$=count]').css('background','#ffe324');
+            else
+                jQuery('[id$=count]').css('background','#FFF');    
+        }
+        
+    }
+    
+    $(document).ready(function() {
+        $(document).on("click", "#checkall", function(){
+            $('.fancyTable tbody tr').find('.childs').prop('checked', this.checked);
+            count = $(".childs:checked").length;    
+            jQuery('[id$=myPlaceholder]').text(count);
+            if(count>0)
+                jQuery('[id$=count]').css('background','#ffe324');
+            else
+                jQuery('[id$=count]').css('background','#FFF');
+            jQuery('[id$=myPlaceholder2]').text(count);
+            if(count>0)
+                jQuery('[id$=count]').css('background','#ffe324');
+            else
+                jQuery('[id$=count]').css('background','#FFF');
+        });
+        
+        
+        $(".childs").on('change',function(){
+            var counts = $('.childs:checked').length;
+            var all_count=$('.fancyTable tbody tr').find(":checkbox").length;
+            
+            if(counts < all_count){
+                $('#checkall').prop('checked',false);
+            }
+            else{
+                $('#checkall').prop('checked',true);
+                
+            }
+            
+            count = $(".childs:checked").length;    
+            jQuery('[id$=myPlaceholder]').text(count);
+            if(count>0)
+                jQuery('[id$=count]').css('background','#ffe324');
+            else
+                jQuery('[id$=count]').css('background','#FFF');
+            jQuery('[id$=myPlaceholder2]').text(count);
+            if(count>0)
+                jQuery('[id$=count]').css('background','#ffe324');
+            else
+                jQuery('[id$=count]').css('background','#FFF');
+        });      
+    });
+    
+    </script>
+    
+    <apex:form >
+        <!-- <apex:actionFunction name="aSelectItem" action="{!doSelectItem}" rerender="NONE" status="loader">
+<apex:param name="contextItem" value="" assignTo="{!contextItem}"/>
+</apex:actionFunction>
+
+<apex:actionFunction name="aDeselectItem" action="{!doDeselectItem}" rerender="NONE" status="loader">
+<apex:param name="contextItem" value="" assignTo="{!contextItem}"/>
+</apex:actionFunction> -->
+        <apex:actionFunction name="isSelectAllItem" action="{!isSelectedAll}"  rerender="NONE">
+            <apex:param name="isSelectedALL" value="" assignTo="{!selectedAllProperties}"/>
+        </apex:actionFunction>
+        <br/>
+        <br/>
+        <img src="/img/s.gif" alt="Files" class="pageTitleIcon" title="Files"/>
+        <apex:outputPanel >
+            <apex:actionFunction name="showNext" action="{!refresh}" />
+            <apex:selectList value="{!FilesFilterId}" size="1" id="filterMenu" onchange="showNext();setWinSize();">
+                <apex:selectOptions value="{!FilesExistingViews}"></apex:selectOptions>
+                <apex:actionSupport event="onchange"  action="{!resetFilter}" rerender="POTable" status="ajaxStatus"/>
+            </apex:selectList>             
+            <br/><br/><br/>
+        </apex:outputPanel>
+        <apex:pageBlock id="POTable">            
+            <apex:outputPanel rendered="{!AllFiles.size==0}" style="font-size:13px;">
+                No records to display
+            </apex:outputPanel>
+            <apex:actionFunction name="showSort" action="{!sortmethod}" />
+            <apex:outputpanel rendered="{!AllFiles.size > 0}">
+                <table class="topPagination" width="100%" border="0" cellpadding="0" cellspacing="0">
+                    <tr> 
+                        <td width="33%" align="left" class="lefttd"></td>
+                        <td width="33%" style="text-align:right">Sort&nbsp; by: &nbsp;<apex:selectList value="{!sortingChoice}" id="sortPicklist" multiselect="false" size="1" onchange="showSort()">
+                            <apex:selectOptions value="{!sortingoptions}"/>
+                            </apex:selectList>&nbsp; 
+                            <apex:selectList styleClass="sortListAsc" value="{!sortType}"  multiselect="false" size="1"  onchange="showSort()" >
+                                <apex:selectOptions value="{!sortingTypeoptions}"/>
+                            </apex:selectList>&nbsp;</td>
+                    </tr>
+                </table>   
+                <div class="container_12 divider freezeTableAutoWidth">
+                    <div class="grid_6">
+                        <table class="fancyTable headerFreezeTable" cellpadding="0" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="checkall" onclick="selectAllCheckboxes(this,'inputId')"/></th>                                   
+                                    
+                                    <th class="textLeft">File TAT</th>
+                                    <th class="textLeft">Production Order Name</th>
+                                    <th class="textLeft">Job Titles</th>
+                                    <th class="textLeft">Status</th>
+                                    <th id="thumbImageHeader" class="textLeft">Thumbnails Display</th> 
+                                    <th class="textLeft">File Attachments</th>
+                                    <th class="textLeft">File Instruction</th>
+                                    <th class="textLeft">Order Attachment</th>
+                                    <th class="textLeft">Order Instructions</th>
+                                    <th class="textLeft">QC Comments</th>
+                                    <th class="textLeft">File Name</th> 
+                                    <th class="textLeft">File HandOver Instructions</th>
+                                    <th class="textLeft">Files To open</th>
+                                </tr>
+                            </thead>    
+                            <apex:repeat value="{!AllFiles}" var="f" >
+                                <tbody>   
+                                    <tr>      
+                                        <td class="Act"><span><apex:inputCheckbox styleClass="childs" value="{!f.chkBox}" onclick="selectAllCheckboxes(this,'{!f.Files.id}')"/></span></td>
+                                        <!-- <td class="title_widthh_incre"> <span> <apex:outputLink title="" value="/{!f.Files.id}/e?retURL=/apex/{!$CurrentPage.Name}" style="font-weight:bold;">Edit</apex:outputLink>&nbsp;|&nbsp;
+<apex:commandLink action="{!deleteFiles}" onclick="if(!confirm('Are you sure?')) return false;" style="font-weight:bold;">Del
+<apex:param value="{!f.Files.id}" name="idToDel" assignTo="{!delid}"/>
+</apex:commandLink> </span>
+</td> -->
+                                        <td class="FileTat textLeft"><apex:outputfield value="{!f.Files.FileTAT__c}" /></td>
+                                        <td class="POrderName textLeft"><apex:outputfield value="{!f.Files.Production_Order_Name__c}" /> </td>                                    
+                                        <td class="order_inst_width_incre textLeft"><apex:outputfield value="{!f.Files.Job_List__c}" /> </td>                                       
+                                        <td class="Status textLeft"><apex:outputfield value="{!f.Files.Status__c}" /> </td>
+                                        <td class="thumbImageBody"><span><apex:outputText value="{!f.Files.Thumbnail_Display__c}" escape="false"/></span></td>                                                                   
+                                        <td class="FileAttachments textLeft"><span><apex:outputField value="{!f.Files.File_Attachments__c}" /></span></td>                                                                  
+                                        <td class="FileInstruction textLeft"><span><apex:outputfield value="{!f.Files.Instruction__c}"/> </span></td>                             
+                                        <td class="OrderAttachments textLeft"><span><apex:outputField value="{!f.Files.Order_Attachments__c}" /></span></td>                                                     
+                                        <td class="OrderInstructions textLeft"><span><apex:outputfield value="{!f.Files.Order_Instructions__c}"/></span></td>                                                                    
+                                        <td class="QCComments textLeft"><span><apex:outputfield value="{!f.Files.QC_Comments__c}" /> </span></td>                             
+                                        <td class="FilesName textLeft"><span><apex:outputlink value="/{!f.Files.id}" target="_blank">{!f.Files.name}</apex:outputlink></span></td>
+                                        <td class="FileInstr textLeft"><span><apex:outputfield value="{!f.Files.File_HandOver_Instructions__c}"/> </span></td>                                                                     
+                                        <td class="FTPUploadTime textRight"><apex:outputfield value="{!f.Files.Files_To_open__c}" /> </td>                                        
+                                        
+                                        
+                                    </tr>
+                                </tbody>    
+                            </apex:repeat>
+                            
+                        </table>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+            </apex:outputpanel> 
+            <br/>
+            <apex:outputPanel rendered="{!AllFiles.size > 0}">
+                <div class="paginationNav">
+                    <table class="pagefooter" width="100%" border="0" cellpadding="0" cellspacing="0" >
+                        <tr>
+                            <td width="20%" align="left" class="lefttd">Display&nbsp;
+                                <apex:selectList value="{!size}" size="1" id="PageRefresh">
+                                    <apex:selectOption itemValue="20" itemLabel="20"></apex:selectOption>                                   
+                                    <apex:selectOption itemValue="50" itemLabel="50"></apex:selectOption>
+                                    <apex:selectOption itemValue="100" itemLabel="100"></apex:selectOption>
+                                    <apex:selectOption itemValue="200" itemLabel="200"></apex:selectOption> 
+                                    <apex:selectOption itemValue="500" itemLabel="500"></apex:selectOption>
+                                    <apex:actionSupport event="onchange" action="{!refreshPageS}"/>
+                                </apex:selectList>&nbsp; records per page &nbsp;
+                                <td width="10%" id="count" class="count_bg" >  <apex:outputText id="myPlaceholder" value="0"/> &nbsp;&nbsp; Records Selected &nbsp;&nbsp; </td> 
+                        </td>
+                    <td width="35%" style="text-align:center;">
+                        <apex:commandButton value="First" action="{!doFirst}" disabled="{!!HasPrevious}" onclick="setWinSize();"/>
+                        &nbsp;&nbsp;
+                        <apex:commandButton value="<<Previous" action="{!doPrevious}" disabled="{!!HasPrevious}" onclick="setWinSize();" />
+                        &nbsp;&nbsp;
+                        <apex:commandButton value="Next>>" action="{!doNext}" disabled="{!!hasnext}" onclick="setWinSize();" />
+                        &nbsp;&nbsp;
+                        <apex:commandButton value="Last" action="{!doLast}" disabled="{!!hasnext}" onclick="setWinSize();" />                           
+                        &nbsp;&nbsp; &nbsp;&nbsp;  &nbsp;&nbsp;  &nbsp;&nbsp;  &nbsp;&nbsp;  &nbsp;&nbsp;  &nbsp;&nbsp;  &nbsp;&nbsp;
+                        &nbsp;&nbsp;
+                        &nbsp;&nbsp;
+                        <apex:outputText > &nbsp; {!(pageNumber * size)+1-size} - {!IF((pageNumber * size)>FileCountList, FileCountList,(pageNumber * size))} of {!FileCountList}</apex:outputText>&nbsp;                                        
+                    </td> 
+                </tr>
+            </table>                   
+        </div>
+    </apex:outputPanel>
+    
+    <div class="paginationNav">
+        <table class="pagefooter" width="100%" border="0" cellpadding="0" cellspacing="0" >
+            <tr>
+                <td width="34%">
+                    <apex:pageBlockButtons location="Top" id="POTable"> 
+                        <!-- <apex:commandButton value="Open Files in Photo Shop" action="{!savePSCS6}" status="myDisplayStatus" rerender="myDisplayStatus, errorMessages" oncomplete="if('{!errorFlag}' == 'false') {Reloadpage('Selected Files Are Marked to Open in Photoshop');};"/> -->
+                        <apex:commandButton value="Open Files in Photo Shop" onclick="Openfiles();" oncomplete="return false;" immediate="true"/>                      
+                        <apex:commandButton value="Assign Operator" onclick="javascript:AssignOp();" oncomplete="return false;" immediate="true"/>
+                        <!-- <apex:commandButton value="Assign Teams" onclick="AssignTeams();" oncomplete="return false;"/>-->
+                        <apex:commandButton value="Re-assign Operators" onclick="javascript:ReassignOp();" oncomplete="return false;" immediate="true"/>
+                        <apex:commandButton value="Redo Assign Operator" onclick="javascript:RedoAssignOp();" oncomplete="return false;" immediate="true"/>
+                        <apex:commandButton value="ReAssign to Me" onclick="javascript:ReAssignMe();" oncomplete="return false;" immediate="true"/>
+                        <apex:commandButton value="Change TL Incharge" onclick="javascript:ChangeTL();" oncomplete="return false;" immediate="true"/>
+                        <apex:commandButton value="HandOver" onclick="javascript:HandOver();" oncomplete="return false;" immediate="true"/>
+                        <apex:commandButton value="Assign Penalty" onclick="javascript:AssignPenalty();" oncomplete="return false;" immediate="true"/>
+                        <apex:commandButton value="Change Job Title" onclick="javascript:ChangeJob();" oncomplete="return false;" immediate="true"/>
+                        <!-- <apex:commandButton value="My Team Files" onclick="MyTeamFiles();" oncomplete="return false;"/> -->
+                        <apex:commandButton value=" " title="Refresh" styleclass="refreshListButton" onclick="window.location.top.reload();"/>
+                    </apex:pageBlockButtons> 
+                    <apex:actionStatus id="myDisplayStatus"  startText="Processing..."  stopText=""/>                    
+                </td>
+            </tr>
+        </table>                   
+    </div> 
+    
+</apex:pageBlock>
+</apex:form>
+</apex:page>

@@ -1,0 +1,412 @@
+<apex:page controller="SitesCreditCardEditController" action="{!init}" cache="false" sidebar="false" showHeader="false" standardStylesheets="false">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>クレジットカード情報変更</title>
+
+    <!-- Design Style -->
+    <apex:stylesheet value="{!URLFOR($Resource.SitesContents, 'common/css/import.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.SitesContents, 'common/css/editorial/sub.css')}" />
+
+    <!-- 独自のスタイル -->
+    <style type="text/css">
+        table.sf-radio {
+            margin-bottom: 0;
+        }
+        table.sf-radio tr td {
+            border-style: none;
+        }
+        .cardlimit {
+            margin: 5px;
+            border: 1px solid #09C;
+        }
+    </style>
+
+    <!-- JQuery --> 
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>
+    
+    <!-- Design Script -->
+    <apex:includeScript value="{!URLFOR($Resource.SitesContents, 'common/js/jquery.blend-min.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.SitesContents, 'common/js/scrollsmoothly.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.SitesContents, 'common/js/heightLine.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.SitesContents, 'common/js/common.js')}"/>
+  
+    <!--Google Analytics-->
+    <script type="text/javascript">
+
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-17698964-1', 'auto', {'allowLinker': true}); 
+    ga('require', 'linker');
+    ga('linker:autoLink', ['kirinuki.jp','kirinuki.secure.force.com','mediabackoffice.co.jp'] ); 
+    ga('send', 'pageview');
+
+    </script>
+    <!--Google Analytics-->
+</head>
+
+<body>
+    <div id="wrapper">
+    <div id="header" class="cf">
+        <div class="left">
+            <h1>
+                <a href="http://www.kirinuki.jp/" target="_blank">切り抜きJP</a>
+            </h1>
+        </div><!--div.left -->
+        <div class="right">
+            <apex:form >
+                <ul>
+                    <li>
+                        <apex:commandLink action="{!order}">
+                            <img src="{!URLFOR($Resource.SitesContents, 'common/img/btn_form.png')}" width="89" height="24" alt="発注フォームへ"/>
+                        </apex:commandLink>                
+                    </li>
+                    <li>
+                        <apex:commandLink action="{!mypage}">
+                            <img src="{!URLFOR($Resource.SitesContents, 'common/img/btn_maypage.png')}" width="89" height="24" alt="マイページへ"/>
+                        </apex:commandLink>                
+                    </li>
+                    <li>
+                        <apex:commandLink action="{!logout}">
+                            <img src="{!URLFOR($Resource.SitesContents, 'common/img/btn_logout.png')}" width="89" height="24" alt="ログアウト"/>
+                        </apex:commandLink>                
+                    </li>
+                </ul>
+            </apex:form>
+        </div><!--div.right -->
+    </div><!--div#header -->
+
+    <div id="container" class="cf">
+    <div id="content" class="cf">
+
+        <!-- 通常モード：登録画面 -->
+        <apex:outputPanel rendered="{!(dispMode=='normal')}">
+            <apex:form >
+                <!-- メッセージ -->
+                <div style="width: 700px; margin: auto;">
+                    <c:SitesMessage msgList="{!msgList}"/>
+                </div>
+
+                <div class="comment_normal">
+                    <p>
+                        ※必要事項をご記入の上、最下部の「確認」へ進んで下さい。
+                    </p>
+                </div>
+                <table border="0" cellspacing="0" cellpadding="0" class="normal" width="700">
+                    <tr>
+                        <th rowspan="4">クレジットカード（メイン）</th>
+                        <td>カード会社</td>
+                        <td>
+                            <apex:selectList value="{!kokyaku.CardCompany}" multiselect="false" size="1" >
+                                <apex:selectOption itemLabel="選択してください" itemValue=""></apex:selectOption>
+                                <apex:selectOptions value="{!cardCompanySelectOptions}"></apex:selectOptions>
+                            </apex:selectList>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>カード番号</td>
+                        <td>
+                            <apex:inputSecret style="width: 50px;" value="{!kokyaku.CardNo1}" redisplay="true" styleClass="textbox3 ime-disabled" maxlength="4" onblur="Blur(this);" onfocus="Focus(this);"/>-
+                            <apex:inputSecret style="width: 50px;" value="{!kokyaku.CardNo2}" redisplay="true" styleClass="textbox3 ime-disabled" maxlength="4" onblur="Blur(this);" onfocus="Focus(this);"/>-
+                            <apex:inputSecret style="width: 50px;" value="{!kokyaku.CardNo3}"  redisplay="true" styleClass="textbox3 ime-disabled" maxlength="4" onblur="Blur(this);" onfocus="Focus(this);"/>-
+                            <apex:inputText style="width: 50px;" value="{!kokyaku.CardNo4}" styleClass="textbox3 ime-disabled" maxlength="4" onblur="Blur(this);" onfocus="Focus(this);"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>カード有効期限</td>
+                        <td>
+                            <apex:selectList value="{!kokyaku.CardLimitMM}" size="1" styleClass="cardlimit">
+                                <apex:selectOptions value="{!monthOptions}"/>
+                            </apex:selectList>/
+                            <apex:selectList value="{!kokyaku.CardLimitYY}" size="1" styleClass="cardlimit">
+                                <apex:selectOptions value="{!yearOptions}"/>
+                            </apex:selectList>
+                            「MM（月）/YYYY（年）」
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>カード名義人</td>
+                        <td>
+                            <apex:inputText value="{!kokyaku.CardOwner}" styleClass="textbox2 ime-disabled" onblur="Blur(this);" onfocus="Focus(this);"/>
+                        </td>
+                    </tr>
+                </table>
+                
+                <hr />
+                
+                <table border="0" cellspacing="0" cellpadding="0" class="normal" width="700">
+                    <tr>
+                        <th rowspan="4">クレジットカード（サブ１）</th>
+                        <td>カード会社</td>
+                        <td>
+                            <apex:selectList value="{!kokyaku.CardCompanySub1}" multiselect="false" size="1" >
+                                <apex:selectOption itemLabel="選択してください" itemValue=""></apex:selectOption>
+                                <apex:selectOptions value="{!cardCompanySelectOptions}"></apex:selectOptions>
+                            </apex:selectList>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>カード番号</td>
+                        <td>
+                            <apex:inputSecret style="width: 50px;" value="{!kokyaku.CardNo1Sub1}" redisplay="true" styleClass="textbox3 ime-disabled" maxlength="4" onblur="Blur(this);" onfocus="Focus(this);"/>-
+                            <apex:inputSecret style="width: 50px;" value="{!kokyaku.CardNo2Sub1}" redisplay="true" styleClass="textbox3 ime-disabled" maxlength="4" onblur="Blur(this);" onfocus="Focus(this);"/>-
+                            <apex:inputSecret style="width: 50px;" value="{!kokyaku.CardNo3Sub1}" redisplay="true" styleClass="textbox3 ime-disabled" maxlength="4" onblur="Blur(this);" onfocus="Focus(this);"/>-
+                            <apex:inputText style="width: 50px;" value="{!kokyaku.CardNo4Sub1}" styleClass="textbox3 ime-disabled" maxlength="4" onblur="Blur(this);" onfocus="Focus(this);"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>カード有効期限</td>
+                        <td>
+                            <apex:selectList value="{!kokyaku.CardLimitMMSub1}" size="1" styleClass="cardlimit">
+                                <apex:selectOptions value="{!monthOptions}"/>
+                            </apex:selectList>/
+                            <apex:selectList value="{!kokyaku.CardLimitYYSub1}" size="1" styleClass="cardlimit">
+                                <apex:selectOptions value="{!yearOptions}"/>
+                            </apex:selectList>
+                            「MM（月）/YYYY（年）」
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>カード名義人</td>
+                        <td>
+                            <apex:inputText value="{!kokyaku.CardOwnerSub1}" styleClass="textbox2 ime-disabled" onblur="Blur(this);" onfocus="Focus(this);"/>
+                        </td>
+                    </tr>
+                </table>
+                <table border="0" cellspacing="0" cellpadding="0" class="normal" width="700">
+                    <tr>
+                        <th rowspan="4">クレジットカード（サブ２）</th>
+                        <td>カード会社</td>
+                        <td>
+                            <apex:selectList value="{!kokyaku.CardCompanySub2}" multiselect="false" size="1" >
+                                <apex:selectOption itemLabel="選択してください" itemValue=""></apex:selectOption>
+                                <apex:selectOptions value="{!cardCompanySelectOptions}"></apex:selectOptions>
+                            </apex:selectList>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>カード番号</td>
+                        <td>
+                            <apex:inputSecret style="width: 50px;" value="{!kokyaku.CardNo1Sub2}" redisplay="true" styleClass="textbox3 ime-disabled" maxlength="4" onblur="Blur(this);" onfocus="Focus(this);"/>-
+                            <apex:inputSecret style="width: 50px;" value="{!kokyaku.CardNo2Sub2}" redisplay="true" styleClass="textbox3 ime-disabled" maxlength="4" onblur="Blur(this);" onfocus="Focus(this);"/>-
+                            <apex:inputSecret style="width: 50px;" value="{!kokyaku.CardNo3Sub2}" redisplay="true" styleClass="textbox3 ime-disabled" maxlength="4" onblur="Blur(this);" onfocus="Focus(this);"/>-
+                            <apex:inputText style="width: 50px;" value="{!kokyaku.CardNo4Sub2}" styleClass="textbox3 ime-disabled" maxlength="4" onblur="Blur(this);" onfocus="Focus(this);"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>カード有効期限</td>
+                        <td>
+                            <apex:selectList value="{!kokyaku.CardLimitMMSub2}" size="1" styleClass="cardlimit">
+                                <apex:selectOptions value="{!monthOptions}"/>
+                            </apex:selectList>/
+                            <apex:selectList value="{!kokyaku.CardLimitYYSub2}" size="1" styleClass="cardlimit">
+                                <apex:selectOptions value="{!yearOptions}"/>
+                            </apex:selectList>
+                            「MM（月）/YYYY（年）」
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>カード名義人</td>
+                        <td>
+                            <apex:inputText value="{!kokyaku.CardOwnerSub2}" styleClass="textbox2 ime-disabled" onblur="Blur(this);" onfocus="Focus(this);"/>
+                        </td>
+                    </tr>
+                </table>
+
+                <hr />
+
+                <!-- ボタン部 -->
+                <p class="inquiry">
+                    <apex:commandButton value="確認" action="{!confirm}" styleClass="button"/>
+                    <input type="reset" value="リセット" class="button"/>
+                </p>
+
+                <p>&nbsp;</p>
+
+            </apex:form>
+        </apex:outputPanel>
+        
+         <!-- 確認モード：確認画面 -->
+        <apex:outputPanel rendered="{!(dispMode=='confirm')}">
+            <apex:form >
+                <div class="comment_normal">
+                    <p>
+                        下記内容でよろしいですか？
+                    </p>
+                </div>
+        
+                <table border="0" cellspacing="0" cellpadding="0" class="normal" width="700">
+                    <tr>
+                        <th rowspan="4">クレジットカード（メイン）</th>
+                        <td>カード会社</td>
+                        <td>
+                            <apex:outputText value="{!kokyaku.CardCompany}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>カード番号</td>
+                        <td>
+                            <apex:outputPanel rendered="{!IF(kokyaku.CardNo1 != null, true, false)}" >
+                                <apex:outputText value=" **** "/>-
+                                <apex:outputText value=" **** "/>-
+                                <apex:outputText value=" **** "/>-
+                                <apex:outputText value="{!kokyaku.CardNo4}"/>
+                            </apex:outputPanel>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>カード有効期限</td>
+                        <td>
+                            <apex:outputPanel rendered="{!IF(kokyaku.CardLimitMM != null, true, false)}" >
+                                <apex:outputText value="{!kokyaku.CardLimitMM}"/>/20
+                                <apex:outputText value="{!kokyaku.CardLimitYY}"/>
+                            </apex:outputPanel>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>カード名義人</td>
+                        <td>
+                            <apex:outputText value="{!kokyaku.CardOwner}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th rowspan="4">クレジットカード（サブ１）</th>
+                        <td>カード会社</td>
+                        <td>
+                            <apex:outputText value="{!kokyaku.CardCompanySub1}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>カード番号</td>
+                        <td>
+                            <apex:outputPanel rendered="{!IF(kokyaku.CardNo1Sub1 != null, true, false)}" >
+                                <apex:outputText value=" **** "/>-
+                                <apex:outputText value=" **** "/>-
+                                <apex:outputText value=" **** "/>-
+                                <apex:outputText value="{!kokyaku.CardNo4Sub1}"/>
+                            </apex:outputPanel>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>カード有効期限</td>
+                        <td>
+                            <apex:outputPanel rendered="{!IF(kokyaku.CardLimitMMSub1 != null, true, false)}" >
+                                <apex:outputText value="{!kokyaku.CardLimitMMSub1}"/>/20
+                                <apex:outputText value="{!kokyaku.CardLimitYYSub1}"/>
+                            </apex:outputPanel>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>カード名義人</td>
+                        <td>
+                            <apex:outputText value="{!kokyaku.CardOwnerSub1}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th rowspan="4">クレジットカード（サブ２）</th>
+                        <td>カード会社</td>
+                        <td>
+                            <apex:outputText value="{!kokyaku.CardCompanySub2}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>カード番号</td>
+                        <td>
+                            <apex:outputPanel rendered="{!IF(kokyaku.CardNo1Sub2 != null, true, false)}" >
+                                <apex:outputText value=" **** "/>-
+                                <apex:outputText value=" **** "/>-
+                                <apex:outputText value=" **** "/>-
+                                <apex:outputText value="{!kokyaku.CardNo4Sub2}"/>
+                            </apex:outputPanel>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>カード有効期限</td>
+                        <td>
+                            <apex:outputPanel rendered="{!IF(kokyaku.CardLimitMMSub2 != null, true, false)}" >
+                                <apex:outputText value="{!kokyaku.CardLimitMMSub2}"/>/20
+                                <apex:outputText value="{!kokyaku.CardLimitYYSub2}"/>
+                            </apex:outputPanel>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>カード名義人</td>
+                        <td>
+                            <apex:outputText value="{!kokyaku.CardOwnerSub2}"/>
+                        </td>
+                    </tr>
+                </table>
+        
+                <p>&nbsp;</p>
+        
+                <!-- ボタン部 -->
+                <p class="inquiry">
+                    <apex:commandButton value="送信" action="{!send}" styleClass="button"/>&nbsp;&nbsp;&nbsp;
+                    <apex:commandButton value="戻る" action="{!back}" styleClass="button"/>
+                </p>
+                <p>&nbsp;</p>
+
+            </apex:form>
+        </apex:outputPanel>
+        
+        <!-- 結果モード：確認画面 -->
+        <apex:outputPanel rendered="{!(dispMode=='result')}">
+            <apex:form >
+                <div class="comment_normal">
+                    <p>
+                        クレジットカード情報を変更しました。
+                    </p>
+                </div>
+
+                <!-- ボタン部 -->
+                <p class="inquiry">
+                    <apex:commandButton value="マイページへ戻る" action="{!mypage}" styleClass="button"/>
+                </p>
+                <p>&nbsp;</p>
+            </apex:form>
+        </apex:outputPanel>
+
+    </div><!--div#content -->
+    </div><!--div#container -->
+    </div><!--div#wrapper -->
+
+    <!-- copy ritgh -->
+    <div id="copyright">
+        Powered by<a href="http://www.force.com/" target="_blank"> force.com</a>
+    </div><!--div#copyright -->
+
+<!--Google リマーケティング-->
+<!-- Google Code for &#20840;&#27969;&#20837; -->
+<!-- Remarketing tags may not be associated with personally identifiable information or placed on pages related to sensitive categories. For instructions on adding this tag and more information on the above requirements, read the setup guide: google.com/ads/remarketingsetup -->
+<script type="text/javascript">
+/* <![CDATA[ */
+var google_conversion_id = 995058442;
+var google_conversion_label = "5mxVCK7c2wYQisa92gM";
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+/* ]]> */
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/995058442/?value=0&amp;label=5mxVCK7c2wYQisa92gM&amp;guid=ON&amp;script=0"/>
+</div>
+</noscript>
+<!--Google リマーケティング-->
+
+<!-- YDN リターゲティング -->
+<script type="text/javascript" language="javascript">
+/* <![CDATA[ */
+var yahoo_retargeting_id = 'T15AP4YAQ4';
+var yahoo_retargeting_label = '';
+/* ]]> */
+</script>
+<script type="text/javascript" language="javascript" src="//b92.yahoo.co.jp/js/s_retargeting.js"></script>
+<!-- YDN リターゲティング -->
+
+</body>
+</apex:page>

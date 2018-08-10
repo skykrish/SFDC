@@ -1,0 +1,53 @@
+<apex:component >
+
+    <!-- パラメータ -->
+    <apex:attribute name="msgList" type="SitesMessage[]" required="false" description="Sitesメッセージ"/>
+
+    <!-- スタイルシート -->
+    <style type="text/css"> 
+        span.normal {
+            color: blue;
+            font-size: 14px;
+        }
+        span.warning {
+            color: purple;
+            font-size: 14px;
+        }
+        span.error {
+            color: red;
+            font-size: 14px;
+        }
+
+        span.sites-message {
+            color: blue;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        table.sites-message {
+            width: 100%;
+            border: #A0A0FF double;
+            border-collapse: collapse;
+            border-spacing: 0;
+            background-color: #F0F0FF;
+            margin-bottom: 10px;
+        }
+
+        table.sites-message td {
+            padding-left: 10px;
+        }
+
+    </style> 
+    
+    <!-- メッセージ -->
+    <apex:outputPanel rendered="{!msgList.size > 0}">
+        <span class="sites-message">[Infomation]</span>
+        <table class="sites-message">
+            <apex:repeat value="{!msgList}" var="item">
+                <tr>
+                    <td><span class="{!item.cls}">{!item.msg}</span></td>
+                </tr>
+            </apex:repeat>
+        </table>
+    </apex:outputPanel>
+</apex:component>

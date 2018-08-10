@@ -1,0 +1,151 @@
+<apex:page Controller="EPMS_CreateProductionOrder"  sidebar="false" showHeader="false">
+
+    <style>
+        p{
+        font-weight:bold;
+        text-align:center;
+        }
+        .bPageBlock {
+        border-top: 0px;
+        }
+        select option:hover, 
+        select option:focus, 
+        select option:active, 
+        select option:checked
+        {
+        background: linear-gradient(#FFC894,#FFC894);
+        background-color: #FFC894 !important; /* for IE */
+        }
+        
+    </style>
+    
+    <script src="/soap/ajax/35.0/connection.js"></script>
+    <script>
+        function refreshtest(){
+        window.opener.location.reload();
+    }
+    function ClosePopup(){
+        
+        sforce.connection.sessionId = '{!$Api.Session_ID}';
+        var describeSObjectResult = sforce.connection.describeSObject("Anken__c");
+        var prefix = describeSObjectResult.keyPrefix; 
+        
+        var url = location.href;
+        var basepath = '{!basepath}';
+        var filerec = '{!fileRecord}';
+        
+        var baseURL = url.substring(0, url.indexOf('/', 14));      
+        var pareurl = baseURL+"/"+filerec;
+        
+        if(basepath == 'detailpage'){
+            if(pareurl)
+            {
+                // window.opener.location.href=baseURL+"/"+filerec;
+            }
+            
+            
+            
+            
+            
+            
+        }else if(basepath =='order')
+        {
+            // window.opener.location.href="/" + prefix;
+        }
+        if(baseURL)
+        {
+            window.top.close();     
+        }
+        
+        
+    }
+    
+    function refreshParentPage() 
+    {
+        
+        var redirectURL = window.opener.location.href;
+        
+        if(redirectURL)
+        {
+            window.opener.location.href = window.opener.location.href;
+            
+            if (window.opener.progressWindow) 
+            {
+                window.opener.progressWindow.close();
+            }
+            window.close();
+        }
+    }
+    </script>
+    
+    
+    
+    
+    <apex:form >
+        <apex:pageBlock mode="maindetail">
+            <apex:pageMessages id="error" />
+            <apex:outputPanel rendered="{!ErrorflagLocCheck}">
+                <apex:pageBlock >
+                    <apex:outputLabel value="Location " style="margin:20px;"></apex:outputLabel>
+                    <apex:selectList value="{!selectedLocId}" size="1" multiselect="false" style="width:230px" >
+                        <apex:selectOptions value="{!ListOfLocations}" />
+                    </apex:selectList>      
+                    
+                </apex:pageBlock>
+            </apex:outputPanel>
+           
+           
+           
+            <apex:pageBlock >
+                <apex:outputPanel >
+                    <apex:outputLabel value="Status" style="margin:20px;"></apex:outputLabel>
+                    <apex:selectList value="{!selectedStatusId}" size="1" multiselect="false" style="width:230px;margin-left:15px;">
+                        <apex:selectOptions value="{!ListOfStatus}" />
+                    </apex:selectList>      
+                </apex:outputPanel>
+                
+                
+            </apex:pageBlock>
+            
+            <apex:outputpanel rendered="{!existPOList.size!=0}" >
+                <div>
+                    <p style="color:blue;"><b> Production Order(s)</b> </p>
+                </div>
+                <apex:pageblock >
+                    <apex:pageBlockTable value="{!existPOList}" var="PO" width="200">
+                        <apex:column value="{!PO.Name}"/>
+                        <apex:column value="{!PO.Production_Order_Status__c}"/>
+                        <apex:column value="{!PO.Mbo_Location__c}"/>            
+                    </apex:pageBlockTable>
+                </apex:pageblock>
+            </apex:outputpanel>
+            
+            <apex:pageBlock >
+                <apex:outputpanel rendered="{!existPOList.size==0}">
+                    <div>
+                        <p style="color:blue;"><b> Order(s) </b> </p>
+                    </div>
+                    <apex:pageBlockTable value="{!ank}" var="anks" width="200">
+                        <apex:column value="{!anks.Name}"/>
+                        <apex:column value="{!anks.Status__c}"/>
+                        <apex:column value="{!anks.Nouki_Date__c}"/>
+                        <apex:column value="{!anks.KokyakuName__c}"/>
+                        <apex:column value="{!anks.Sagyoshiji_Renrakujiko__c}"/>
+                        <apex:column value="{!anks.SagyoNaiyo_1__c}"/>
+                    </apex:pageBlockTable>
+                </apex:outputpanel>
+                <apex:pageBlockButtons location="bottom" > 
+                    <apex:outputPanel rendered="{!ErrorflagstatusCheck == false}" id="commandButton">
+                        <apex:outputPanel rendered="{!updateButton==false}">
+                            <apex:commandButton value="Create Production Order(s)"  action="{!save}" rerender="error,commandButton" disabled="{!diableButton}" onclick="this.disabled = true;" />             
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!updateButton}">
+                            <apex:commandButton value="Update Production Order(s)"  action="{!save}" rerender="error,commandButton" disabled="{!diableButton}" onclick="this.disabled = true;"/>             
+                        </apex:outputPanel>-
+                    </apex:outputPanel>
+                    <apex:commandButton value="Close" onclick="ClosePopup();" oncomplete="refreshtest();"/>                
+                </apex:pageBlockButtons>
+            </apex:pageBlock>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

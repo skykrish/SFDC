@@ -1,0 +1,95 @@
+<apex:page title="発注情報一括登録" standardController="Anken__c" extensions="HachuRegisterAllController" recordSetVar="records" action="{!init}">
+
+    <!-- 共通スクリプト -->
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>
+
+    <apex:sectionHeader title="発注情報一括登録" />
+    <apex:pageMessages id="messagearea" showDetail="false" />
+
+    <apex:form >
+        <!-- 初期表示チェックOK時 -->
+        <apex:pageBlock rendered="{!isInitCheck}">
+            <!-- ボタンエリア -->
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="登録＆発注依頼" action="{!save}" />
+                <apex:commandButton value="キャンセル" action="{!cancel}" immediate="true" />
+            </apex:pageBlockButtons>
+
+            <!-- 発注情報 -->
+            <apex:pageBlockSection title="発注先" columns="1">
+                <apex:inputField value="{!hachuInfo.Hachusaki__c}" required="true"/>
+            </apex:pageBlockSection>
+    
+            <!-- 詳細エリア -->
+            <apex:pageBlockSection title="発注依頼対象" columns="1">
+                <apex:pageBlockTable var="item" value="{!records}">
+                    <!-- 伝票番号 -->
+                    <apex:column style="width:110px">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.Anken__c.fields.Name.label}"/>
+                        </apex:facet>
+                        <apex:outputLink value="{!URLFOR($Action.Anken__c.View, item.Id)}">{!item.Name}</apex:outputLink>
+                   </apex:column>
+    
+                    <!-- 案件名 -->
+                    <apex:column style="width:210px">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.Anken__c.fields.AnkenName__c.label}"/>
+                        </apex:facet>
+                        <apex:outputfield style="width:200px" value="{!item.AnkenName__c}"/> 
+                    </apex:column>
+    
+                    <!-- 顧客名 -->
+                    <apex:column style="width:110px">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.Account.fields.Name.label}"/>
+                        </apex:facet>
+                        <apex:outputfield style="width:100px" value="{!item.KokyakuName__c}"/> 
+                    </apex:column>
+    
+                    <!-- ステータス -->
+                    <apex:column style="width:110px">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.Anken__c.fields.Status__c.label}"/>
+                        </apex:facet>
+                        <apex:outputfield style="width:100px" value="{!item.Status__c}"/> 
+                    </apex:column>
+    
+                    <!-- 納期 -->
+                    <apex:column style="width:110px">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.Anken__c.fields.Nouki__c.label}"/>
+                        </apex:facet>
+                        <apex:outputfield style="width:100px" value="{!item.Nouki__c}"/> 
+                    </apex:column>
+    
+                    <!-- 点数 -->
+                    <apex:column style="width:110px">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.Anken__c.fields.ItemCnt__c.label}"/>
+                        </apex:facet>
+                        <apex:outputfield style="width:100px" value="{!item.ItemCnt__c}"/> 
+                    </apex:column>
+    
+                    <!-- 合計金額（税込み） -->
+                    <apex:column style="width:110px">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.Anken__c.fields.JuchuTotalKingaku_Tax__c.label}"/>
+                        </apex:facet>
+                        <apex:outputfield style="width:100px" value="{!item.JuchuTotalKingaku_Tax__c}"/> 
+                    </apex:column>
+                </apex:pageBlockTable>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        
+        <!-- 初期表示チェックNG時 -->
+        <apex:pageBlock rendered="{!(!isInitCheck)}">
+            <!-- ボタンエリア -->
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="戻る" action="{!cancel}" immediate="true" />
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+
+    </apex:form>
+
+</apex:page>

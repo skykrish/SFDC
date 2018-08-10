@@ -1,0 +1,454 @@
+<apex:page standardController="File_Categories__c" extensions="EPMS_ProdIncentiveSettings" sidebar="false">
+    <apex:includeScript value="{!URLFOR($Resource.attendance,'jquery.min.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.attendance,'jquery-ui.min.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.csspopup,'add-style.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.csspopup,'css-pop.js')}" />
+    
+    <apex:stylesheet value="{!URLFOR($Resource.Classification,'css/defaultTheme.css')}" /> 
+    <apex:stylesheet value="{!URLFOR($Resource.Classification,'css/myTheme.css')}" />
+    <apex:includescript value="{!URLFOR($Resource.Classification,'js/jquery.fixedheadertable.js')}" />
+
+
+<style type="text/css">
+  
+body .pbBody table.list tr th, body .pbBody table.list tr td 
+    {   
+        border-width:0 1px 0 0;
+        border-color:#ECECEC;
+        border-style:solid;
+    }
+
+        
+table.list
+    {
+        background-color: #fff;
+        border-top: 0px solid #e0e3e5;
+    }
+.list td, .list th, body.oldForecast .list .last td, body.oldForecast .list .last th {
+    /*padding: 5px 2px 0px 5px;*/
+    color: #000;
+    padding:10px 5px 10px 5px;
+    vertical-align:middle;
+    }
+.GridviewScrollHeader
+{
+background: #f2f3f3 !important;
+    border-width: 0 0 1px 1px;
+    border-color: #e0e3e5;
+    color: #000;
+    font-size: .9em;
+    font-weight: bold;
+    padding: 4px 2px 4px 5px;
+}
+.pbBody, .pbBody a, .pbBody td, .lbBody a, .lbBodyDescription, .list .headerRow .noRowsHeader {
+    color: #000;
+}
+.pbBody table.list tr.dataRow td:first-child {
+    border-left-width: 0;
+    }
+table.list tr.dataRow td {
+    border-width: 0 0 1px 0;
+    vertical-align: middle;
+    text-align:center;
+}
+.GridviewScrollHeader td {
+border-right:0px solid #ededed;
+}
+.list-custom {
+    margin: 0px;
+    /*float: left;*/
+    border: 1px solid #ededed;
+} 
+.ratingtxt
+{
+    width:80px;
+    border-radius:1px;
+    -webkit-border-radius:1px;
+    -moz-border-radius:1px;
+    border:1px solid #BBBBBB;
+    padding:2px;
+    background:#eceeef;
+}
+.ratingtxtFrmTO
+{
+    width:34px;
+        border-radius:1px;
+    -webkit-border-radius:1px;
+    -moz-border-radius:1px;
+    border:1px solid #BBBBBB;
+    padding:1px;
+    background:#eceeef;
+}
+body .pbBody table.list tr.dataRow th, body .pbBody table.list tr.dataRow td
+{
+    border-left:1px solid #fff
+    padding:0;
+}
+.blockTD
+{
+    width:93.665px !important;
+    float:left;
+    border-right:1px solid #ececec;
+    display:block;
+    padding:5px 2px;
+    text-align: center;
+    min-height: 19px;
+}
+.perfDiv {
+    display: inline;
+    /* margin-right: 1px; */
+}
+
+    .list-custom tr td:nth-child(odd){ 
+        background: #F5F5F5;
+    }
+    .list-custom tr td:nth-child(even){
+        background: #fff;
+    }
+        .list-custom tr td:first-child{ 
+        background: #fff;
+    }
+    .outerNoSidebar
+    {
+    min-height: 500px;
+    }
+    .noSidebarCell
+    {
+    vertical-align: top;
+    }
+    .headerSec {width:100%; float:left; margin-bottom:20px;}
+.headerSec h2 {font-family:"Helvetica Neue", Helvetica, Arial, sans-serif; font-size:18px; color:#333; margin:0; padding-bottom:15px;}
+.standardRegSec {width:49%; float:left; text-align:center; color:#999; border:1px solid #e5e5e5;}
+.standardLeftPart {width:199px; float:left; font-weight:bold; font-size:13px; background:#f3f3f3; color:#868686; padding:20px 0; border-right:1px solid #e5e5e5;}
+.standardRightPart {width:200px; float:left; padding:13px 0;}
+.standardRightPart input {padding:5px 5px; border-radius:3px; -moz-border-radius:3px; -webkit-border-radius:3px; -ms-border-radius:3px; background:#e5e5e5; border:1px solid #CCC;}
+
+    .lastone{visibility:hidden}
+    .column_01, .column_02, .column_03
+    {
+        border: 0px solid #e5e5e5;
+    }
+    .column_01_row_01, .column_02_row_02, .column_03_row_03
+    {
+        border-left: 1px solid #e5e5e5;
+    }
+    #standardRegTable
+    {
+        border-right: 1px solid #e5e5e5;
+        height:325px;
+        margin-bottom:15px;
+    }
+.GridviewScrollHeader td
+{
+background: #f2f3f3 !important;
+text-align:center;
+}
+.searchtble
+{
+width:100%;
+border:1px solid #e5e5e5;
+    color: #868686;
+    margin-bottom:10px;
+        border-collapse: collapse;
+       
+}
+.searchtble td
+{
+padding:10px 10px;
+}
+.searchtble tr td:nth-child(even){ 
+        background: #Fff;
+    }
+    .searchtble tr td:nth-child(odd){
+        background: #f3f3f3;
+         font-weight: bold;
+    font-size: 13px;
+    min-width:130px;
+    width:10%;
+    }
+    .tableButtonSec
+    {
+        margin-top: 10px;
+    }
+    
+
+.fancyTable tbody tr td:first-child {background:#FFF !important;} 
+.fancyTable tbody tr td:nth-of-type(2) {background:#FFF !important;} 
+.fancyTable tbody tr td:nth-child(odd) {background:#F5F5F5;}
+.fancyTable td, .fancyTable th {border:1px solid #EAEAEA;}
+
+    
+</style>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+
+      var selectedVal = document.getElementById("j_id0:theForm:locationsel");
+      var letter = "{!$CurrentPage.parameters.nid}";
+       for(var i = 0; i < selectedVal .length; i++){
+          if(selectedVal.options[i].value == letter)
+          selectedVal.selectedIndex = i;
+       }
+    });
+
+    function redirectProd(locId){
+     var selectedVal = document.getElementById(locId);
+    var strUser = selectedVal.options[selectedVal.selectedIndex].value;
+    if(strUser=="") {
+        window.location.assign("/apex/EPMS_ProdIncentiveSettings");
+        
+    }else{
+        window.location.assign("/apex/EPMS_ProdIncentiveSettings?nid="+strUser)
+    }  
+                
+    }
+    
+    function calculate(){
+    }
+
+
+    function EnterOnlyNumber(evt) {
+        evt = (evt) ? evt : window.event;
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+            return false;
+        }
+        return true;
+    }
+
+
+
+
+function setWinSize(){
+    var winwidth = document.body.clientWidth-10;
+    //var winheight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+    var winheight = window.innerHeight-420;
+    //var winheight = window.innerHeight - 350;
+    
+    
+    $(".freezeTableAutoWidth").css('width', winwidth+"px");         
+    //$('.headerFreezeTable').fixedHeaderTable({ altClass: 'odd', height:winheight+"px"});      
+    
+    setTimeout(function(){
+    
+        $('.headerFreezeTable').fixedHeaderTable({ altClass: 'odd', fixedColumns: 2, height:winheight+"px"})                   
+        
+    },200);
+    
+}    
+
+
+
+$(document).ready(function() {  
+    setWinSize();   
+}); 
+    
+    
+
+</script>
+
+
+<apex:form id="theForm" >
+
+   <apex:pageMessages id="errorMessages" />
+           <div class="headerSec">
+            <h2 >Production Incentive Settings</h2> 
+            </div>
+           <table width='100%' class="searchtble" >
+           <tr>
+           <td width='25%'>
+           
+                Standard Regular Cost
+             
+          
+            </td>
+            <td width='25%'>
+             
+                   <apex:outputPanel rendered="{!MyProflieName=='System Administrator' || MyProflieName=='Country Administrator'}">
+                       <apex:inputText id="costId"  value="{!cost}"   onkeypress="return EnterOnlyNumber(event)"/>
+                   </apex:outputPanel>
+                   <apex:outputPanel rendered="{!MyProflieName=='Production Administrator'}">
+                       <apex:inputText id="cost1Id" html-readonly="true" value="{!cost}"   />
+                   </apex:outputPanel>
+            </td>
+         <apex:outputPanel rendered="{!(MyProflieName=='System Administrator')||(MyProflieName=='Production Administrator') ||(MyProflieName=='Country Administrator')}">
+            <td width='25%'> Location</td>
+          
+           <td width='25%'>
+                                           
+                  <apex:selectList value="{!selLoc}" size="1" id="locationsel" onchange="javascript:redirectProd('{!$Component.locationsel}');" multiselect="false"  style="margin-left:10px">
+                   <!--  <apex:actionSupport event="onchange" action="{!getselval}"  rendered="theForm"/> -->
+                           <apex:selectOptions value="{!Locationlist}"  />
+                    </apex:selectList>
+            
+            
+             </td>
+              </apex:outputPanel>
+             </tr>
+        </table>
+         
+             <apex:outputPanel rendered="{!incentiveList==NULL}">
+                      <div class="" style="width:300px;border:none;float:none;margin:0 auto;text-align:center;"><h1>Select Location To View Incentive Settings</h1></div>
+              </apex:outputPanel>
+     </apex:form>
+     
+        <apex:form id="formtb">            
+            <apex:outputPanel rendered="{!incentiveList!=NULL}">
+            
+                <div class="container_12 divider freezeTableAutoWidth">
+                    <div class="grid_6">
+                        <table class="fancyTable headerFreezeTable" cellpadding="0" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th style="min-width:24px;">SNo</th>
+                                    <th style="min-width:250px;">Rating</th>
+                                    <apex:repeat value="{!incentiveList}" var="incentive">
+                                        <th>{!incentive.Name}</th> </apex:repeat> 
+                                </tr>   
+                            </thead>
+                          
+                            <tbody>
+                                <tr>
+                                  <td>1</td>
+                                  <td>Standard Time per File in mnts (STF)</td>
+                                  <apex:repeat value="{!incentiveList}" var="incentive" id="repeatId">
+                                    <td><apex:inputField value="{!incentive.Standard_Time_per_File_Min__c}"   styleClass="doubleInput ratingtxtFrmTO" onchange="calculate()"  onkeypress="return EnterOnlyNumber(event)"/>                     
+                                        ~
+                                        <apex:inputField value="{!incentive.Standard_Time_per_File_Max__c}"  styleClass="doubleInput ratingtxtFrmTO" onchange="calculate()"  onkeypress="return EnterOnlyNumber(event)"/></td>
+                                  </apex:repeat>
+                                </tr>
+                                <tr>
+                                  <td>2</td>
+                                  <td>Standard Target per Day (STD)</td>
+                                  <apex:variable var="inc" value="{!0}"/>
+                                      <apex:repeat value="{!incentiveList}" var="incentive" id="repeatId2"> 
+                                      <apex:variable var="inc" value="{!inc+1}"/>
+                                        <td id="std{!inc}">    
+                                              <script type="text/javascript">                     
+                                            var stfmin='{!incentive.Standard_Time_per_File_Min__c}';
+                                            var stfmax='{!incentive.Standard_Time_per_File_Max__c}';
+                                            $("#std{!inc}").html(parseFloat((60.0 / ((parseFloat(stfmin) + parseFloat(stfmax)) / 2.0)) * 8.0).toFixed(2));                    
+                                        </script>  
+                                        </td>  
+                                  </apex:repeat>
+                                </tr>
+                                <tr>
+                                  <td>3</td>
+                                  <td>Standard Regular Cost per File (SRCF)</td>
+                                  <apex:repeat value="{!incentiveList}" var="incentive" id="repeatId3"> <td><apex:inputField value="{!incentive.Standard_Regular_Cost_per_File__c}" styleClass="doubleInput  ratingtxt"/></td></apex:repeat>
+                                </tr>
+                                <tr>
+                                  <td>4</td>
+                                  <td>Standard Optional Cost per File (SOCF)</td>
+                                  <apex:repeat value="{!incentiveList}" var="incentive" id="repeatId4"> <td><apex:inputField value="{!incentive.Standard_OptionalCost_Per_file__c}" styleClass="doubleInput  ratingtxt"/></td></apex:repeat>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div class="tableButtonSec">
+                           <apex:outputPanel rendered="{!(MyProflieName=='System Administrator')||(MyProflieName=='Production Administrator')}">
+                                <apex:commandbutton value="Save Changes"  rerender="panelId1, panelId3, panelId3,errorMessages"   action="{!saveChanges}" />
+                                <apex:commandbutton value="Reset"  action="{!reset}" immediate="true" />
+                          </apex:outputPanel>         
+                        </div>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                
+                
+                
+                
+            </apex:outputPanel>
+        </apex:form>
+        
+        
+        
+  <apex:includeScript value="{!URLFOR($Resource.attendance,'gridviewScroll.js')}"/>
+<script type="text/javascript">
+
+    function isNumber(evt) {
+        evt = (evt) ? evt : window.event;
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+            return false;
+        }
+        return true;
+    }
+    
+    $(".MAX input").on("change", function(){
+        var maxVal = $(this).val();
+        var minVal = $(this).parent(".MAX").prev().find("input").val();
+        console.log('MinVal='+minVal);
+        console.log('MaxVal='+maxVal);
+        if(parseInt(maxVal) <= parseInt(minVal))
+        {
+        alert("Min Value should be less than Max Value");
+        $(this).parent(".MAX").prev().find("input").val('');
+        $(this).val('');
+        }
+        
+    });
+    $(".MIN input").on("change", function(){
+    
+        var minVal = $(this).val();
+        
+        var maxVal = $(this).parent(".MIN").next().find("input").val();
+        console.log('MinVal='+minVal);
+        console.log('MaxVal='+maxVal);
+         if(maxVal!=''){
+            if(parseInt(maxVal) <= parseInt(minVal))
+            {
+            alert("Min Value should be less than Max Value");
+            $(this).parent(".MIN").next().find("input").val('');
+            $(this).val('');
+            }
+         }
+        
+        
+    });
+   
+    /*function validate(max) {   
+        maxVal=max;
+        alert($(this));
+        
+        console.log('maxVal:'+maxVal);
+        console.log('minVal:'+minVal);
+    $()
+         
+   /* var FieldVal = document.getElementById('FieldName').value;                 
+    if(FieldVal < 51) {           
+        alert("Valid!");         
+    } else {             
+        alert("Invalid");     
+    } 
+    }*/
+    $(document).ready(function () {
+var winwidth = screen.width - 50;
+        var winheight = screen.height- 400;
+         gridviewScroll(winwidth, winheight);
+
+        function gridviewScroll(winwidth, winheight ) {
+            gridView1 = $('#GridView1').gridviewScroll({
+                 width: winwidth,
+                height: winheight,
+                railcolor: "#F0F0F0",
+                barcolor: "#CDCDCD",
+                barhovercolor: "#606060",
+                bgcolor: "#F0F0F0",
+                arrowsize: 30,              
+                varrowtopimg: "{!URLFOR($Resource.attendance,'Images/arrowvt.png')}",               
+                varrowbottomimg: "{!URLFOR($Resource.attendance,'Images/arrowvb.png')}",
+                harrowleftimg:"{!URLFOR($Resource.attendance,'Images/arrowhl.png')}",
+                harrowrightimg: "{!URLFOR($Resource.attendance,'Images/arrowhr.png')}",
+                headerrowcount: 1,
+                railsize: 16,
+                barsize: 8,
+                freezesize: 2
+            });
+    }
+    });
+
+    
+</script>
+ 
+</apex:page>

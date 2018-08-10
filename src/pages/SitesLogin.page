@@ -1,0 +1,174 @@
+<apex:page controller="SitesLoginController" action="{!init}" cache="false" sidebar="false" showHeader="false" standardStylesheets="false">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>ログインページ</title>
+
+    <!-- Design Style -->
+    <apex:stylesheet value="{!URLFOR($Resource.SitesContents, 'common/css/import.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.SitesContents, 'common/css/editorial/login.css')}" />
+
+    <!-- JQuery --> 
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>
+    
+    <!-- Design Script -->
+    <apex:includeScript value="{!URLFOR($Resource.SitesContents, 'common/js/jquery.blend-min.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.SitesContents, 'common/js/scrollsmoothly.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.SitesContents, 'common/js/heightLine.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.SitesContents, 'common/js/common.js')}"/>
+    <script language="JavaScript" type="text/javascript">
+        function addBookmark(title,url) {
+            if (window.sidebar) {
+                window.sidebar.addPanel(title, url,"");
+            } else if( document.all ) {
+                window.external.AddFavorite( url, title);
+            } else if( window.opera && window.print ) {
+                return true;
+            }
+        }
+
+        var settings = {
+          tl: { radius: 10 },
+          tr: { radius: 10 },
+          bl: { radius: 10 },
+          br: { radius: 10 },
+          antiAlias: true
+        };
+    </script>
+
+    <!-- 独自のJavaScript -->
+    <script type="text/javascript">
+        // Onloadイベント追加
+        $(document).ready(function() {
+            // UserIDにフォーカス
+            setTimeout(
+                function() {
+                    $('input[id$="userId"]').focus();
+                },
+                800
+            );
+        });
+    
+        // Enterキー押下時にアクション実行
+        function doEnter() {
+            if (event.keyCode == 13) {
+                 $('input[id$="btnLogin"]').click();
+            }
+        }
+
+        // イベント設定
+        window.document.onkeydown = doEnter;
+
+    </script>
+    
+    <!--Google Analytics-->
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-17698964-1']);
+  _gaq.push(['_setDomainName', 'none']);
+  _gaq.push(['_setAllowLinker', true]);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+    <!--Google Analytics-->
+
+    <meta name="Keywords" content="" />
+    <meta name="Description" content="" />
+    <meta name="robots" content="index,follow" />
+</head>
+
+<body>
+    <div id="wrapper">
+        <div id="header" class="cf">
+            <div class="left">
+                <h1><a href="http://www.kirinuki.jp/" onclick="_gaq.push(['_link', this.href]); return false;" target="_blank">切り抜きJP</a></h1>
+            </div><!--div.left -->
+            <div class="right">
+                <a href="#" onclick="addBookmark(document.title, location.href);" onkeypress="addBookmark(document.title, location.href);">
+                    <apex:image url="{!URLFOR($Resource.SitesContents, 'common/img/btn_bookmark.png')}" width="175" height="24" alt="このページをブックマークする"/>
+                </a>
+            </div>
+        </div><!--div#header -->
+
+        <div id="container" class="cf">
+        <div id="content" class="cf">
+
+            <!-- メッセージ -->
+            <div>
+                <c:SitesMessage msgList="{!msgList}"/>
+            </div>
+
+            <apex:form >
+                <!-- 左側 -->
+                <div class="left">
+                    <div class="inner round">
+                        <ul class="form">
+                            <li>
+                                <apex:image url="{!URLFOR($Resource.SitesContents, 'common/img/name_user.png')}" width="79" height="15" alt="ユーザー名"/><br />
+                                <apex:inputText id="userId" value="{!userId}" styleClass="textbox4  ime-disabled" onblur="Blur(this);" onfocus="Focus(this);"/>
+                            </li>
+                            <li>
+                                <apex:image url="{!URLFOR($Resource.SitesContents, 'common/img/name_pass.png')}" width="79" height="15" alt="パスワード"/><br />
+                                <apex:inputSecret value="{!password}" styleClass="textbox4" redisplay="true" onblur="Blur(this);" onfocus="Focus(this);"/>
+                            </li>
+                        </ul>
+                        <p>
+                            <apex:inputCheckbox id="isAutoset" value="{!isAutoset}"/>
+                            <apex:outputLabel for="isAutoset" style="vertical-align: 0.20em;">
+                                次回からIDとパスワードの入力を省略
+                            </apex:outputLabel>
+                            <br />
+                            共用パソコンではチェックを外してください。
+                        </p>
+                        <apex:commandLink action="{!login}">
+                            <img src="{!URLFOR($Resource.SitesContents, 'common/img/btn_login.png')}" alt="ログイン"/>
+                        </apex:commandLink><br />
+                        <apex:commandLink action="{!forget}">
+                            ID・パスワードをお忘れの方
+                        </apex:commandLink>
+                    </div><!--div.inner round-->
+                </div><!--div.left-->
+    
+                <!-- 右側 -->
+                <div class="right">
+                    <div class="inner round">
+                        <p>&nbsp;</p>
+                        <p>&nbsp;</p>
+                        <p>&nbsp;</p>
+                        <p class="fig">
+                            <apex:image url="{!URLFOR($Resource.SitesContents, 'common/img/text_regist.png')}" width="184" height="14" alt="ログインIDをお持ちでない方"/>
+                        </p>
+                        <p class="fig">
+                            <apex:commandLink action="{!register}">
+                                <img src="{!URLFOR($Resource.SitesContents, 'common/img/btn_regist.png')}" alt="新規会員登録"/>
+                            </apex:commandLink>
+                        </p>
+                    </div>
+                </div><!--/right-->
+
+                <!-- Enterキーを押された場合の見えないSubmitボタン -->
+                <div style="display: none;">
+                    <apex:commandButton id="btnLogin" action="{!login}" value="ログイン"/>
+                </div>
+
+            </apex:form>
+        </div><!--div#content -->
+        </div><!--div#container -->
+
+        <div id="footer">
+        </div><!--div#footer -->
+    </div><!--div#wrapper -->
+
+    <div id="copyright">
+        Powered by<a href="http://www.force.com/" target="_blank"> force.com</a>
+    </div>
+</body>
+
+</apex:page>

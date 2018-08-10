@@ -1,0 +1,148 @@
+<apex:page title="請求書作成" controller="CreateSeikyusyoController" action="{!init}" tabStyle="SeikyuKakuteiTab__tab">
+
+    <!-- スタイルシート -->
+    <style type="text/css"> 
+    </style> 
+
+    <!-- 共通スクリプト -->
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>
+
+    <apex:sectionHeader title="請求書作成" />
+    <apex:pageMessages id="messageArea" showDetail="false" />
+
+    <apex:form >
+
+        <!-- リジューム進捗状況表示エリア -->
+        <apex:outputPanel id="resumeProgress">
+            <apex:outputPanel id="resumeProgressInner" rendered="{!resume.hasNext}">
+                <table width="440px">
+                    <tr>
+                        <td width="400px">PDFを生成しています...&nbsp;&nbsp;({!resume.execCnt}&nbsp;/&nbsp;{!resume.totalCnt})</td>
+                        <td width="40px"></td>
+                    </tr>
+                    <tr>
+                        <td width="400px" style="border:1px black solid;"><div style="width: {!resume.progress}%; background-color:red;">&nbsp;</div></td>
+                        <td width="40px">{!resume.progress}&nbsp;％</td>
+                    </tr>
+                </table>
+            </apex:outputPanel>
+        </apex:outputPanel>
+
+        <apex:pageBlock title="締めグループ：{!shimeGroup} - 請求年月：{!shimebi}">
+
+            <!-- ボタンエリア -->
+            <apex:pageBlockButtons location="top">
+                <apex:outputPanel id="buttonArea">
+                    <apex:commandButton id="btnCreatePdf" value="請求書作成" action="{!createPdf}" rendered="{!(NOT(ISNULL(shList))) && (shList.size != 0)}" reRender="resumeControl, resumeProgress, messageArea"/>
+                </apex:outputPanel>
+            </apex:pageBlockButtons>
+
+            <!-- 検索結果 -->
+            <apex:outputPanel id="resultArea">
+                <!-- 検索結果：レコードあり -->
+                <apex:pageBlockSection title="請求書作成対象" columns="1" rendered="{!(NOT(ISNULL(shList))) && (shList.size != 0)}">
+                    <apex:pageBlockTable var="item" value="{!shList}">
+        
+                        <!-- 請求書番号 -->
+                        <apex:column style="width:80px">
+                            <apex:facet name="header">
+                                <apex:outputText value="{!$ObjectType.SeikyuHeader__c.fields.Name.label}"/>
+                            </apex:facet>
+                            <apex:outputField value="{!item.Name}"/>
+                        </apex:column>
+
+                        <!-- 請求先 -->
+                        <apex:column style="width:200px">
+                            <apex:facet name="header">
+                                <apex:outputText value="{!$ObjectType.SeikyuHeader__c.fields.Seikyusaki__c.label}"/>
+                            </apex:facet>
+                            <apex:outputField value="{!item.Seikyusaki__r.Name}"/>
+                        </apex:column>
+
+                        <!-- 締めグループ -->
+                        <apex:column style="width:80px">
+                            <apex:facet name="header">
+                                <apex:outputText value="{!$ObjectType.SeikyuHeader__c.fields.ShimeGroup__c.label}"/>
+                            </apex:facet>
+                            <apex:outputField value="{!item.ShimeGroup__c}"/>
+                        </apex:column>
+
+                        <!-- 締め日 -->
+                        <apex:column style="width:80px">
+                            <apex:facet name="header">
+                                <apex:outputText value="{!$ObjectType.SeikyuHeader__c.fields.Shimebi__c.label}"/>
+                            </apex:facet>
+                            <apex:outputField value="{!item.Shimebi__c}"/>
+                        </apex:column>
+
+                        <!-- 請求先取引区分 -->
+                        <apex:column style="width:80px">
+                            <apex:facet name="header">
+                                <apex:outputText value="{!$ObjectType.SeikyuHeader__c.fields.SeikyusakiTorihikiKbn__c.label}"/>
+                            </apex:facet>
+                            <apex:outputField value="{!item.SeikyusakiTorihikiKbn__c}"/>
+                        </apex:column>
+
+                        <!-- 回収予定日-->
+                        <apex:column style="width:80px">
+                            <apex:facet name="header">
+                                <apex:outputText value="{!$ObjectType.SeikyuHeader__c.fields.KaisyuScheduledDate__c.label}"/>
+                            </apex:facet>
+                            <apex:outputField value="{!item.KaisyuScheduledDate__c}"/>
+                        </apex:column>
+
+                        <!-- 請求額（税込み）-->
+                        <apex:column style="width:80px">
+                            <apex:facet name="header">
+                                <apex:outputText value="{!$ObjectType.SeikyuHeader__c.fields.Seikyugaku_Tax__c.label}"/>
+                            </apex:facet>
+                            <apex:outputField value="{!item.Seikyugaku_Tax__c}"/>
+                        </apex:column>
+
+                    </apex:pageBlockTable>
+                </apex:pageBlockSection>
+
+                <!-- 検索結果：レコードなし-->
+                <apex:outputPanel rendered="{!(NOT(ISNULL(shList))) && (shList.size == 0)}">
+                    <apex:pageBlockSection title="請求確定対象" collapsible="false"/>
+                    <apex:outputText >請求書作成対象データはありません。</apex:outputText>
+                </apex:outputPanel>
+
+            </apex:outputPanel>
+        </apex:pageBlock>
+
+        <!-- リジュームエリア（画面上は非表示） -->
+        <div style="display: none;">
+            <!-- リジューム処理ボタン -->
+            <apex:commandButton id="btnResumeProcess" value="リジューム" action="{!resumeProcess}" reRender="resumeControl, resumeProgress"/>
+            <!-- リジューム終了処理ボタン -->
+            <apex:commandButton id="btnResumeFinish" value="リジューム終了" action="{!resumeFinish}" reRender="resumeControl, resumeProgress, messageArea, buttonArea, resultArea"/>
+            <!-- リジューム制御 -->
+            <apex:outputPanel id="resumeControl">
+                <script type="text/javascript">
+
+                    var resumeFlg = {!resume.hasNext};
+                    var finishFlg = {!resume.isFinish};
+                    if (resumeFlg) {
+                        // リジューム処理を起動
+                        $('input[id$="btnResumeProcess"]').click();
+                        $('input[id$="btnCreatePdf"]').attr("disabled", "disabled");
+                    }
+                    else if(finishFlg) {
+                        // リジューム終了処理を起動
+                        $('input[id$="btnResumeFinish"]').click();
+                    }
+                    else {
+                        // 上記以外
+                        $('span[id$="resumeProgress"]').css("display", "none");
+                        $('input[id$="btnCreatePdf"]').removeAttr("disabled");
+                    }
+        
+                </script>
+            </apex:outputPanel>
+        </div>
+
+    </apex:form>
+
+
+</apex:page>

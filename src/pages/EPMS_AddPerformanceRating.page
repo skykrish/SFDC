@@ -1,0 +1,120 @@
+<apex:page standardController="Performance_Rating__c"  extensions="EPMS_AddPerformanceRating" sidebar="false" showHeader="false">
+<apex:includeScript value="{!URLFOR($Resource.attendance,'jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.attendance,'jquery-ui.min.js')}"/>
+<style>
+#table-wrapper {
+  position:relative;
+overflow-x: scroll;
+}
+#table-scroll {
+  height:520px;
+  overflow:auto;  
+  margin-top:20px;
+}
+#table-wrapper table {
+  width:100%;
+
+}
+
+}
+#table-wrapper table thead th .text {
+  position:absolute;   
+  top:-20px;
+  z-index:2;
+  height:20px;
+  width:35%;
+  border:1px solid red;
+}
+</style>
+
+<apex:form id="formids" >
+<body >
+<div >
+
+<table >
+<tr >
+<td  style="padding-left: 5px; padding-bottom: 3px;font-size: 20px;">Group Name </td>
+<td> <apex:inputText id="in" value="{!valueName}" onkeypress="return alpha(event);"  /></td>
+</tr>
+</table>
+
+<apex:pagemessages />
+<div id="table-wrapper" style="width:700px;" >
+  <div id="table-scroll">
+<table id="table1">
+<apex:repeat value="{!performWrap}" var="Wrap"> 
+<tr>
+<td>Category : <apex:Outputtext value="{!Wrap.CategoryName.Name}"/></td>
+<td>STF MIN : <apex:inputText id="mininc" value="{!Wrap.valuemin}" maxlength="11" styleClass="doubleInput"  /></td>
+<td>STF MAX : <apex:inputText id="maninc" value="{!Wrap.valuemax}" maxlength="11" styleClass="doubleInput"  /></td>
+
+</tr>
+</apex:repeat>
+
+</table>
+</div>
+</div>
+<div id='header' style="margin-left:25%;" >
+<apex:commandButton value="Save"  action="{!saveChanges}"/>
+<apex:commandbutton value="Reset" action="{!reset}"  /> 
+<apex:commandbutton value="Close Window" onclick="ClosePopup();return false;"/>     
+</div>
+</div>
+</body>
+</apex:form>
+
+<script>
+function ClosePopup(){
+           window.parent.close();
+           window.opener.location.reload();
+      }
+
+      function reset(){
+
+           document.getElementById("mininc")=NULL;
+           document.getElementById("maxinc")=NULL;
+           document.getElementById("name")=NULL;
+           windows.location.reload();
+      } 
+      /*
+ function isNumber(evt, element) {
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (
+            (charCode != 45 || $(element).val().indexOf('-') != -1) &&      // “-” CHECK MINUS, AND ONLY ONE.
+            (charCode != 46 || $(element).val().indexOf('.') != -1) &&      // “.” CHECK DOT, AND ONLY ONE.
+            (charCode < 48 || charCode > 57))
+            
+                return false;
+                
+        return true;
+    }  */
+
+function alpha(e) {
+    var k;
+    document.all ? k = e.keyCode : k = e.which;
+    return ((k > 64 && k < 91) || (k > 96 && k < 123) || k == 8 || k == 32 || (k >= 48 && k <= 57));
+}
+
+    
+    $(document).ready(function() {
+        $('.doubleInput').keypress(function (event) {
+        
+        if ((event.which != 46 || $(this).val().indexOf('.') != -1) &&
+        ((event.which < 48 || event.which > 57) &&
+        (event.which != 0 && event.which != 8))) {
+        event.preventDefault();
+        }
+
+        var text = $(this).val();
+
+        if ((text.indexOf('.') != -1) &&
+        (text.substring(text.indexOf('.')).length > 2) &&
+        (event.which != 0 && event.which != 8) &&
+        ($(this)[0].selectionStart >= text.length - 2)) {
+        event.preventDefault();
+        }       
+            //return isNumber(event, this)
+        });         
+     });
+</script>
+</apex:page>

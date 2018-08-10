@@ -1,0 +1,219 @@
+<apex:page controller="EPMS_TaskDistributionCaseLogsController" sidebar="false" showHeader="false"  id="pg_mass_task">
+    
+    <style type="text/css">
+        .maincontent{
+        width: 50%;    
+        margin: 0 auto;
+        display:table:
+        }
+        .leftLable {width:30%; display:table-cell; vertical-align:middle;}
+        .rightTextArea {width:70%; display:table-cell; vertical-align:middle;}
+        
+        .pbTitle{
+        position: relative;
+        display: none;
+        }
+        #j_id0:j_id2:j_id3:j_id30 {
+        margin-top: 50px;
+        }
+        
+        .bPageTitle {margin-bottom:0;}
+        
+        .task_title{ font-size:28px;}
+        .taskform {  display: block;  float: left;  width: 100%;  margin-bottom: 10px;}
+        .task_label{ width: 100px;  text-align: right;  float: left;  padding-right: 10px;   padding-top: 8px;}
+        .task_fields {  width: 70%;   float: left;}
+        .task_fields input, .task_fields select{ width:85%;   height: 22px;}
+        .task_fields.selectcustom input, .task_fields.selectcustom select{ width:40%;}
+        .task_fields.selectcustom select{ margin-right:10px;  float: left; height: 26px !important;}
+        .task_fields select{ float: left; height: 26px !important; width:auto;}
+        .task_fields textarea{ width:85%;     min-height: 75px; }
+        .clear{ clear:both;}
+        .task_fields.fieldwidthauto input { width:auto;}
+        .fLeft {float:left;}
+        .fLeft .dateFormat {display:none;}
+        .mRight_5 {margin-right:5px;}
+    </style>
+    <script src="/soap/ajax/35.0/connection.js"></script>
+    <script>
+        function refreshtest() {
+        window.opener.location.reload();
+    }
+    function ClosePopup(){
+        
+        sforce.connection.sessionId = '{!$Api.Session_ID}';
+        var describeSObjectResult = sforce.connection.describeSObject("Case_Logs__c");
+        var prefix = describeSObjectResult.keyPrefix; 
+        
+        var url = location.href;
+        var basepath = '{!basepath}';
+        var filerec = '{!fileRecord}';
+        
+        
+        var baseURL = url.substring(0, url.indexOf('/', 14));      
+        var pareurl = baseURL+"/"+filerec;
+        
+        if(basepath == 'detailpage'){
+            if(pareurl)
+            {
+                // window.opener.location.href=baseURL+"/"+filerec;
+            }  
+            
+        }else if(basepath =='order')
+        {
+            // window.opener.location.href="/" + prefix;
+        }
+        
+        
+        
+        if(baseURL)
+        {
+            window.top.close();     
+        }
+        
+        
+        
+    }
+    
+    function refreshParentPage() {
+        
+        var redirectURL = window.opener.location.href;
+        
+        if(redirectURL) {
+            window.opener.location.href = window.opener.location.href;
+            
+            if (window.opener.progressWindow) {
+                window.opener.progressWindow.close();
+            }
+            window.close();
+        }
+    }    
+    
+    
+    function assignUser(){
+        var objCtr = document.getElementById('pg_mass_task:frmSubmitMassTask:field_section:section01:owner');
+        objCtr.disabled = true;
+        objCtr = document.getElementById('pg_mass_task:frmSubmitMassTask:field_section:section01:owner_lkwgt');
+        objCtr.disabled = true;            
+    }
+    function togglereminder(blnStatus){
+        var objDate = document.getElementById('pg_mass_task:frmSubmitMassTask:j_id26:field_section:reminder_time');
+        var objTime = document.getElementById('pg_mass_task:frmSubmitMassTask:j_id26:field_section:task__ListTime');
+        if(blnStatus){
+            objDate.disabled = false;
+            objTime.disabled = false;
+        }else{
+            objDate.disabled = true;
+            objTime.disabled = true;
+        }
+    }
+    //togglereminder(false);
+    
+    
+    function popupwindow() { 
+        var url2 = '/apex/EPMS_AssignedTaskGroups'; 
+        window.open(url2, "_blank", "scrollbars=1,width=800, height=500,resizable=1,titlebar=0,toolbar=0,status=0");
+    }
+    
+      
+    </script>
+    
+    <apex:form id="frmSubmitMassTask">
+        <apex:pageMessages id="Showmsg"></apex:pageMessages>
+        <apex:pageBlock mode="maindetail" >
+            
+            <apex:outputPanel >
+                <apex:pageBlock id="field_section">
+                    <apex:outputLabel for="targetName"/>
+                    <apex:sectionHeader id="section_header" title="Task Edit" />
+                    <br/><br/>
+                    <div class="taskform">
+                        <div class="task_label"><apex:outputLabel value="Subject" /></div>
+                        <div class="task_fields"><apex:inputField value="{!tasks.Subject}" required="true"/></div>
+                    </div>
+                    <div class="taskform">
+                        <div class="task_label"><apex:outputLabel value="Title" /></div>
+                        <div class="task_fields"><apex:inputField value="{!CLogs.Title__c}"/></div>
+                    </div> 
+
+                    <div class="taskform">
+                        <div class="task_label"><apex:outputLabel value="Assigned To" id="targetId"/></div>                       
+                        <div class="task_fields"><div class="requiredInput"> 
+                             <div class="requiredBlock"></div>
+                            <apex:inputText value="{!strlist}" id="targetName"/>                          
+                            <apex:image value="/s.gif" StyleClass="lookupIcon" style="cursor:pointer;" onclick="popupwindow();" />                                            
+                        </div> 
+                            </div>                        
+                    </div> 
+                    
+                    <div class="taskform">
+                        <div class="task_label"><apex:outputLabel value=""/></div>                        
+                        <div class="task_fields"><apex:outputText value="{!taskCount}" id="taskCount"/></div>                         
+                    </div>
+                    
+                    <div class="taskform">
+                        <div class="task_label"><apex:outputLabel value="Related To" /></div>
+                        <div class="task_fields selectcustom"><apex:inputField value="{!tasks.whatid}" required="true"/></div>
+                    </div>
+                    <div class="taskform">
+                        <div class="task_label"><apex:outputLabel value="Comments" /></div>
+                        <div class="task_fields"><apex:inputField value="{!tasks.Description}" /></div>
+                    </div>
+                    <div class="taskform">
+                        <div class="task_label"><apex:outputLabel value="Status" /></div>
+                        <div class="task_fields"><apex:inputField value="{!tasks.Status}" /></div>
+                    </div>
+                    <div class="taskform">
+                        <div class="task_label"><apex:outputLabel value="Priority" /></div>
+                        <div class="task_fields"><apex:inputField value="{!tasks.Priority}" /></div>
+                    </div>
+                    
+                    <apex:outputPanel id="reminder_section">
+                        <apex:outputLabel for="task__IsReminderSet" />
+                        <div class="taskform ">
+                            <div class="task_label"><apex:outputLabel value="Reminder"/></div>
+                            <div class="task_fields fieldwidthauto">
+                                <div class="fLeft">
+                                    <apex:inputCheckbox value="{!tasks.IsReminderSet}" selected="true" onclick="togglereminder(this.checked);"/>
+                                   <!-- <apex:inputField value="{!tasks.IsReminderSet}" onclick="togglereminder(this.checked);"/> -->
+                                </div>
+                                <div class="fLeft">
+                                    <apex:outputLabel id="reminder_section_1">
+                                        <div class="fLeft mRight_5">
+                                            <apex:inputField id="reminder_time" value="{!tasks.ReminderDate__c}"/>
+                                        </div>
+                                        <div class="fLeft">                                        
+                                          <apex:selectList id="task__ListTime" value="{!reminderTime}" size="1" styleclass="FormDataASmaller">
+                                              <apex:selectOptions id="reminder_time_options" value="{!ReminderTimeOptions}" />
+                                           </apex:selectList> 
+                                              <!-- <apex:inputField value="{!tasks.ReminderTime__c}" /> -->
+                                        </div>
+                                           <!--<apex:inputField id="task__ListDate" value="{!tasks.Reminderdatetime}" html-disabled="true"/> -->
+                                        <!-- <div class="fLeft">
+                                                     <apex:selectList id="task__ListTime" value="{!reminderTime}" size="1" styleclass="FormDataASmaller" disabled="true">
+                                                     <apex:selectOptions id="reminder_time_options" value="{!selReminderOptions}" />
+                                                  </apex:selectList>
+                                            </div> -->   
+                                    </apex:outputLabel>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </apex:outputPanel>
+                    
+                    <div class="clear">  </div>
+                </apex:pageBlock>
+            </apex:outputPanel>
+            
+            <apex:pageBlockButtons style="text-align:center;" location="bottom"> 
+                <apex:outputPanel id="commandButton">
+                    <apex:outputPanel >
+                        <apex:commandButton value="Save" action="{!saveNew}" reRender="Showmsg"/>
+                        <apex:commandButton value="Close" onclick="ClosePopup();" oncomplete="refreshtest();"/> 
+                    </apex:outputPanel>
+                </apex:outputPanel>          
+            </apex:pageBlockButtons>
+            
+        </apex:pageBlock>
+    </apex:form>   
+</apex:page>

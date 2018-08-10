@@ -1,0 +1,127 @@
+<apex:page title="発注依頼" controller="HachuIraiController" tabStyle="Anken__c" action="{!init}">
+
+    <!-- 共通スクリプト -->
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>
+
+    <!-- 発注依頼内容をセット -->
+    <script type="text/javascript">
+        // 初期表示時
+        $(document).ready(function(){
+            // 発注依頼内容をセット
+            var detailSource = $('pre[id$="detailSource"]').text();
+            $('textarea[id$="hachuIraiDetail"]').val(detailSource);
+        });
+
+        // クリップボードにコピー
+        function copyText() {
+            try {
+                // クリップボードコピー
+                var text= $('textarea[id$="hachuIraiDetail"]').val();
+                clipboardData.setData("Text", text);
+                
+                // メッセージ表示
+                $("#copyMessage").css("color", "blue");
+                $("#copyMessage").html("<br/>&nbsp;クリップボードにコピーしました。");
+
+            } catch(e) {
+                // エラーメッセージ表示
+                $("#copyMessage").css("color", "red");
+                $("#copyMessage").html("<br/>&nbsp;このブラウザはクリップボードへのアクセスをサポートしていません。");
+            }
+        }
+    </script>
+
+    <apex:sectionHeader title="発注依頼" />
+    <apex:pageMessages id="messagearea" showDetail="false" />
+
+    <apex:form >
+        <!-- 初期表示チェックOK時 -->
+        <apex:pageBlock >
+
+            <!-- ボタンエリア -->
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="クリップボードにコピー" onclick="javascript:copyText(); return false;"/>
+                <apex:commandButton value="ステータス変更（受注→受注委託済み）" action="{!updStatus}"/>
+                <apex:commandButton value="キャンセル" action="{!cancel}" immediate="true"/>
+                <span id="copyMessage"/>
+            </apex:pageBlockButtons>
+            
+            <!-- 発注依頼対象 -->
+            <apex:pageBlockSection title="発注依頼対象" columns="1">
+                <apex:pageBlockTable var="item" value="{!hachuInfoList}">
+                
+                    <!-- 発注番号 -->
+                    <apex:column style="width:110px">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.HachuInfo__c.fields.Name.label}"/>
+                        </apex:facet>
+                        <apex:outputfield style="width:100px" value="{!item.Name}"/> 
+                    </apex:column>
+
+                    <!-- 案件（伝票番号） -->
+                    <apex:column style="width:110px">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.HachuInfo__c.fields.Anken__c.label}"/>
+                        </apex:facet>
+                        <apex:outputfield style="width:100px" value="{!item.Anken__c}"/> 
+                    </apex:column>
+
+                    <!-- 発注先 -->
+                    <apex:column style="width:110px">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.HachuInfo__c.fields.Hachusaki__c.label}"/>
+                        </apex:facet>
+                        <apex:outputField style="width:100px" value="{!item.Hachusaki__c}"/> 
+                    </apex:column>
+
+                    <!-- 納期 -->
+                    <apex:column style="width:110px">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.HachuInfo__c.fields.Nouki__c.label}"/>
+                        </apex:facet>
+                        <apex:outputField style="width:100px" value="{!item.Nouki__c}"/> 
+                    </apex:column>
+
+                    <!-- 点数 -->
+                    <apex:column style="width:110px">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.HachuInfo__c.fields.ItemCnt__c.label}"/>
+                        </apex:facet>
+                        <apex:outputField style="width:100px" value="{!item.ItemCnt__c}"/> 
+                    </apex:column>
+
+                    <!-- 発注ステータス -->
+                    <apex:column style="width:110px">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.HachuInfo__c.fields.HachuStatus__c.label}"/>
+                        </apex:facet>
+                        <apex:outputField style="width:100px" value="{!item.HachuStatus__c}"/> 
+                    </apex:column>
+
+                </apex:pageBlockTable>
+            </apex:pageBlockSection>
+
+            <!-- 発注依頼内容 -->
+            <apex:pageBlockSection title="発注依頼内容" columns="1">
+                <apex:inputTextarea id="hachuIraiDetail" style="width: 100%;" rows="25" />
+            </apex:pageBlockSection>
+
+        </apex:pageBlock>
+    </apex:form>
+
+<!-- 発注依頼内容の生成元データ -->
+<div style="display: none;">
+<pre id="detailSource">
+New Order
+<apex:repeat var="item" value="{!hachuInfoList}">
+
+{!item.Name}
+Number of Files : <apex:outputText value="{0, number, #}"><apex:param value="{!item.ItemCnt__c}"/></apex:outputText>
+TAT : {!item.Nouki__c}
+Instructions : 
+{!item.Sagyoshiji_Renrakujiko__c}
+</apex:repeat>
+</pre>
+</div>
+
+</apex:page>

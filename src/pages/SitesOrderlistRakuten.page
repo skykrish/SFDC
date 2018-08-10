@@ -1,0 +1,383 @@
+<apex:page controller="SitesOrderlistControllerRakuten" action="{!init}" cache="false" sidebar="false" showHeader="false" standardStylesheets="false">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>ご利用履歴</title>
+
+    <!-- Design Style -->
+    <apex:stylesheet value="{!URLFOR($Resource.SitesContentsRakuten, 'common/css/import.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.SitesContentsRakuten, 'common/css/editorial/sub.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.SitesContentsRakuten, 'common/css/editorial/mypage_sub.css')}" />
+
+    <!-- Calender Style -->
+    <apex:stylesheet value="{!URLFOR($Resource.JQueryCalender, 'css/jquery-ui-1.8.19.custom.css')}" />
+
+    <!-- Paginator Style -->
+    <apex:stylesheet value="{!URLFOR($Resource.Paginator, 'css/paginator.css')}" />
+
+    <!-- JQuery --> 
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>
+    
+    <!-- Design Script -->
+    <apex:includeScript value="{!URLFOR($Resource.SitesContentsRakuten, 'common/js/jquery.blend-min.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.SitesContentsRakuten, 'common/js/scrollsmoothly.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.SitesContentsRakuten, 'common/js/heightLine.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.SitesContentsRakuten, 'common/js/common.js')}"/>
+
+    <!-- Calender Script -->
+    <apex:includeScript value="{!URLFOR($Resource.JQueryCalender, 'js/jquery-ui-1.8.19.custom.min.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.JQueryCalender, 'js/jquery.ui.datepicker-ja.js')}" />
+    
+    <!-- 独自のスクリプト -->
+    <script type="text/javascript">
+        // CSV出力
+        function doCsv(bulkFlg) {
+           // 案件IDリスト取得
+           // 全件ダウンロードのチェック
+           callCheckDownLoadAllCsvData();
+           
+           if({!resultCount} > 1000){
+               return falase;
+           }
+
+            // 空のウィンドウを開く
+            //var csvWindow = window.open("", "csvWindow");
+            // 開いたウィンドウに対してPOSTリクエスト
+            var nextUrl = "/rakuten/SitesOrderlistCsvRakuten";
+            $('#formPostRequest').attr("target", "csvWindow");
+            $('#formPostRequest').attr("action", nextUrl);
+            $('#formPostRequest').submit();
+        }
+
+        // カレンダ表示
+        jQuery(function($){
+            $(".calender").datepicker({
+                dateFormat: 'yy/mm/dd',
+                changeMonth: true,
+                changeYear: true,
+                yearRange: '2010:2040'
+            });
+        });
+
+    </script>
+
+    <!--Google Analytics-->
+    <script type="text/javascript">
+
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-17698964-1', 'auto', {'allowLinker': true}); 
+    ga('require', 'linker');
+    ga('linker:autoLink', ['kirinuki.jp','kirinuki.secure.force.com','mediabackoffice.co.jp'] ); 
+    ga('send', 'pageview');
+
+    </script>
+    <!--Google Analytics-->
+</head>
+
+<body>
+    <div id="wrapper">
+    <div id="header" class="cf">
+        <div class="left">
+            <h1>
+            </h1>
+        </div><!--div.left -->
+        <div class="right">
+            <apex:form >
+                <ul>
+                    <li>
+                        <apex:commandLink action="{!order}">
+                            <img src="{!URLFOR($Resource.SitesContentsRakuten, 'common/img/btn_form.png')}" width="89" height="24" alt="発注フォームへ"/>
+                        </apex:commandLink>                
+                    </li>
+                    <li>
+                        <apex:commandLink action="{!mypage}">
+                            <img src="{!URLFOR($Resource.SitesContentsRakuten, 'common/img/btn_maypage.png')}" width="89" height="24" alt="マイページへ"/>
+                        </apex:commandLink>                
+                    </li>
+                    <li>
+                        <apex:commandLink action="{!logout}">
+                            <img src="{!URLFOR($Resource.SitesContentsRakuten, 'common/img/btn_logout.png')}" width="89" height="24" alt="ログアウト"/>
+                        </apex:commandLink>                
+                    </li>
+                </ul>
+            </apex:form>
+        </div><!--div.right -->
+    </div><!--div#header -->
+
+    <div id="container" class="cf">
+    <div id="content" class="cf">
+
+        <apex:form >
+
+            <!-- メッセージ -->
+            <div style="width: 700px;">
+                <apex:outputPanel id="msgArea">
+                <c:SitesMessage msgList="{!msgList}"/>
+                </apex:outputPanel>
+            </div>
+
+            <!-- 検索条件 -->
+            <div>
+                <span style="font-size: 14px;">
+                    <apex:selectList value="{!dateColumn}" multiselect="false" size="1" >
+                        <apex:selectOptions value="{!dateSelectOptions}"></apex:selectOptions>
+                    </apex:selectList>
+                </span>
+                <apex:inputText value="{!dateFrom}" styleClass="textbox4 calender" style="width:75px;"/>
+                <span style="font-size: 14px;">～</span>
+                <apex:inputText value="{!dateTo}" styleClass="calender textbox4" style="width:75px;"/>
+                <apex:commandButton styleClass="button2" value="絞込み" action="{!search}"/>
+            </div>
+
+            <!-- 利用履歴 -->
+            <apex:outputPanel id="resultArea">
+                <table class="normal list">
+                    <caption>
+                        <input type="button" class="button2" value="CSV形式でダウンロードする" onclick="doCsv();" />
+                    </caption>
+                    <tr>
+                        <!-- <th>
+                            <apex:inputCheckbox id="selectCheckedAll" onclick="javascript:checkAll();"/>
+                        </th> -->
+                        <th>
+                            <apex:commandLink action="{!sort}" value="案件番号 {!IF(sortExp=='Name', IF(sortDrc=='ASC', '↑', '↓'), '')}" reRender="resultArea">
+                                <apex:param value="Name" assignTo="{!sortExp}"/>
+                            </apex:commandLink>
+                        </th>
+                        <th>
+                            <apex:commandLink action="{!sort}" value="ご発注日時 {!IF(sortExp=='JuchuDateTime__c', IF(sortDrc=='ASC', '↑', '↓'), '')}" reRender="resultArea">
+                                <apex:param value="JuchuDateTime__c" assignTo="{!sortExp}"/>
+                            </apex:commandLink>
+                        </th>
+                        <th>
+                            <apex:commandLink action="{!sort}" value="ステータス {!IF(sortExp=='Status__c', IF(sortDrc=='ASC', '↑', '↓'), '')}" reRender="resultArea">
+                                <apex:param value="Status__c" assignTo="{!sortExp}"/>
+                            </apex:commandLink>
+                        </th>
+                        <th>
+                            <apex:commandLink action="{!sort}" value="部署名 {!IF(sortExp=='KokyakuTantosya_Main__r.Department', IF(sortDrc=='ASC', '↑', '↓'), '')}" reRender="resultArea">
+                                <apex:param value="KokyakuTantosya_Main__r.Department" assignTo="{!sortExp}"/>
+                            </apex:commandLink>
+                        </th>
+                        <th>
+                            <apex:commandLink action="{!sort}" value="発注担当者様 {!IF(sortExp=='KokyakuTantosya_Main__r.Name', IF(sortDrc=='ASC', '↑', '↓'), '')}" reRender="resultArea">
+                                <apex:param value="KokyakuTantosya_Main__r.Name" assignTo="{!sortExp}"/>
+                            </apex:commandLink>
+                        </th>
+                        <th>ご入稿フォルダ名</th>
+                        <th>
+                            <apex:commandLink action="{!sort}" value="点数 {!IF(sortExp=='ItemCnt__c', IF(sortDrc=='ASC', '↑', '↓'), '')}" reRender="resultArea">
+                                <apex:param value="ItemCnt__c" assignTo="{!sortExp}"/>
+                            </apex:commandLink>
+                        </th>
+                        <th>
+                            <apex:commandLink action="{!sort}" value="納品日時 {!IF(sortExp=='NohinDateTime__c', IF(sortDrc=='ASC', '↑', '↓'), '')}" reRender="resultArea">
+                                <apex:param value="NohinDateTime__c" assignTo="{!sortExp}"/>
+                            </apex:commandLink>
+                        </th>
+                        <th>
+                            <apex:commandLink action="{!sort}" value="納品担当者 {!IF(sortExp=='NohinTantosya__r.Name', IF(sortDrc=='ASC', '↑', '↓'), '')}" reRender="resultArea">
+                                <apex:param value="NohinTantosya__r.Name" assignTo="{!sortExp}"/>
+                            </apex:commandLink>
+                        </th>
+                        <th>
+                            <apex:commandLink action="{!sort}" value="納品金額（税抜） {!IF(sortExp=='JuchuTotalKingaku__c', IF(sortDrc=='ASC', '↑', '↓'), '')}" reRender="resultArea">
+                                <apex:param value="JuchuTotalKingaku__c" assignTo="{!sortExp}"/>
+                            </apex:commandLink>
+                        </th>
+                        <th>
+                            <apex:commandLink action="{!sort}" value="消費税 {!IF(sortExp=='JuchuTotalTax__c', IF(sortDrc=='ASC', '↑', '↓'), '')}" reRender="resultArea">
+                                <apex:param value="JuchuTotalTax__c" assignTo="{!sortExp}"/>
+                            </apex:commandLink>
+                        </th>
+                        <th>
+                            <apex:commandLink action="{!sort}" value="納品金額（税込） {!IF(sortExp=='JuchuTotalKingaku_Tax__c', IF(sortDrc=='ASC', '↑', '↓'), '')}" reRender="resultArea">
+                                <apex:param value="JuchuTotalKingaku_Tax__c" assignTo="{!sortExp}"/>
+                            </apex:commandLink>
+                        </th>
+                        <th>見積書</th>
+                        <th>納品書</th>
+                    </tr>
+                    <apex:repeat value="{!ankenList}" var="item">
+                        <tr> 
+                            <td>
+                                <apex:outputField value="{!item.anken.Name}"/>
+                            </td>
+                            <td>
+                                <apex:outputText value="{0, date, yyyy/MM/dd}">
+                                    <apex:param value="{!item.anken.JuchuDateTime__c + (0.041667 * 9)}"/>
+                                </apex:outputText>
+                            </td>
+                            <td>
+                                <apex:outputText value="{!item.ankenStatus}"/>
+                            </td>
+                            <td>
+                                <apex:outputText value="{!item.anken.KokyakuTantosya_Main__r.Department}"/>
+                            </td>
+                            <td>
+                                <apex:outputText value="{!item.anken.KokyakuTantosya_Main__r.Name}"/>
+                            </td>
+                            <td>
+                                <apex:outputField value="{!item.anken.FolderName__c}"/>
+                            </td>
+                            <td>
+                                <apex:outputField value="{!item.anken.ItemCnt__c}"/>
+                            </td>
+                            <td>
+                                <apex:outputText value="{0, date, yyyy/MM/dd}">
+                                    <apex:param value="{!item.anken.NohinDateTime__c + (0.041667 * 9)}"/>
+                                </apex:outputText>
+                            </td>
+                            <td>
+                                <apex:outputField value="{!item.anken.NohinTantosya__r.Name}"/>
+                            </td>
+                            <td>
+                                <apex:outputField value="{!item.anken.JuchuTotalKingaku__c}"/>
+                            </td>
+                            <td>
+                                <apex:outputField value="{!item.anken.JuchuTotalTax__c}"/>
+                            </td>
+                            <td>
+                                <apex:outputField value="{!item.anken.JuchuTotalKingaku_Tax__c}"/>
+                            </td>
+                            <td class="center">
+                                <apex:commandLink action="{!printMitsumorisyo}" target="_blank" rendered="{!(item.anken.MitsumorisyoId__c != null)}">
+                                    <img src="{!URLFOR($Resource.SitesContentsRakuten, 'common/img/icon_pdf.png')}" width="24" height="24" alt="PDF"/>
+                                    <apex:param name="aid" value="{!item.anken.Id}"/>
+                                </apex:commandLink>
+                            </td>
+                            <td class="center">
+                                <apex:commandLink action="{!printNohinsyo}" target="_blank" rendered="{!(item.anken.NohinsyoId__c != null)}">
+                                    <img src="{!URLFOR($Resource.SitesContentsRakuten, 'common/img/icon_pdf.png')}" width="24" height="24" alt="PDF"/>
+                                    <apex:param name="aid" value="{!item.anken.Id}"/>
+                                </apex:commandLink>
+                            </td>
+                        </tr>
+                    </apex:repeat>
+                </table>
+    
+                <!-- ページング -->
+                <div class="paginator" style="width: 1250px;">
+                    <span class="prevNextLinks">
+                        <!-- 最初 -->
+                        <span class="prevNext">
+                            <!-- リンク有効 -->
+                            <apex:outputPanel rendered="{!(paginator.classFirst=='first')}">
+                                <apex:commandLink action="{!paging}" reRender="resultArea">
+                                    <apex:param value="{!(0)}" assignTo="{!paginator.dispPage}"/>
+                                    <img class="{!paginator.classFirst}" src="{!URLFOR($Resource.Paginator, 'img/s.gif')}"/>
+                                </apex:commandLink>
+                            </apex:outputPanel>
+                            <!-- リンク無効 -->
+                            <apex:outputPanel rendered="{!(paginator.classFirst=='firstoff')}">
+                                <img class="{!paginator.classFirst}" src="{!URLFOR($Resource.Paginator, 'img/s.gif')}"/>
+                            </apex:outputPanel>
+                        </span>
+    
+                        <!-- 前へ-->
+                        <span class="prevNext">
+                            <!-- リンク有効 -->
+                            <apex:outputPanel rendered="{!(paginator.classPrev=='prev')}">
+                                <apex:commandLink action="{!paging}" reRender="resultArea">
+                                    <apex:param value="{!(paginator.dispPage - 1)}" assignTo="{!paginator.dispPage}"/>
+                                    <img class="{!paginator.classPrev}" src="{!URLFOR($Resource.Paginator, 'img/s.gif')}"/>
+                                    前へ
+                                </apex:commandLink>
+                            </apex:outputPanel>
+                            <!-- リンク無効 -->
+                            <apex:outputPanel rendered="{!(paginator.classPrev=='prevoff')}">
+                                <img class="{!paginator.classPrev}" src="{!URLFOR($Resource.Paginator, 'img/s.gif')}"/>
+                                前へ
+                            </apex:outputPanel>
+                        </span>
+    
+                        <!-- 次へ -->
+                        <span class="prevNext">
+                            <!-- リンク有効 -->
+                            <apex:outputPanel rendered="{!(paginator.classNext=='next')}">
+                                <apex:commandLink action="{!paging}" reRender="resultArea">
+                                    <apex:param value="{!(paginator.dispPage + 1)}" assignTo="{!paginator.dispPage}"/>
+                                    次へ
+                                    <img class="{!paginator.classNext}" src="{!URLFOR($Resource.Paginator, 'img/s.gif')}"/>
+                                </apex:commandLink>
+                            </apex:outputPanel>
+                            <!-- リンク無効 -->
+                            <apex:outputPanel rendered="{!(paginator.classNext=='nextoff')}">
+                                次へ
+                                <img class="{!paginator.classNext}" src="{!URLFOR($Resource.Paginator, 'img/s.gif')}"/>
+                            </apex:outputPanel>
+                        </span>
+    
+                        <!-- 最後 -->
+                        <span class="prevNext">
+                            <!-- リンク有効 -->
+                            <apex:outputPanel rendered="{!(paginator.classLast=='last')}">
+                                <apex:commandLink action="{!paging}" reRender="resultArea">
+                                    <apex:param value="{!(paginator.maxPage)}" assignTo="{!paginator.dispPage}"/>
+                                    <img class="{!paginator.classLast}" src="{!URLFOR($Resource.Paginator, 'img/s.gif')}"/>
+                                </apex:commandLink>
+                            </apex:outputPanel>
+                            <!-- リンク無効 -->
+                            <apex:outputPanel rendered="{!(paginator.classLast=='lastoff')}">
+                                <img class="{!paginator.classLast}" src="{!URLFOR($Resource.Paginator, 'img/s.gif')}"/>
+                            </apex:outputPanel>
+                        </span>
+                    </span>
+                </div>
+            </apex:outputPanel>
+            <p>&nbsp;</p>
+            <apex:actionFunction name="callCheckDownLoadAllCsvData" action="{!checkDownLoadAllCsvData}" rerender="msgArea"/>
+        </apex:form>
+        
+        <!-- Postデータ -->
+        <div style="display: none;">
+            <form id="formPostRequest" method="POST">
+                <input id="aidList" name="aidList" type="hidden" value="{!ankenIdsStr}"/>
+            </form>
+        </div>
+
+    </div><!--div#content -->
+    </div><!--div#container -->
+    </div><!--div#wrapper -->
+
+    <!-- copy ritgh -->
+    <div id="copyright">
+        Powered by<a href="http://www.force.com/" target="_blank"> force.com</a>
+    </div><!--div#copyright -->
+
+<!--Google リマーケティング-->
+<!-- Google Code for &#20840;&#27969;&#20837; -->
+<!-- Remarketing tags may not be associated with personally identifiable information or placed on pages related to sensitive categories. For instructions on adding this tag and more information on the above requirements, read the setup guide: google.com/ads/remarketingsetup -->
+<script type="text/javascript">
+/* <![CDATA[ */
+var google_conversion_id = 995058442;
+var google_conversion_label = "5mxVCK7c2wYQisa92gM";
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+/* ]]> */
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/995058442/?value=0&amp;label=5mxVCK7c2wYQisa92gM&amp;guid=ON&amp;script=0"/>
+</div>
+</noscript>
+<!--Google リマーケティング-->
+
+<!-- YDN リターゲティング -->
+<script type="text/javascript" language="javascript">
+/* <![CDATA[ */
+var yahoo_retargeting_id = 'T15AP4YAQ4';
+var yahoo_retargeting_label = '';
+/* ]]> */
+</script>
+<script type="text/javascript" language="javascript" src="//b92.yahoo.co.jp/js/s_retargeting.js"></script>
+<!-- YDN リターゲティング -->
+
+</body>
+</apex:page>

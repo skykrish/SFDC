@@ -1,0 +1,88 @@
+<apex:page title="(入金自動登録SMBC)" standardController="Document" extensions="NyukinJidoRegisterSMBCController">
+    <!-- 共通スクリプト -->
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>
+
+    <apex:sectionHeader title="入金自動登録(SMBC)" />
+    <apex:pageMessages id="messageArea" showDetail="false" />
+
+    <apex:form >
+        <!-- 初期表示チェックOK時 -->
+        <apex:pageBlock >
+            <apex:pageBlockSection title="CSV取込み" collapsible="false" />
+            <apex:outputPanel id="buttonArea">
+                <table>
+                    <tr>
+                        <!-- CSV参照 -->
+                        <td>
+                            <apex:inputFile value="{!document.body}" filename="{!document.name}" contentType="text/html;charset=UTF-8"/>
+                        </td>
+                        <!-- チェックボタン -->
+                        <td>
+                            <apex:commandButton value="チェック" action="{!check}"/>
+                        </td>
+                        <!-- 自動取込ボタン -->
+                        <td>
+                            <apex:commandButton value="自動取込" action="{!register}" disabled="{!disabledTorikomiBtnFlag}"/>
+                        </td>
+                    </tr>
+                </table>
+            </apex:outputPanel>
+            <!-- CSV取込み結果 -->
+            <apex:outputPanel id="resultArea">
+                <apex:pageBlockSection title="CSV取込み結果" columns="1" rendered="{!(NOT(ISNULL(NyukinList))) && (NyukinList.size != 0)}">
+                    <apex:pageBlockTable var="nyukin" value="{!NyukinList}">
+                        <!-- 行数 -->
+                        <apex:column style="width:25px">
+                            <apex:facet name="header">
+                                <apex:outputText value="行数"/>
+                            </apex:facet>
+                            <apex:outputText style="width:100px" value="{!nyukin.no}"/>
+                        </apex:column>
+                        <!-- 勘定日 -->
+                        <apex:column style="width:110px">
+                            <apex:facet name="header">
+                                <apex:outputText value="勘定日"/>
+                            </apex:facet>
+                            <apex:outputText style="width:100px" value="{!nyukin.torihikiDateDisp}"/>
+                        </apex:column>
+                        <!-- 金額 -->
+                        <apex:column style="width:110px">
+                            <apex:facet name="header">
+                                <apex:outputText value="金額"/>
+                            </apex:facet>
+                            <apex:outputText style="width:100px" value="{!nyukin.nyukinkingakuDisp}"/>
+                        </apex:column>
+                        <!-- 振込依頼人コード -->
+                        <apex:column style="width:110px">
+                            <apex:facet name="header">
+                                <apex:outputText value="振込依頼人コード"/>
+                            </apex:facet>
+                            <apex:outputText style="width:100px" value="{!nyukin.furikomiiraininNo}"/>
+                        </apex:column>
+                        <!-- 振込依頼人名 -->
+                        <apex:column style="width:110px">
+                            <apex:facet name="header">
+                                <apex:outputText value="振込依頼人名"/>
+                            </apex:facet>
+                            <apex:outputText style="width:100px" value="{!nyukin.furikomiiraininName}"/>
+                        </apex:column>
+                        <!-- 取込 -->
+                        <apex:column style="width:60px">
+                            <apex:facet name="header">
+                                <apex:outputText value="取込"/>
+                            </apex:facet>
+                            <apex:outputText style="width:100px" value="{!nyukin.torikomi}"/>
+                        </apex:column>
+                        <!-- 引当 -->
+                        <apex:column style="width:60px">
+                            <apex:facet name="header">
+                                <apex:outputText value="引当"/>
+                            </apex:facet>
+                            <apex:outputText style="width:100px" value="{!nyukin.hikiate}"/>
+                        </apex:column>
+                    </apex:pageBlockTable>
+                </apex:pageBlockSection>
+            </apex:outputPanel>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

@@ -1,0 +1,476 @@
+<apex:page Controller="SeikyusyoController" renderAs="pdf">
+
+    <html>
+        <head>
+            <style>
+                @page {
+                    size: ;  /* A4 width and height */
+                    margin: 10px;
+                }
+
+                body {
+                    font-family: Arial Unicode MS;
+                }
+
+                div.main {
+                    font-size: 11px;
+                    width: 7.75in;
+                    padding-left:15px;
+                }
+
+                div.main table {
+                    font-size: 11px;
+                    border-collapse: collapse;
+
+                }
+
+                div.main td, th {
+                    padding: 0px;
+                }
+
+                table.header-title {
+                    width: 100%;
+                    height: 36px;
+                    text-align: center;
+                    background-color: #BDBDBD;
+                    margin-bottom: 20px;
+                }
+
+                table.header-title td {
+                    font-size: 24px;
+                }
+
+                table.header-basic {
+                    width: 100%;
+                    height: 150px;
+                    font-size: 14px;
+                    margin-bottom: 15px;
+                }
+
+                table.header-basic td {
+                    vertical-align: top;
+                    paddin: 0px;
+                }
+
+                table.header-basic span {
+                    font-size: 14px;
+                    font-weight: bold;
+                }
+
+                table.header-basic td table {
+                    paddin: 0px;
+                }
+
+                table.header-payinfo {
+                    width: 100%;
+                    height: 110px;
+                    font-size: 14px;
+                    margin-bottom: 15px;
+                }
+
+                table.header-payinfo td {
+                    vertical-align: top;
+                    paddin: 0px;
+                }
+
+                table.header-kouzainfo {
+                    width: 100%;
+                    border: solid #000000 2px;
+                    margin-bottom: 10px;
+                }
+
+                table.header-kouzainfo td{
+                    height: 20px;
+                    vertical-align: top;
+                    padding: 2px 2px 2px 10px;
+                    border: solid #000000 1px;
+                }
+
+                table.detail {
+                    width: 100%;
+                    border: solid #000000 2px;
+                    margin-bottom: 5px;
+                }
+
+                table.detail th{
+                    height: 30px;
+                    text-align: center;
+                    border: solid #000000 1px;
+                    border-top: solid #000000 2px;
+                    border-bottom: solid #000000 2px;
+                    background-color: #BDBDBD;
+                }
+
+                table.detail td{
+                    height: 30px;
+                    border: solid #000000 1px;
+                    padding: 2px;
+                }
+                
+                table.overlap{
+                    position: relative;
+                    z-index: 2;
+                }
+
+                div.break {
+                    page-break-before: always;
+                    height: 10px;
+                }
+
+                div.company-seal {
+                    position: relative;
+                    top: -65px;
+                    left: 180px;
+                    width: 0px;
+                    height: 0px;
+                    z-index: 1;
+                }
+
+                div.staff-seal {
+                    position: relative;
+                    top: 5px;
+                    left: 65px;
+                    width: 0px;
+                    height: 0px;
+                }
+
+            </style>
+        </head>
+        <body>
+
+            <!-- 請求ヘッダ単位の繰り返し -->
+            <apex:repeat var="seikyusyoItem" value="{!seikyusyoList}">
+
+                <!-- ページ単位の繰り返し -->
+                <apex:repeat var="pageItem" value="{!seikyusyoItem}">
+
+                <div class="main">
+                    <!-- ヘッダ：タイトル -->
+                    <table class="header-title">
+                        <tr>
+                            <td width="20%"></td>
+                            <td width="60%">請&nbsp;&nbsp;求&nbsp;&nbsp;書</td>
+                            <td width="20%"></td>
+                        </tr>
+                    </table>
+
+                    <!-- ヘッダ：宛名／住所 -->
+                    <table class="header-basic">
+                        <tr>
+                            <!-- ヘッダ：宛名／住所（左側） -->
+                            <td width="65%" height="100%">
+                                <table width="80%" height="80%" style="border-collapse:">
+                                    <tr>
+                                        <td style="height: 145px; padding-left:40px;">
+                                            <span style="font-size: 18px;">{!pageItem.sHead.BillingPostalCode__c}</span><br/>
+                                            <span>{!pageItem.sHead.BillingState__c}{!pageItem.sHead.BillingCity__c}</span><br/>
+                                            <span>{!pageItem.sHead.BillingStreet__c}</span>
+                                            <apex:repeat var="name" value="{!pageItem.seikyusakiNameList}"><br/><span>{!name}</span>
+                                            </apex:repeat>
+                                            <span>&nbsp;御中</span><br/>
+                                            <span>({!pageItem.sHead.Seikyusaki__r.KokyakuCd__c})</span><br/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <!-- ヘッダ：宛名／住所（右側） -->
+                            <td width="35%" height="100%" style="border-collapse: collapse; ">
+                                <table width="100%" >
+                                    <tr>
+                                        <td width="90%" align="right">
+                                            PAGE&nbsp;&nbsp;{!pageItem.pageNo}
+                                        </td>
+                                    </tr>
+                                </table>
+                                <table width="100%" >
+                                    <tr>
+                                        <td width="50%" align="left">請求日：<apex:outputText value="{0, date, yyyy年MM月dd日}"><apex:param value="{!pageItem.sHead.Shimebi__c}"/></apex:outputText></td>
+                                        <td width="50%" align="right">請求No.&nbsp;{!pageItem.sHead.Name}</td>
+                                    </tr>
+                                </table>
+                                <table width="100%" class="overlap">
+                                    <tr>
+                                        <td width="15%" align="left">{!$Organization.PostalCode}</td>
+                                        <td width="35%" align="left">
+                                            {!$Organization.State}{!$Organization.City}<br/>{!$Organization.Street}
+                                        </td>
+                                    </tr>
+                                </table>
+                                <table width="100%" class="overlap"><tr><td>{!$Organization.Name}</td></tr></table>
+                                <table width="100%" class="overlap"><tr><td>TEL&nbsp;{!$Organization.Phone}&nbsp;FAX&nbsp;{!$Organization.Fax}</td></tr></table>
+                                <br/>
+                                <!-- 社印 -->
+                                <div class="company-seal">
+                                    <apex:image url="{!URLFOR($Resource.SignImage, 'sign_company.png')}" width="80px" height="80px" alt="社印"/>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- ヘッダ：支払情報 -->
+<!-- 20160107追加 -->
+                    <apex:outputPanel layout="none" rendered="{!pageItem.isFirst}">
+                    <table class="header-payinfo">
+                        <tr>
+                            <td style="height: 25px; vertical-align: bottom;" colspan="3">
+<!-- 20160107削除
+                                <apex:outputPanel layout="none" rendered="{!pageItem.isFirst}">
+-->
+                                    <apex:outputPanel layout="none" rendered="{!pageItem.sHead.SeikyusakiTorihikiKbn__c!='クレジットカード'}">お振込み分として、
+                                    下記の金額をご請求いたしますので、ご報告申し上げます。<br/>
+                                    誠に勝手ながら、振込銀行手数料は貴社にてご負担いただきますようお願い申し上げます。</apex:outputPanel>
+                                    <apex:outputPanel layout="none" rendered="{!pageItem.sHead.SeikyusakiTorihikiKbn__c=='クレジットカード'}">クレジットカードご決済分として、
+                                    下記の金額をご請求いたしますので、ご報告申し上げます。</apex:outputPanel>
+<!-- 20160107削除
+                                </apex:outputPanel>
+-->
+                            </td>
+                        </tr>
+                        <tr>
+                            <!-- ヘッダ：支払情報（左側） -->
+                            <td width="60%" height="100%">
+                                <!-- 合計金額 -->
+<!-- 20160107削除
+                                <apex:outputPanel layout="none" rendered="{!pageItem.isFirst}">
+-->
+                                    <table width="100%">
+                                        <tr>
+                                            <td style="height: 30px; vertical-align: middle;">
+                                                <table width="100%" height="100%">
+                                                    <tr>
+                                                        <td width="50%" style="font-size:20px; font-weight:bold; text-align: center; vertical-align: middle; border: solid #000000 2px; border-right: solid #000000 1px; background-color: #BDBDBD;">
+                                                            ご請求金額（税込）
+                                                        </td>
+                                                        <td align="center" width="50%" style="font-size:20px; font-weight:bold; vertical-align: middle; border: solid #000000 2px; border-left: solid #000000 1px;">
+                                                            <apex:outputtext value="{0, number, ###,###}"><apex:param value="{!pageItem.sHead.Seikyugaku_Tax__c}"/></apex:outputtext>&nbsp;円
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td width="50%" style="font-size:20px; font-weight:bold; text-align: center; vertical-align: middle; border: solid #000000 2px; border-right: solid #000000 1px; background-color: #BDBDBD;">
+                                                            <apex:outputPanel layout="none" rendered="{!pageItem.sHead.SeikyusakiTorihikiKbn__c!='クレジットカード'}">
+                                                                お振込期日
+                                                            </apex:outputPanel>
+                                                            <apex:outputPanel layout="none" rendered="{!pageItem.sHead.SeikyusakiTorihikiKbn__c=='クレジットカード'}">
+                                                                ご決済予定日
+                                                            </apex:outputPanel>
+                                                        </td>
+                                                        <td align="center" width="50%" style="font-size:20px; font-weight:bold; vertical-align: middle; border: solid #000000 2px; border-left: solid #000000 1px;">
+                                                            <apex:outputText value="{0, date, yyyy年MM月dd日}"><apex:param value="{!pageItem.sHead.KaisyuScheduledDate__c}"/></apex:outputText>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <br/>
+<!-- 20160107削除
+                                </apex:outputPanel>
+-->
+                            </td>
+                            <td width="5%" height="100%"></td>
+                            <!-- ヘッダ：支払情報（右側） -->
+                            <td width="35%" height="100%" style="border-collapse: collapse; ">
+<!-- 20160107削除
+                                <apex:outputPanel layout="none" rendered="{!pageItem.isFirst}">
+-->
+                                    <apex:outputPanel layout="none" rendered="{!pageItem.sHead.SeikyusakiTorihikiKbn__c!='クレジットカード'}">
+                                        <table class="header-kouzainfo">
+                                            <tr>
+                                                <td colspan="2" style="border-bottom: 0px;">【振込先】</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="width:30%; border-top: 0px; border-bottom: 0px; border-right: 0px;">［銀　行］</td>
+                                                <td style="width:70%; border-top: 0px; border-bottom: 0px; border-left: 0px;">{!pageItem.sHead.FurikomiBankName__c}&nbsp;&nbsp;{!pageItem.sHead.FurikomiShitenName__c}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="width:30%; border-top: 0px; border-bottom: 0px; border-right: 0px;">［口座番号］</td>
+                                                <td style="width:70%; border-top: 0px; border-bottom: 0px; border-left: 0px;">{!pageItem.sHead.FurikomiKozaType__c}&nbsp;&nbsp;{!pageItem.sHead.FurikomiKozaNo__c}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="width:30%; border-top: 0px; border-right: 0px;">［口座名義］</td>
+                                                <td style="width:70%; border-top: 0px; border-left: 0px;">{!pageItem.sHead.FurikomiKozaName__c}</td>
+                                            </tr>
+                                        </table>
+                                    </apex:outputPanel>
+<!-- 20160107削除
+                                </apex:outputPanel>
+-->
+                            </td>
+                        </tr>
+                    </table>
+                    </apex:outputpanel>
+
+                    <!-- 詳細 -->
+                    <table class="detail">
+                        <!-- 詳細：ヘッダ -->
+                        <tr>
+                            <th width="10%">日付<br/>伝票番号</th>
+                            <th width="54%">件名/商品名</th>
+                            <th width="8%">数量</th>
+                            <th width="8%">単価</th>
+                            <th width="10%">金額</th>
+                            <th width="10%" style="border-right: solid #000000 2px;">消費税</th>
+                        </tr>
+                        <!-- 詳細：各レコード -->
+                        
+                        <apex:repeat var="item" value="{!pageItem.meisaiList}">
+
+                            <tr>
+                                <!-- 番号・日付行 -->
+                                <apex:outputPanel layout="none" rendered="{!(item.styleClass == 'head' && item.denpyoNo != '')}">
+                                    <td align="center">
+                                        <apex:outputText value="{0, date, yy/MM/dd}"><apex:param value="{!item.uriageDate + (0.041667 * 9)}"/></apex:outputText><br/>
+                                        <apex:outputtext value="{!item.denpyoNo}"></apex:outputtext>
+                                    </td>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!(item.styleClass == 'meisai')}">
+                                    <td/>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!(item.styleClass == 'subtotal')}">
+                                    <td/>
+                                </apex:outputPanel>
+                                
+                                <!-- 作業名行 -->
+                                <apex:outputPanel layout="none" rendered="{!(item.styleClass == 'head' && item.denpyoNo != '')}">
+                                    <td align="left">
+                                        <apex:outputtext value="{!item.seikyuMeisai.SeikyuNo__r.AnkenName__c}"></apex:outputtext>&nbsp;&nbsp;
+                                        <apex:outputtext value="{!item.seikyuMeisai.SeikyuNo__r.AnkenTantosya__c}"></apex:outputtext>
+                                        <apex:outputPanel layout="none" rendered="{!item.seikyuMeisai.SeikyuNo__r.AnkenTantosya__c!=''}">&nbsp;様</apex:outputPanel><br/>
+                                        <apex:outputText value="お客様発注番号：{!item.seikyuMeisai.SeikyuNo__r.DenpyoNo__r.ClientOrderNumber__c}" rendered="{!IF(ISNULL(item.seikyuMeisai.SeikyuNo__r.DenpyoNo__r.ClientOrderNumber__c), false, true)}"/>
+                                     </td>
+                                 </apex:outputPanel>
+                                 <apex:outputPanel layout="none" rendered="{!(item.styleClass == 'meisai' && item.denpyoNo== '')}">
+                                     <td align="left">                              
+                                        <apex:outputtext value="{!item.seikyuMeisai.SagyoName__c}"></apex:outputtext>
+                                    </td>  
+                                </apex:outputPanel>        
+                                <apex:outputPanel layout="none" rendered="{!(item.styleClass == 'subtotal')}">
+                                    <td align="right">
+                                        <apex:outputtext value="{!item.subtotalTitle}"></apex:outputtext>
+                                    </td>
+                                </apex:outputPanel>
+                                
+                                <!-- 数量行 -->
+                                <apex:outputPanel layout="none" rendered="{!(item.styleClass == 'meisai')}">
+                                    <td align="right">
+                                        <apex:outputtext value="{0, number, ###,###}"><apex:param value="{!item.seikyuMeisai.Suryo__c}"/></apex:outputtext>
+                                    </td>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!(item.styleClass == 'subtotal')}">
+                                    <td align="right">
+                                        <apex:outputtext value="{0, number, ###,###}"><apex:param value="{!item.subtotalSuryo}"/></apex:outputtext>
+                                    </td>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!(item.styleClass == 'head')}">
+                                    <td/>
+                                </apex:outputPanel>
+                                
+                                <!-- 単価行 -->
+                                <apex:outputPanel layout="none" rendered="{!(item.styleClass == 'meisai')}">
+                                    <td align="right">
+                                        <apex:outputtext value="{0, number, ###,###}"><apex:param value="{!item.seikyuMeisai.Tanka__c}"/></apex:outputtext>
+                                    </td>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!(item.styleClass == 'subtotal')}">
+                                    <td/>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!(item.styleClass == 'head')}">
+                                    <td/>
+                                </apex:outputPanel>
+                                
+                                <!-- 金額行 -->
+                                <apex:outputPanel layout="none" rendered="{!(item.styleClass == 'meisai')}">
+                                    <td align="right">
+                                        <apex:outputtext value="{0, number, ###,###}"><apex:param value="{!item.seikyuMeisai.Kingaku__c}"/></apex:outputtext>
+                                    </td>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!(item.styleClass == 'subtotal')}">
+                                    <td align="right">
+                                        <apex:outputtext value="{0, number, ###,###}"><apex:param value="{!item.subtotalSeikyugaku}"/></apex:outputtext>
+                                    </td>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!(item.styleClass == 'head')}">
+                                    <td/>
+                                </apex:outputPanel>
+                                
+                                <!-- 消費税行 -->
+                                <apex:outputPanel layout="none" rendered="{!(item.styleClass == 'meisai')}">
+                                    <td align="right">
+                                        <apex:outputtext value="{0, number, ###,###}"><apex:param value="{!item.seikyuMeisai.Tax__c}"/></apex:outputtext>
+                                    </td>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!(item.styleClass == 'subtotal')}">
+                                    <td align="right">
+                                        <apex:outputtext value="{0, number, ###,###}"><apex:param value="{!item.subtotalTax}"/></apex:outputtext>
+                                    </td>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!(item.styleClass == 'head')}">
+                                    <td/>
+                                </apex:outputPanel>
+                            
+                            </tr>
+                        </apex:repeat>
+
+                        <!-- 詳細：余白 -->
+                        <tr>
+                            <td colspan="6" style="height: 20px;"></td>
+                        </tr>
+
+                        <!-- 詳細：合計 -->
+                        <apex:outputPanel layout="none" rendered="{!pageItem.isLast}">
+                            <tr>
+                                <td colspan="6" style="padding: 0px;">
+                                    <table style="width: 100%; height: 100%; border-collapse: collapse; border: 0px;">
+                                        <tr>
+                                            <td align="center" style="width: 10%; border-top: 0px; border-bottom: 0px; border-left: 0px;">
+                                                数量合計
+                                            </td>
+                                            <td align="right" style="width: 10%; border-top: 0px; border-bottom: 0px;">
+                                                <apex:outputtext value="{0, number, ###,###}"><apex:param value="{!pageItem.suryo}"/></apex:outputtext>
+                                            </td>
+                                            <td align="center" style="width: 10%; border-top: 0px; border-bottom: 0px;">
+                                                合計(税抜き)
+                                            </td>
+                                            <td align="right" style="width: 10%; border-top: 0px; border-bottom: 0px;">
+                                                <apex:outputtext value="{0, number, ###,###}"><apex:param value="{!pageItem.kingaku}"/></apex:outputtext>
+                                            </td>
+                                            <td align="center" style="width: 10%; border-top: 0px; border-bottom: 0px;">
+                                                消費税額
+                                            </td>
+                                            <td align="right" style="width: 10%; border-top: 0px; border-bottom: 0px;">
+                                                <apex:outputtext value="{0, number, ###,###}"><apex:param value="{!pageItem.tax}"/></apex:outputtext>
+                                            </td>
+                                            <td align="center" style="width: 10%; border-top: 0px; border-bottom: 0px;">
+                                                前回繰越額
+                                            </td>
+                                            <td align="right" style="width: 10%; border-top: 0px; border-bottom: 0px; border-right: 0px;">
+                                                <apex:outputtext value="{0, number, ###,###}"><apex:param value="{!pageItem.kurikoshigaku}"/></apex:outputtext>
+                                            </td>
+                                            <td align="center" style="width: 10%; border-top: 0px; border-bottom: 0px;">
+                                                合計(税込み)
+                                            </td>
+                                            <td align="right" style="width: 10%; border-top: 0px; border-bottom: 0px; border-right: 0px;">
+                                                <apex:outputtext value="{0, number, ###,###}"><apex:param value="{!pageItem.sHead.Seikyugaku_Tax__c}"/></apex:outputtext>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </apex:outputPanel>
+
+                    </table>
+
+                    <!-- 改ページ -->
+                    <apex:outputPanel layout="none" rendered="{!(!pageItem.isLastHead)}">
+                        <div class="break"></div>
+                    </apex:outputPanel>
+
+                </div>
+
+                </apex:repeat>
+
+            </apex:repeat>
+
+        </body>
+    </html>
+</apex:page>

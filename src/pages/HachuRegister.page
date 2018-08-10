@@ -1,0 +1,138 @@
+<apex:page title="発注情報登録" controller="HachuRegisterController" action="{!init}" tabStyle="Anken__c">
+
+    <!-- 共通スクリプト -->
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>
+
+    <!-- スクリプト処理 -->
+    <script type="text/javascript">
+        // 全チェック
+        function checkAll() {
+            var checked = $('input[id$="selectCheckedAll"]').attr('checked');
+            if(checked){
+                $('input[id$="selectChecked"]').attr('checked', 'checked');
+            }else{
+                $('input[id$="selectChecked"]').removeAttr('checked');
+            }
+        }
+    </script>
+
+    <apex:sectionHeader title="発注情報登録" />
+    <apex:pageMessages id="messagearea" showDetail="false" />
+
+    <apex:form >
+        <!-- 初期表示チェックOK時 -->
+        <apex:pageBlock title="対象案件一覧" rendered="{!isInitCheck}">
+
+            <!-- ボタンエリア -->
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="登録＆発注依頼" action="{!save}"/>
+                <apex:commandButton value="キャンセル" action="{!cancel}" immediate="true"/>
+            </apex:pageBlockButtons>
+            
+            <!-- 発注情報 -->
+            <apex:pageBlockSection title="発注先" columns="1">
+                <apex:inputField value="{!hachuInfo.Anken__c}" required="true"/>
+                <apex:inputField value="{!hachuInfo.Hachusaki__c}" required="true"/>
+                <apex:inputField value="{!hachuInfo.ItemCnt__c}" required="true"/>
+                <apex:inputField value="{!hachuInfo.Sagyoshiji_Renrakujiko__c}" style="width: 500px; height: 200px;"/>
+            </apex:pageBlockSection>
+
+            <!-- 発注依頼対象 -->
+            <apex:pageBlockSection title="発注依頼対象" columns="1">
+                <apex:pageBlockTable var="item" value="{!ankenMeisaiList}">
+
+                    <!-- 選択チェックボックス -->
+                    <apex:column style="width:30px">
+                        <apex:facet name="header">
+                            <apex:inputCheckbox id="selectCheckedAll" onclick="javascript:checkAll();"/>
+                        </apex:facet>
+                      　<apex:inputcheckbox id="selectChecked" value="{!item.checked}" />
+                    </apex:column>
+        
+                    <!-- 作業コード -->
+                    <apex:column style="width:120px">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.AnkenMeisai__c.fields.SagyoCd__c.label}"/>
+                        </apex:facet>
+                        <apex:outputfield style="width:100px" value="{!item.ankenMeisai.SagyoCd__c}"/> 
+                    </apex:column>
+
+                    <!-- 作業名 -->
+                    <apex:column style="width:220px">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.AnkenMeisai__c.fields.SagyoName__c.label}"/>
+                        </apex:facet>
+                        <apex:outputfield style="width:200px" value="{!item.ankenMeisai.SagyoName__c}"/> 
+                    </apex:column>
+
+                    <!-- 数量 -->
+                    <apex:column style="width:60px">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.AnkenMeisai__c.fields.Suryo__c.label}"/>
+                        </apex:facet>
+                        <apex:outputfield style="width:50px" value="{!item.ankenMeisai.Suryo__c}"/> 
+                    </apex:column>
+
+                    <!-- 単価 -->
+                    <apex:column style="width:60px">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.AnkenMeisai__c.fields.Tanka__c.label}"/>
+                        </apex:facet>
+                        <apex:outputfield style="width:50px" value="{!item.ankenMeisai.Tanka__c}"/> 
+                    </apex:column>
+
+                    <!-- 割引率 -->
+                    <apex:column style="width:60px">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.AnkenMeisai__c.fields.Waribikiritsu__c.label}"/>
+                        </apex:facet>
+                        <apex:outputfield style="width:50px" value="{!item.ankenMeisai.Waribikiritsu__c}"/> 
+                    </apex:column>
+
+                    <!-- 金額（税抜） -->
+                    <apex:column style="width:120px">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.AnkenMeisai__c.fields.Kingaku__c.label}"/>
+                        </apex:facet>
+                        <apex:outputfield style="width:100px" value="{!item.ankenMeisai.Kingaku__c}"/> 
+                    </apex:column>
+
+                    <!-- 消費税額 -->
+                    <apex:column style="width:120px">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.AnkenMeisai__c.fields.Tax__c.label}"/>
+                        </apex:facet>
+                        <apex:outputfield style="width:100px" value="{!item.ankenMeisai.Tax__c}"/> 
+                    </apex:column>
+
+                    <!-- 発注情報 -->
+                    <apex:column style="width:120px">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.AnkenMeisai__c.fields.HachuInfo__c.label}"/>
+                        </apex:facet>
+                        <apex:outputField style="width:100px" value="{!item.ankenMeisai.HachuInfo__c}"/> 
+                    </apex:column>
+
+                    <!-- 発注先 -->
+                    <apex:column style="width:120px">
+                        <apex:facet name="header">
+                            <apex:outputText value="{!$ObjectType.AnkenMeisai__c.fields.Hachusaki__c.label}"/>
+                        </apex:facet>
+                        <apex:outputText style="width:100px" value="{!item.ankenMeisai.Hachusaki__c}" escape="false"/> 
+                    </apex:column>
+
+                </apex:pageBlockTable>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+
+        <!-- 初期表示チェックNG時 -->
+        <apex:pageBlock rendered="{!(!isInitCheck)}">
+            <!-- ボタンエリア -->
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="戻る" action="{!cancel}" immediate="true" />
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+
+    </apex:form>
+
+</apex:page>

@@ -1,0 +1,5 @@
+<apex:page standardController="Shift_Assignments__c" sidebar="false" >
+<script>
+window.location.assign('/apex/EPMS_Shift_Assignment');      
+</script>
+</apex:page>

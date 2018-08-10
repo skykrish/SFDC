@@ -1,0 +1,96 @@
+<apex:page Controller="EPMS_CreateProductionOrderRedo"  sidebar="false" showHeader="false"> 
+    
+    <style type="text/css">
+        .maincontent{
+        width: 50%;    
+        margin: 0 auto;
+        }
+        .pbTitle{
+        position: relative;
+        display: none;
+        }
+        #j_id0:j_id2:j_id3:j_id30 {
+        margin-top: 50px;
+        }
+        
+    </style>
+    <script src="/soap/ajax/35.0/connection.js"></script>
+    <script>
+        function refreshtest() {
+        window.opener.location.reload();
+    }
+    function ClosePopup() {
+        
+        sforce.connection.sessionId = '{!$Api.Session_ID}';
+        var describeSObjectResult = sforce.connection.describeSObject("Anken__c");
+        var prefix = describeSObjectResult.keyPrefix; 
+        var url = location.href;
+        var basepath = '{!basepath}';
+        var filerec = '{!fileRecord}';
+        var baseURL = url.substring(0, url.indexOf('/', 14));      
+        var pareurl = baseURL+"/"+filerec; 
+        if(basepath == 'detailpage'){
+            if(pareurl) {
+                // window.opener.location.href=baseURL+"/"+filerec;
+            }  
+        }else if(basepath =='order') {
+            // window.opener.location.href="/" + prefix;
+        }
+        if(baseURL) {
+            window.top.close();     
+        }  
+    }
+    
+    function refreshParentPage() {
+        
+        var redirectURL = window.opener.location.href;
+        
+        if(redirectURL) {
+            window.opener.location.href = window.opener.location.href;
+            
+            if (window.opener.progressWindow) {
+                window.opener.progressWindow.close();
+            }
+            window.close();
+        }
+    }
+    </script>
+    
+    <apex:form >
+        <apex:pageBlock mode="maindetail">
+            <apex:pageMessages id="error" />
+            
+            <apex:outputPanel >
+                <apex:pageBlock >
+                    <br/><br/>
+                    <div class="maincontent">
+                        <apex:outputLabel value="PO Instruction" style="margin:40px;bottom:5em;position:relative;"/>
+                        <apex:inputTextarea value="{!poInstruction}" style="height:10em;width:18em;" />
+                    </div>
+                </apex:pageBlock>
+            </apex:outputPanel>
+            
+            <apex:pageBlockButtons style="text-align:center;" location="bottom"> 
+                <apex:outputPanel id="commandButton">
+                    <apex:outputPanel >
+                        <apex:commandButton value="Redo Order" action="{!save}" rerender="error,commandButton" disabled="{!diableButton}" onclick="this.disabled = true;"/>                                    
+                        - <apex:commandButton value="Close" onclick="ClosePopup();" oncomplete="refreshtest();"/> 
+                    </apex:outputPanel>
+                </apex:outputPanel>          
+            </apex:pageBlockButtons>
+            
+        </apex:pageBlock>
+        <apex:outputpanel rendered="{!existingPO.size!=0}" >
+            <div>
+                <p style="color:blue;"><b> Production Order(s)</b> </p>
+            </div>
+            <apex:pageblock >
+                <apex:pageBlockTable value="{!existingPO}" var="PO" width="200">
+                    <apex:column value="{!PO.Name}"/>
+                    <apex:column value="{!PO.Production_Order_Status__c}"/>
+                    <apex:column value="{!PO.Mbo_Location__c}"/>            
+                </apex:pageBlockTable>
+            </apex:pageblock>
+        </apex:outputpanel>
+    </apex:form>
+</apex:page>

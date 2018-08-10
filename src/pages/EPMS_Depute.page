@@ -1,0 +1,80 @@
+<apex:page controller="EPMS_Depute_Member" sidebar="false" showHeader="false">
+
+   <style>
+   p{
+    font-weight:bold;
+    text-align:center;
+    }
+    .bPageBlock {
+     border-top: 0px;
+    }
+    
+   </style>
+
+    <script>   
+    function Close(){
+           window.parent.close();
+           window.opener.location.reload();
+      }
+      
+      function ClosePopup(){
+     
+       var url = location.href;
+       
+        var baseURL = url.substring(0, url.indexOf('/', 14));      
+        window.opener.location.href=baseURL+"/a0l";
+       
+        if(baseURL)
+        {
+            window.top.close();     
+        }
+        refreshParentPage();
+    }
+    
+    function refreshParentPage() 
+    {
+        alert(window.opener.location.href)
+        var redirectURL = window.opener.location.href;
+        if(redirectURL)
+        {
+            window.opener.location.href = window.opener.location.href;
+            if (window.opener.progressWindow) 
+            {
+                window.opener.progressWindow.close();
+            }
+            window.close();
+        }
+    }
+      
+    </script>  
+    <apex:form >
+        <apex:pageBlock mode="maindetail">
+            <apex:pageMessages />
+            <apex:pageBlock >
+                <apex:outputLabel value="Location "></apex:outputLabel>
+                <apex:selectList value="{!selectedLocId}" size="1" multiselect="false"  >
+                <apex:selectOptions value="{!ListOfLocations}" />
+                </apex:selectList>      
+            
+            </apex:pageBlock>
+            <div>
+            <p><b>These are the selected members</b> </p>
+            </div>
+            <apex:pageBlockTable value="{!mem}" var="me" width="200">
+            <apex:column value="{!me.Name}"/>
+            <apex:column value="{!me.Location__c}"/>
+            <apex:column value="{!me.Country__c}"/> 
+            
+           
+            
+            </apex:pageBlockTable>
+            <apex:pageBlock >
+            
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="Depute Location" action="{!save}" />
+                <apex:commandbutton value="Close" onclick="ClosePopup();return false;"/>
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+      </apex:pageBlock>
+    </apex:form>
+</apex:page>

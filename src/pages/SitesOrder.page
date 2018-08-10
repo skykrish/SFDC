@@ -1,0 +1,649 @@
+<apex:page controller="SitesOrderController" action="{!init}" cache="false" sidebar="false" showHeader="false" standardStylesheets="false">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>ご発注</title>
+
+    <!-- Design Style -->
+    <apex:stylesheet value="{!URLFOR($Resource.SitesContents, 'common/css/import.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.SitesContents, 'common/css/editorial/sub.css')}" />
+
+    <!-- Uploader Style -->
+    <apex:stylesheet value="{!URLFOR($Resource.PluploadLib, 'plupload/js/jquery.ui.plupload/css/jquery.ui.plupload.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.JQueryUICustom, 'css/smoothness/jquery-ui-1.8.16.custom.css')}" />
+
+    <!-- 独自のStyle -->
+    <style type="text/css">
+        span.upload-message {
+            font-size: 12px;
+            color: red;
+        }
+    </style>
+
+    <!-- JQuery, JQueryUI --> 
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>
+    <apex:includeScript value="{!URLFOR($Resource.JQueryUI)}"/>
+    
+    <!-- Design Script -->
+    <apex:includeScript value="{!URLFOR($Resource.SitesContents, 'common/js/jquery.blend-min.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.SitesContents, 'common/js/scrollsmoothly.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.SitesContents, 'common/js/heightLine.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.SitesContents, 'common/js/common.js')}"/>
+
+    <!-- Uploader Script --> 
+    <apex:includeScript value="{!URLFOR($Resource.PluploadLib, 'plupload/js/plupload.full.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.PluploadLib, 'plupload/js/jquery.ui.plupload/jquery.ui.plupload.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.PluploadLib, 'plupload/js/i18n/ja.js')}"/>
+    <script type="text/javascript">
+        // global variables
+        var errorInfoes = null;
+        var uploader = null;
+
+        // Pluploadローディング, 設定
+        function do_plupload() {
+
+            //
+            // 初期化処理
+            //
+            initialize();
+
+            //
+            // コントロールローディング, 設定
+            //
+            $('#flash_uploader').plupload({
+                // General settings
+                runtimes : 'flash',
+                url : 'https://{!fileServerAddressGlobal}/plupload/upload.php?userDir={!fileServerId}&dateDir={!fileServerDir}',
+                max_file_size : '1024mb',
+                chunk_size : '5mb',
+                unique_names : true,
+
+                // Specify what files to browse for
+                filters : [
+                    {title : "画像、圧縮ファイル", extensions : "jpg,jepg,tif,tiff,eps,psd,bmp,pdf,png,zip,lzh,rar,sit,sitx"}
+                ],
+
+                // Flash settings
+                flash_swf_url : '{!URLFOR($Resource.PluploadLib, 'plupload/js/plupload.flash.swf')}'
+            });
+
+            //
+            // アップローダコントロール取得
+            //
+            uploader = $('#flash_uploader').plupload('getUploader');
+
+            //
+            // ファイル追加時のオートスタート
+            //
+            uploader.bind('FilesAdded', function(up, files) {
+                setTimeout('uploader.start()', 100)
+            });
+
+            //
+            // １ファイルアップロード完了
+            //
+            uploader.bind('FileUploaded', function(up, file, res) {
+
+                // checkstatus
+                if (file.status == plupload.FAILED) {
+                    // エラーの場合
+                    errorInfoes.push({fileid : file.id, name : file.name, code : "", message : "System Error."});
+
+                } else {
+                    // phpからのステータスをチェックする
+                    try {
+                        var resJson = getResJson(res.response);
+                        if (resJson) {
+                            if (resJson.error) {
+                                // エラー時
+                                errorInfoes.push({fileid : file.id, name : file.name, code : resJson.error.code, message : resJson.error.message});
+                            } else {
+                                // 正常時
+                                $('input[id$="isUseUploader"]').val(true);
+                            }
+                        }
+                    } catch (e) {
+                    }
+                }
+            });
+
+            //
+            // 全ファイルアップロード完了
+            //
+            uploader.bind('UploadComplete', function(up, files) {
+
+                var errorHtml = '';
+
+                // エラーコード処理
+                $.each (errorInfoes, function (key, error) {
+                    // エラー情報作成
+                    errorHtml += '<span class="upload-message">[' + error.name + '] : アップロードできませんでした。 Reason : [' + error.message + ']</span><br/>';
+                });
+                // エラー情報表示
+                $('#result_area').html(errorHtml);
+            });
+            
+            //
+            // エラー発生時
+            //
+            uploader.bind('Error', function(up, error) {
+                errorInfoes.push({fileid : error.file.id, name : error.file.name, code : "", message : error.message});
+            });
+        }
+
+        //
+        // 初期化処理
+        //
+        function initialize() {
+            errorInfoes = new Array();
+            $('#result_area').html('');
+        }
+
+        //
+        // phpのレスポンスからJson部分を取り出す
+        //
+        function getResJson(resStr) {
+            var ret;
+            if (resStr) {
+                var resPos = resStr.indexOf("jsonrpc");
+                resStr = resStr.substring(resPos - 2);
+                ret = jQuery.parseJSON(resStr);
+            }
+            return ret;
+        }
+    </script>
+
+    <!-- 独自のScript -->
+    <script type="text/javascript">
+        // 初期化処理
+        $(document).ready(function() {
+
+            // Pluploadローディング, 設定
+            do_plupload();
+        
+            // ラジオボタンデフォルトチェック
+            var dispMode = '{!dispMode}';
+            if (dispMode == 'normal') {
+                var status = $('input[id$="status"]').val();
+                $("input[name='add_radio']").val([status]);
+            }
+        });
+        
+        //
+        // ラジオボタンチェック
+        //
+        // 発注のタイミング
+        function changeRadio(e) {
+            $('input[id$="status"]').val(e.value)
+        }
+        // 納品方法
+        function changeNouhin(e) {
+            $('input[id$="nouhin"]').val(e.value)
+        }
+        // アップロード方法
+        function changeUpload(e) {
+            $('input[id$="upload"]').val(e.value)
+        }
+        
+        
+        
+        // 定型テキスト呼び出し
+        function openFormatText() {
+            var url = 'https://{!$Site.domain}/formatText';
+            window.open(url, "formatText", "width=800, height=600, menubar=0, toolbar=0, location=0, titlebar=0, status=0, scrollbars=1");
+        }
+        
+        // 定型テキスト設定
+        function setFormatText(str) {
+            $('textarea[id$="EndUserComment"]').val(str);
+        }
+    </script>
+    
+    <!--Google Analytics-->
+    <script type="text/javascript">
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-17698964-1', 'auto', {'allowLinker': true}); 
+    ga('require', 'linker');
+    ga('linker:autoLink', ['kirinuki.jp','kirinuki.secure.force.com','mediabackoffice.co.jp'] ); 
+    ga('send', 'pageview');
+    </script>
+    <!--Google Analytics-->
+    
+    <!-- Yahoo Code for your Target List -->
+    <script type="text/javascript">
+    /* <![CDATA[ */
+    var yahoo_ss_retargeting_id = 1000068721;
+    var yahoo_sstag_custom_params = window.yahoo_sstag_params;
+    var yahoo_ss_retargeting = true;
+    /* ]]> */
+    </script>
+    <script type="text/javascript" src="//s.yimg.jp/images/listing/tool/cv/conversion.js">
+    </script>
+    <noscript>
+    <div style="display:inline;">
+    <img height="1" width="1" style="border-style:none;" alt="" src="//b97.yahoo.co.jp/pagead/conversion/1000068721/?guid=ON&script=0&disvt=false"/>
+    </div>
+    </noscript>
+
+</head>
+
+<body>
+    <div id="wrapper">
+    <div id="header" class="cf">
+        <div class="left">
+            <h1>
+                <a href="http://www.kirinuki.jp/" target="_blank">切り抜きJP</a>
+            </h1>
+        </div><!--div.left -->
+        <div class="right">
+            <apex:form >
+                <ul>
+                    <li>
+                        <apex:commandLink action="{!mypage}">
+                            <img src="{!URLFOR($Resource.SitesContents, 'common/img/btn_maypage.png')}" width="89" height="24" alt="マイページへ"/>
+                        </apex:commandLink>                
+                    </li>
+                    <li>
+                        <apex:commandLink action="{!logout}">
+                            <img src="{!URLFOR($Resource.SitesContents, 'common/img/btn_logout.png')}" width="89" height="24" alt="ログアウト"/>
+                        </apex:commandLink>                
+                    </li>
+                </ul>
+            </apex:form>
+        </div><!--div.right -->
+    </div><!--div#header -->
+
+    <div id="container" class="cf">
+    <div id="content" class="cf">
+
+        <!-- 通常モード：登録画面 -->
+        <apex:outputPanel rendered="{!(dispMode=='normal')}">
+            <apex:form >
+                <!-- メッセージ -->
+                <div style="width: 700px; margin: auto;">
+                    <c:SitesMessage msgList="{!msgList}"/>
+                </div>
+    
+                <div class="comment_normal">
+                    <p>
+                        ファイルのアップ方法は、下記の<input type="radio" name="radio" id="radio" value="radio" />から選択可能です。
+                    </p>
+                </div>
+        
+                <table border="0" cellspacing="0" cellpadding="0" class="normal" width="700">
+                    <tr>
+                        <th width="140" rowspan="3">ファイルのアップロード<br /><span class="require">※必須</span></th>
+                        <td>
+                            <label>
+                                <input type="radio" name="radio" id="radio" value="radio" />
+                                アップローダーを使用&nbsp;
+                                <apex:image url="{!URLFOR($Resource.SitesContents, '/common/img/icon_i.png')}" width="18" height="18" alt="フォルダごとアップロードをご希望の場合、圧縮したフォルダをアップロードして下さい" title="フォルダごとアップロードをご希望の場合、圧縮したフォルダをアップロードして下さい"/>
+                            </label><br />
+                            <span class="require">
+                                ※「ファイルを選択」をクリックしても動作しない場合は、<a href="https://goo.gl/MoKMbm" target="_blank">こちら</a>をご参照ください
+                            </span>                     
+                            <div id="flash_uploader">Loading Uploader...</div>
+                            <div id="result_area"></div>    
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>
+                                <input type="radio" name="radio" id="radio2" value="radio" />
+                                サーバーのフォルダを開く（Macのお客様）<br />
+                            </label>
+                            <div>
+                                <!-- ファイル共有：Mac -->
+                                <a href="afp://{!fileServerId}:{!fileServerPw}@{!fileServerAddressGlobal}/">
+                                    <apex:image url="{!URLFOR($Resource.SitesContents, '/common/img/folder_mac_mouseout.png')}" alt="Machintosh" width="109" height="100"
+                                    onmouseover="this.src='{!URLFOR($Resource.SitesContents, '/common/img/folder_mac_mouseover.png')}';"
+                                    onmouseout="this.src='{!URLFOR($Resource.SitesContents, '/common/img/folder_mac_mouseout.png')}';" />
+                                </a>
+                            </div>
+                            <span class="text_inline">
+                                ■上のフォルダアイコンをクリックすると、サーバー内のフォルダが立ち上がります <br />
+                                ■サーバーへ直接アクセスも可能です<br />
+                                接続方法は、<a href="http://kirinuki.jp/procedure/data.html" target="_blank">こちら</a>をご参照ください
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>
+                                <input type="radio" name="radio" value="FTPでアップロード" onclick="changeUpload(this)"/>
+                                FTPソフトでデータをサーバーへ直接アップロード&nbsp;
+                                <apex:image url="{!URLFOR($Resource.SitesContents, '/common/img/icon_i.png')}" width="18" height="18" alt="FTPソフトを使用して、サーバーへ直接ファイルをアップロードされた方はこちらにチェックを入れて下さい" title="FTPソフトを使用して、サーバーへ直接ファイルをアップロードされた方はこちらにチェックを入れて下さい"/><br />
+                            </label>
+
+                            <span class="text_inline">
+                                接続方法は、<a href="http://kirinuki.jp/procedure/data.html" target="_blank">こちら</a>をご参照ください
+                            </span>
+                            <apex:inputHidden id="upload" value="{!upload}" />
+                        </td>
+                    </tr>
+                </table>
+        
+                <hr />
+        
+                <table border="0" cellspacing="0" cellpadding="0" class="normal" width="700">
+                    <tr>
+                        <th width="140" rowspan="2">納品方法<span class="require"><br />※必須</span></th>
+                        <td>
+                            <label><input type="radio" name="add_Nouhin" value="サーバーへのアップロード" onclick="changeNouhin(this)" />サーバーへのアップロード</label><br />
+                            <span class="text_inline">
+                                ■完成データを、ftpサーバー内の「OUTPUT」フォルダにアップ後、メールにてご連絡を致します。<br />
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label><input type="radio" name="add_Nouhin" value="ダウンロード用URLでの納品" onclick="changeNouhin(this)" />ダウンロード用URLでの納品</label><br />
+                            <span class="text_inline">
+                                ■ダウンロード用URLをメールにてお知らせ致します。<br />
+                            </span>
+                            <apex:inputHidden id="nouhin" value="{!nouhin}" />
+                        </td>
+                    </tr>
+                </table>
+        
+                <hr />
+
+                <table border="0" cellspacing="0" cellpadding="0" class="normal" width="700">
+                    <tr>
+                        <th width="140">お客様のPC環境</th>
+                        <td>
+                            <apex:selectList value="{!pc}" multiselect="false" size="1">
+                                <apex:selectOption itemLabel="なし" itemValue=""></apex:selectOption>
+                                <apex:selectOptions value="{!pcSelectOptions}"></apex:selectOptions>
+                            </apex:selectList><br />
+                            <span class="text_inline">*「なし」の場合、会員登録された際のPC環境がご登録されます。</span>
+                        </td>
+                    </tr>
+                </table>
+        
+                <hr />
+        
+                <table border="0" cellspacing="0" cellpadding="0" class="normal" width="700">
+                    <tr>
+                        <th width="140">ご入稿フォルダ名<br />（空白可）&nbsp;
+                                <apex:image url="{!URLFOR($Resource.SitesContents, '/common/img/icon_i.png')}" width="18" height="18" alt="サーバに直接データをアップロードされたお客様はこちらにフォルダ名をご記入下さい" title="サーバに直接データをアップロードされたお客様はこちらにフォルダ名をご記入下さい"/></th>
+                        <td>
+                            <apex:inputField value="{!anken.FolderName__c}" styleClass="upload" onfocus="Focus(this);" onblur="Blur(this);"/><br />
+                            <span class="text_inline">*例 : 2011SSキリヌキ用画像</span>
+                        </td>
+                    </tr>
+                </table>
+        
+                <hr />
+        
+                <table border="0" cellspacing="0" cellpadding="0" class="normal" width="700">
+                    <tr>
+                    <th width="140">案件名（空白可）&nbsp;
+                                <apex:image url="{!URLFOR($Resource.SitesContents, '/common/img/icon_i.png')}" width="18" height="18" alt="納品書やご請求書に案件名の記載が必要な際はこちらにご入力下さい" title="納品書やご請求書に案件名の記載が必要な際はこちらにご入力下さい"/></th>
+                        <td>
+                            <apex:inputField value="{!anken.AnkenName__c}" styleClass="textbox2" onfocus="Focus(this);" onblur="Blur(this);"/><br />
+                            <span class="text_inline">例 : 2011SS カタログ用キリヌキ</span>
+                        </td>
+                    </tr>
+                </table>
+        
+                <hr />
+
+                <table border="0" cellspacing="0" cellpadding="0" class="normal" width="700">
+                    <tr>
+                    <th width="140">お客様発注番号&nbsp;
+                                <apex:image url="{!URLFOR($Resource.SitesContents, '/common/img/icon_i.png')}" width="18" height="18" alt="納品書やご請求書にお客様の発注番号（管理番号）の記載が必要な際はこちらにご入力下さい" title="納品書やご請求書にお客様の発注番号（管理番号）の記載が必要な際はこちらにご入力下さい"/><br />（空白可）</th>
+                         <td>
+                            <apex:inputField value="{!anken.ClientOrderNumber__c}" styleClass="textbox2" onfocus="Focus(this);" onblur="Blur(this);"/><br />
+                            <span class="text_inline">例 : 2011SS0000001</span>
+                        </td>
+                    </tr>
+                </table>
+        
+                <hr />
+        
+                <table border="0" cellspacing="0" cellpadding="0" class="normal" width="700">
+                    <tr>
+                        <th width="140">ご発注のタイミング<span class="require"><br />※必須</span></th>
+                        <td>
+                            <label><input type="radio" name="add_radio" value="受注" onclick="changeRadio(this)" />すぐに発注する</label>
+                            <apex:image url="{!URLFOR($Resource.SitesContents, '/common/img/icon_i.png')}" width="18" height="18" alt="お見積りが不要の場合こちらをご選択下さい" title="お見積りが不要の場合こちらをご選択下さい"/><br />
+                            <label><input type="radio" name="add_radio" value="見積受付" onclick="changeRadio(this)" />お見積りご確認後のご発注</label>
+                            <apex:image url="{!URLFOR($Resource.SitesContents, '/common/img/icon_i.png')}" width="18" height="18" alt="当社からのお見積り金額をご確認後のご発注をご希望の場合、こちらをご選択下さい" title="当社からのお見積り金額をご確認後のご発注をご希望の場合、こちらをご選択下さい"/><br />
+                            <apex:inputHidden id="status" value="{!anken.Status__c}" />
+                        </td>
+                    </tr>
+                </table>
+        
+                <hr />
+        
+                <table border="0" cellspacing="0" cellpadding="0" class="normal" width="700">
+                    <tr>
+                        <th width="140">ご担当者様<span class="require">　※必須</span></th>
+                        <td><span class="text_inline">ご担当者様を選択して下さい。複数名のご担当者様（5名まで）選択可能です。<br />お見積り・納品時のメールが各ご担当者様宛に送信されます。 </span>
+                            <table width="400" border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <th>主担当</th>
+                                    <td>
+                                        <apex:selectList value="{!tantosyaMain}" multiselect="false" size="1" >
+                                            <apex:selectOptions value="{!tantosyaSelectOptions}"></apex:selectOptions>
+                                        </apex:selectList>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>CC</th>
+                                    <td>
+                                        <apex:selectList value="{!tantosyaCc1}" multiselect="false" size="1">
+                                            <apex:selectOption itemLabel="なし" itemValue=""></apex:selectOption>
+                                            <apex:selectOptions value="{!tantosyaSelectOptions}"></apex:selectOptions>
+                                        </apex:selectList>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>CC</th>
+                                    <td>
+                                        <apex:selectList value="{!tantosyaCc2}" multiselect="false" size="1">
+                                            <apex:selectOption itemLabel="なし" itemValue=""></apex:selectOption>
+                                            <apex:selectOptions value="{!tantosyaSelectOptions}"></apex:selectOptions>
+                                        </apex:selectList>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>CC</th>
+                                    <td>
+                                        <apex:selectList value="{!tantosyaCc3}" multiselect="false" size="1">
+                                            <apex:selectOption itemLabel="なし" itemValue=""></apex:selectOption>
+                                            <apex:selectOptions value="{!tantosyaSelectOptions}"></apex:selectOptions>
+                                        </apex:selectList>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>CC</th>
+                                    <td>
+                                        <apex:selectList value="{!tantosyaCc4}" multiselect="false" size="1">
+                                            <apex:selectOption itemLabel="なし" itemValue=""></apex:selectOption>
+                                            <apex:selectOptions value="{!tantosyaSelectOptions}"></apex:selectOptions>
+                                        </apex:selectList>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+        
+                <hr />
+        
+                <table border="0" cellspacing="0" cellpadding="0" class="normal" width="700">
+                    <tr>
+                        <th width="140">作業指示（空白可）<span class="require"></span></th>
+                        <td>
+                            <span class="text_inline">
+                                作業指示、注意点などが御座いましたら、こちらにご指示のご記入をお願い申し上げます。<br />
+                                例：ファイル形式変換、背景の処理など
+                            </span>
+                            <apex:inputField id="EndUserComment" value="{!anken.EndUserComment__c}" styleClass="comment" onfocus="Focus(this);" onblur="Blur(this);"/>
+                        </td>
+                    </tr>
+                </table>
+        
+                <p class="inquiry">
+                    <input type="button" value="定型テキストより呼び起こす" class="button2" onclick="javascript:openFormatText();"/>&nbsp;
+                    <apex:image url="{!URLFOR($Resource.SitesContents, '/common/img/icon_i.png')}" width="18" height="18" alt="反復性の高いテキストを保存して、次回以降流用できます。3つまで登録可能です" title="反復性の高いテキストを保存して、次回以降流用できます。3つまで登録可能です"/>
+                </p>
+        
+                <p>&nbsp;</p>
+
+                <!-- ボタン部 -->
+                <p class="inquiry">
+                    <apex:commandButton value="確認画面へ進む" action="{!confirm}" styleClass="button"/>
+                </p>
+                <p>&nbsp;</p>
+
+                <!-- アップローダ使用有無 -->
+                <apex:inputHidden id="isUseUploader" value="{!anken.IsUseUploader__c}"/>
+
+            </apex:form>
+        </apex:outputPanel>
+
+        <!-- 確認モード：確認画面 -->
+        <apex:outputPanel rendered="{!(dispMode=='confirm')}">
+            <apex:form >
+                <div class="comment_normal">
+                    <p>
+                        下記の内容でよろしいですか？
+                    </p>
+                </div>
+        
+                <table border="0" cellspacing="0" cellpadding="0" class="normal" width="700">
+                    <tr>
+                        <th>ご入稿フォルダ名</th>
+                        <td colspan="2">
+                            <apex:outputField value="{!anken.FolderName__c}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>納品方法</th>
+                        <td colspan="2">
+                            <apex:outputText value="{!nouhin}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>お客様のPC環境</th>
+                        <td colspan="2">
+                            <apex:outputText value="{!pc}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>案件名</th>
+                        <td colspan="2">
+                            <apex:outputField value="{!anken.AnkenName__c}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>お客様発注番号</th>
+                        <td colspan="2">
+                            <apex:outputField value="{!anken.ClientOrderNumber__c}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>ご発注のタイミング</th>
+                        <td colspan="2">
+                            <apex:outputText value="{!IF(anken.Status__c == '受注', 'すぐに発注する', 'お見積り確認後のご発注')}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th rowspan="5">ご担当者様</th>
+                        <td width="50">主担当</td>
+                        <td>
+                            <apex:outputText value="{!tantosyaMainName}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>CC</td>
+                        <td>
+                            <apex:outputText value="{!tantosyaCc1Name}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>CC</td>
+                        <td>
+                            <apex:outputText value="{!tantosyaCc2Name}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>CC</td>
+                        <td>
+                            <apex:outputText value="{!tantosyaCc3Name}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="50">CC</td>
+                        <td>
+                            <apex:outputText value="{!tantosyaCc4Name}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>作業指示</th>
+                        <td colspan="2">
+                            <apex:outputField value="{!anken.EndUserComment__c}"/>
+                        </td>
+                    </tr>
+                </table>
+        
+                <p>&nbsp;</p>
+
+                <!-- ボタン部 -->
+                <p class="inquiry">
+                    <apex:commandButton value="送信" action="{!send}" styleClass="button"/>&nbsp;&nbsp;&nbsp;
+                    <apex:commandButton value="戻る" action="{!back}" styleClass="button"/>
+                </p>
+                <p>&nbsp;</p>
+
+            </apex:form>
+        </apex:outputPanel>
+
+    </div><!--div#content -->
+    </div><!--div#container -->
+    </div><!--div#wrapper -->
+
+    <!-- copy ritgh -->
+    <div id="copyright">
+        Powered by<a href="http://www.force.com/" target="_blank"> force.com</a>
+    </div><!--div#copyright -->
+    
+<!--Google リマーケティング-->
+<!-- Google Code for &#20840;&#27969;&#20837; -->
+<!-- Remarketing tags may not be associated with personally identifiable information or placed on pages related to sensitive categories. For instructions on adding this tag and more information on the above requirements, read the setup guide: google.com/ads/remarketingsetup -->
+<script type="text/javascript">
+/* <![CDATA[ */
+var google_conversion_id = 995058442;
+var google_conversion_label = "5mxVCK7c2wYQisa92gM";
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+/* ]]> */
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/995058442/?value=0&amp;label=5mxVCK7c2wYQisa92gM&amp;guid=ON&amp;script=0"/>
+</div>
+</noscript>
+<!--Google リマーケティング-->
+
+<!-- YDN リターゲティング -->
+
+<script type="text/javascript" language="javascript">
+/* <![CDATA[ */
+var yahoo_retargeting_id = 'T15AP4YAQ4';
+var yahoo_retargeting_label = '';
+/* ]]> */
+</script>
+<script type="text/javascript" language="javascript" src="//b92.yahoo.co.jp/js/s_retargeting.js"></script>
+<!-- YDN リターゲティング -->
+
+</body>
+</apex:page>

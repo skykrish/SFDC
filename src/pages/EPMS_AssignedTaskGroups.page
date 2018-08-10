@@ -1,0 +1,118 @@
+<apex:page controller="EPMS_TaskDistributionCaseLogsController" sidebar="false" showHeader="false" >
+    
+    <script src="/soap/ajax/35.0/connection.js"></script>
+    <script>
+        function refreshtest() {
+        window.opener.location.reload();
+    }
+    
+    function ClosePopup(){
+        
+        var selectedId = document.getElementById('j_id0:j_id2:j_id3:abcd:test1');
+        // alert('Val : ' + document.getElementById('j_id0:j_id2:j_id3:abcd:selVal').value);
+        
+        var hidselectedId = document.getElementById('j_id0:j_id2:j_id3:abcd:theHiddenInput');
+        var hidselectedId1 = document.getElementById('j_id0:j_id2:j_id3:abcd:theHiddenInput1');
+        //alert('Val : ' + document.getElementById('j_id0:j_id2:j_id3:abcd:theHiddenInput').value);
+        
+        if (window.opener != null && !window.opener.closed) {
+            var txtName = window.opener.document.getElementById('pg_mass_task:frmSubmitMassTask:j_id26:field_section:targetName');            
+            txtName.value = hidselectedId.value;
+            //alert('txtName.value : ' + txtName.value)
+            //var txtCount = window.opener.document.getElementById('pg_mass_task:frmSubmitMassTask:j_id26:field_section:taskCount');
+            //txtCount.value = hidselectedId1.value;
+            //window.opener.document.getElementById('pg_mass_task:frmSubmitMassTask:j_id26:field_section:taskCount').innerHTML = hidselectedId1.value;
+            window.opener.document.getElementById('pg_mass_task:frmSubmitMassTask:j_id26:field_section:taskCount').innerHTML = hidselectedId1.value.bold(); 
+            //alert(txtCount.value); 
+        }
+        
+        window.close();         
+    }
+    function refreshParentPage() {
+        
+        var redirectURL = window.opener.location.href;
+        
+        if(redirectURL) {
+            window.opener.location.href = window.opener.location.href;
+            
+            if (window.opener.progressWindow) {
+                window.opener.progressWindow.close();
+            }
+            window.close();
+        }
+    }  
+    </script>
+    <apex:form >
+        <apex:pageBlock >
+            <h1 id="section_header" style="font-size:25px; font-weight:normal;">Lookup</h1>
+            <hr/>
+            <br/><h1>
+            Search: 
+            </h1> 
+            <apex:selectList value="{!option}" size="1">
+              <apex:actionSupport event="onchange" action="{!refreshPage}" reRender="abcd" /> 
+                <apex:selectOptions value="{!values}"></apex:selectOptions>
+            </apex:selectList> 
+            
+            
+            <table border="0" cellpadding="0" cellspacing="0" style="width:565px; padding-left:13px; padding-top:15px;">
+                <tr>
+                    <td width="45%" align="center">Available Members</td>
+                    <td width="10%">&nbsp;</td>
+                    <td width="45%" align="center">Selected Members</td>
+                </tr>
+            </table>
+            
+            
+            <apex:pageBlockSection id="abcd"> 
+                <apex:panelGrid columns="3"> 
+                    <apex:outputPanel >
+                        <apex:selectList value="{!leftselected}" size="15" multiselect="true" style="width:250px;height:260px">
+                            <apex:selectOptions value="{!listValues}" />
+                        </apex:selectList>   
+                    </apex:outputPanel>
+                    
+                    <apex:panelGroup >
+                        <br/><br/><br/><br/>
+                        <div style="width:45px; text-align:center;"> 
+                            Add <br/> 
+                            <apex:image value="/img/s.gif" alt="Add" styleClass="rightArrowIcon" title="Add">                   
+                                <apex:actionSupport event="onclick"  action="{!selectclick}" reRender="abcd"/>
+                            </apex:image>  
+                        </div>                           
+                        
+                        <div style="width:45px; text-align:center; margin-top:5px;"> 
+                            <apex:image value="/img/s.gif" alt="Remove" styleClass="leftArrowIcon" title="Remove">
+                                <apex:actionSupport event="onclick" action="{!unselectclick}"  reRender="abcd"/>
+                            </apex:image> 
+                            Remove<br/>
+                        </div>
+                    </apex:panelGroup>
+                    
+                    <apex:outputPanel id="selItem">
+                        <apex:selectList value="{!rightselected}" size="15" multiselect="true" style="width:250px;height:260px" id="selVal">
+                            <apex:selectOptions value="{!SelectedValues}" />
+                        </apex:selectList>
+                    </apex:outputPanel>
+                    <apex:outputPanel id="hiddenitems">
+                        <apex:inputHidden value="{!strlist}" id="theHiddenInput"/>
+                        <apex:inputHidden value="{!taskCount}" id="theHiddenInput1"/> 
+                    </apex:outputPanel>
+                </apex:panelGrid>
+            </apex:pageBlockSection>
+            <br/><br/>
+            
+            
+            <table border="0" cellpadding="0" cellspacing="0" style="width:565px; padding-left:13px;">
+                <tr>
+                    <td width="100%" align="center">
+                        <apex:commandButton value="Done" action="{!AssignedSave}" reRender="PickValues,selItem,hiddenitems" oncomplete="ClosePopup();"/>
+                        <apex:commandButton value="Cancel" onclick="ClosePopup();" oncomplete="refreshtest();"/>
+                    </td>
+                </tr>
+            </table>
+            
+        </apex:pageBlock>
+    </apex:form>
+
+</apex:page>

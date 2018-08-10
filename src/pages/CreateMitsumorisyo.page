@@ -1,0 +1,5 @@
+<apex:page title="見積書作成" controller="CreateMitsumorisyoController" action="{!createPdf}">
+
+    <h1>見積書作成中...</h1>
+
+</apex:page>

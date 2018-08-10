@@ -1,0 +1,80 @@
+<apex:page Controller="EPMS_HandOverDirectoriesTL" showHeader="false" sidebar="false">
+    <style>
+    .bPageBlock {
+         background-color: white;
+     }
+    .bPageTitle h3 {
+            font-family: arial,"Times New Roman", Georgia, Serif;
+            font-size: 90% !important; 
+            // you can write this way also font-size: 40px !important;
+        }
+      
+        .bPageTitle h1{
+            font-style: Arial;
+            font-weight: bold;
+            font-size: 150% !important;
+            text-align:center;
+         }     
+     
+     </style>
+    <style>
+.tbldates table
+{
+width:100%;
+}
+.tbldates table th
+{
+width:50% !important;
+text-align:left !important;
+}
+.tbldates table select
+{
+width:94% !important;
+}
+</style>
+
+<script>   
+       function ClosePopup(){
+           window.parent.close();
+           window.opener.location.reload();
+      }
+      
+</script>   
+       <apex:form >
+          <apex:sectionHeader title="Change Person In-Charge for Directories" />
+          <apex:pagemessages > </apex:pagemessages>
+          <center>
+            <apex:pageblock mode="maindetail">
+             <apex:pageblockButtons location="bottom">
+                    <apex:commandbutton action="{!saveChanges}" value="Submit"/>
+                    <apex:commandbutton value="Close" onclick="ClosePopup();return false;"/>                 
+                </apex:pageblockButtons>
+                <div class="tbldates"> 
+                   <apex:pageBlockSection columns="1">
+                    <apex:pageblocksectionItem >
+                       <apex:outputText value="Available Shifts" style="font-size: 105%;margin-left:30px;" />
+                            <apex:selectList value="{!selShift}" size="1" multiselect="false">
+                            <apex:actionSupport event="onchange" action="{!changeShift}"  />
+                                <apex:selectOptions value="{!shiftNames}" />
+                            </apex:selectList>
+                                             
+                            </apex:pageblocksectionItem> 
+                        <apex:pageblocksectionItem >
+                        <apex:outputText value="Available Teams" style="font-size: 105%;margin-left:30px;" />
+                            <apex:selectList value="{!selTeam}" size="1" multiselect="false">
+                            <apex:actionSupport event="onchange" action="{!changeTeam}"  />
+                                <apex:selectOptions value="{!teamNames}" />
+                            </apex:selectList>
+                        </apex:pageblocksectionItem>
+                        <apex:pageblocksectionItem >
+                        <apex:outputText value="Person In-Charge" style="font-size: 105%;margin-left:30px;" />
+                            <apex:selectList value="{!selTL}" size="1" multiselect="false">
+                                <apex:selectOptions value="{!TLNames}" />
+                            </apex:selectList>
+                        </apex:pageblocksectionItem>
+                </apex:pageBlockSection>
+                </div>
+           </apex:pageblock>
+           </center>
+    </apex:form>
+</apex:page>
